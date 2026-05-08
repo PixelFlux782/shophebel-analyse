@@ -61,6 +61,8 @@ function createRequest(body: unknown) {
 
 describe("POST /api/analyse", () => {
   beforeEach(() => {
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_SERVICE_ROLE_KEY;
     lookupMock.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
 
     vi.stubGlobal(

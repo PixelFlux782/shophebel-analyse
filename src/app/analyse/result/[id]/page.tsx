@@ -8,7 +8,7 @@ import { PremiumReportRequestButton } from "@/components/results/premium-report-
 import { RevenueBlockersReport } from "@/components/results/revenue-blockers-report";
 import { ScoreGrid } from "@/components/results/score-grid";
 import { VisualAuditSection } from "@/components/results/visual-audit-section";
-import { getStoredAnalysisResult } from "@/lib/analysisStore";
+import { getAnalysisResult } from "@/lib/analysisStore";
 import { getAnalysisSummary, getOverallStatusLabel, getScoreTone } from "@/lib/result-ui";
 
 interface AnalyseResultPageProps {
@@ -26,7 +26,7 @@ export default async function AnalyseResultPage({
 }: AnalyseResultPageProps) {
   const { id } = await params;
   await searchParams;
-  const result = getStoredAnalysisResult(id);
+  const result = await getAnalysisResult(id);
 
   if (!result) {
     notFound();

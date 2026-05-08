@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createStoredAnalysisResult } from "@/lib/analysisStore";
+import { saveAnalysisResult } from "@/lib/analysisStore";
 import { DEMO_ANALYSES } from "@/lib/demoData";
 
 export async function POST(request: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       ...DEMO_ANALYSES[type],
     };
-    const record = createStoredAnalysisResult({ analysis: demoAnalysis });
+    const record = await saveAnalysisResult({ analysis: demoAnalysis, isDemo: true });
 
     return NextResponse.json({
       id: record.id,

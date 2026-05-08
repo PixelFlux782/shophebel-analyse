@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { createStoredAnalysisResult } from "@/lib/analysisStore";
+import { saveAnalysisResult } from "@/lib/analysisStore";
 import { AnalysePageError, analysePage } from "@/lib/analyse/analyse-page";
 import { InvalidUrlError } from "@/lib/analyse/fetch-html";
 import { AnalysisRequest } from "@/types/analysis";
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as AnalysisRequest;
     const analysis = await analysePage(body.url);
-    const record = createStoredAnalysisResult({ analysis });
+    const record = await saveAnalysisResult({ analysis });
 
     return NextResponse.json({
       id: record.id,
