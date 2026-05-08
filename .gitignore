@@ -30,6 +30,19 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# local dev logs
+*.log
+.codex-dev.*.log
+.dev-server.*.log
+frontend-local-*.log
+analyse-local-*.log
+
+# runtime/generated analysis artifacts
+public/generated-screenshots/
+
+# local puppeteer scratch files
+.tmp-puppeteer-test/
+
 # env files (can opt-in for committing if needed)
 .env*
 

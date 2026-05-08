@@ -1,0 +1,12 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" fill="#f1f5f9"/>
+  <rect x="40" y="40" width="1360" height="820" rx="12" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="80" y="100" width="800" height="60" rx="8" fill="#0f172a"/>
+  <rect x="80" y="200" width="600" height="20" rx="4" fill="#64748b"/>
+  <rect x="80" y="240" width="500" height="20" rx="4" fill="#64748b"/>
+  <rect x="80" y="320" width="200" height="48" rx="8" fill="#0f172a"/>
+  <rect x="300" y="320" width="180" height="48" rx="8" fill="#e2e8f0" stroke="#0f172a" stroke-width="2"/>
+  <rect x="920" y="100" width="400" height="300" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  <text x="1040" y="270" text-anchor="middle" fill="#64748b" font-family="system-ui" font-size="16">Demo Screenshot</text>
+  <text x="1040" y="290" text-anchor="middle" fill="#94a3b8" font-family="system-ui" font-size="14">Shophebel Analyse</text>
+</svg>
