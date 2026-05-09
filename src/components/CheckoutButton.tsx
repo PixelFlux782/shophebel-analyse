@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { buildCheckoutRequestPayload } from "@/lib/checkout-client";
+
 interface CheckoutButtonProps {
   analysisId: string;
   label?: string;
@@ -26,7 +28,7 @@ export function CheckoutButton({
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ analysisId }),
+        body: JSON.stringify(buildCheckoutRequestPayload({ analysisId })),
       });
 
       const payload = (await response.json()) as { url?: string; error?: string };

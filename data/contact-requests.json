@@ -1,0 +1,20 @@
+[
+  {
+    "id": "4571d44f-78fb-43bc-a247-da8e2da6d4be",
+    "createdAt": "2026-05-08T15:53:10.340Z",
+    "status": "new",
+    "productType": "premium_report",
+    "topic": "Premium Report",
+    "analysisId": "7c293ace-4a48-4ef8-8928-b923ec0ce385",
+    "url": "https://stapelstuhl-klapptisch.de/"
+  },
+  {
+    "id": "7b7696dc-3c9c-44b5-a331-a61118d6f985",
+    "createdAt": "2026-05-08T15:54:17.885Z",
+    "status": "new",
+    "productType": "premium_report",
+    "topic": "Premium Report",
+    "analysisId": "7c293ace-4a48-4ef8-8928-b923ec0ce385",
+    "url": "https://stapelstuhl-klapptisch.de/"
+  }
+]

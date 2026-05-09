@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getAnalysisResult, saveAnalysisResult } from "@/lib/analysisStore";
 import { AnalysisResult } from "@/types/analysis";
 
-function createAnalysisResult(): AnalysisResult {
+function createAnalysisResult(overrides: Partial<AnalysisResult> = {}): AnalysisResult {
   const now = new Date().toISOString();
 
   return {
@@ -36,6 +36,7 @@ function createAnalysisResult(): AnalysisResult {
     findings: [],
     recommendations: [],
     aiSuggestions: [],
+    ...overrides,
   };
 }
 
@@ -79,6 +80,18 @@ describe("analysisStore", () => {
     expect(loaded?.isDemo).toBe(true);
   });
 
+  it("normalisiert leere Screenshot-Arrays im Fallback defensiv", async () => {
+    const analysis = createAnalysisResult({
+      screenshots: [] as unknown as AnalysisResult["screenshots"],
+      visualPreviewAvailable: true,
+    });
+
+    const saved = await saveAnalysisResult({ analysis });
+
+    expect(saved.analysis.screenshots).toBeUndefined();
+    expect(saved.analysis.visualPreviewAvailable).toBe(false);
+  });
+
   it("blockt Production ohne Supabase-Konfiguration klar", async () => {
     vi.stubEnv("NODE_ENV", "production");
 
@@ -88,5 +101,151 @@ describe("analysisStore", () => {
     await expect(getAnalysisResult("missing-id")).rejects.toThrow(
       "Analysis persistence is not configured",
     );
+  });
+
+  it("meldet Supabase-Netzwerkfehler ohne Secret auszugeben", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(
+      new Error("fetch failed", { cause: new Error("unable to verify the first certificate") }),
+    ));
+
+    await expect(saveAnalysisResult({ analysis: createAnalysisResult() })).rejects.toThrow(
+      "Network error: fetch failed",
+    );
+
+    try {
+      await saveAnalysisResult({ analysis: createAnalysisResult() });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+
+      expect(message).toContain("SUPABASE_URL set: true");
+      expect(message).toContain("SUPABASE_SERVICE_ROLE_KEY set: true");
+      expect(message).toContain("Request URL: https://example.supabase.co/rest/v1/analysis_results");
+      expect(message).toContain("Network cause: unable to verify the first certificate");
+      expect(message).not.toContain("secret-service-role-key");
+    }
+  });
+
+  it("meldet Supabase-HTTP-Fehler mit Status und Response Text", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(() => Promise.resolve(
+      new Response("relation analysis_results does not exist", { status: 404 }),
+    )));
+
+    await expect(saveAnalysisResult({ analysis: createAnalysisResult() })).rejects.toThrow(
+      "HTTP status: 404",
+    );
+    await expect(saveAnalysisResult({ analysis: createAnalysisResult() })).rejects.toThrow(
+      "Response text: relation analysis_results does not exist",
+    );
+  });
+
+  it("persistiert Screenshot-URLs vollstaendig in Supabase", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const screenshots = {
+      viewport: "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/viewport.png",
+      fullPage: "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/full.png",
+      mobile: "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/mobile.png",
+    };
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 201 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await saveAnalysisResult({
+      analysis: createAnalysisResult({
+        screenshots,
+        visualPreviewAvailable: true,
+      }),
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const payload = JSON.parse(init.body as string) as {
+      screenshots: typeof screenshots;
+      visual_preview_available: boolean;
+      result: AnalysisResult;
+    };
+
+    expect(payload.screenshots).toEqual(screenshots);
+    expect(payload.result.screenshots).toEqual(screenshots);
+    expect(payload.visual_preview_available).toBe(true);
+    expect(payload.result.visualPreviewAvailable).toBe(true);
+  });
+
+  it("normalisiert alte Supabase-Ergebnisse mit leerem Screenshot-Array beim Lesen", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const stored = {
+      id: "analysis-123",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult({
+        screenshots: [] as unknown as AnalysisResult["screenshots"],
+        visualPreviewAvailable: true,
+      }),
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-123");
+
+    expect(loaded?.analysis.screenshots).toBeUndefined();
+    expect(loaded?.analysis.visualPreviewAvailable).toBe(false);
+  });
+
+  it("liest Screenshot-URLs aus dem separaten Supabase-Screenshots-Feld", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const screenshots = {
+      viewport: "/generated-screenshots/analysis-test-viewport.png",
+      mobile: "/generated-screenshots/analysis-test-mobile.png",
+    };
+    const stored = {
+      id: "analysis-456",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult({
+        screenshots: undefined,
+        visualPreviewAvailable: false,
+      }),
+      screenshots,
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-456");
+
+    expect(loaded?.analysis.screenshots).toEqual(screenshots);
+    expect(loaded?.analysis.visualPreviewAvailable).toBe(true);
+  });
+
+  it("liest Payment-Status fuer Premium-Zugriff aus Supabase", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const stored = {
+      id: "analysis-paid",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult(),
+      payment_status: "paid",
+      paid_at: "2026-05-08T12:30:00.000Z",
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-paid");
+
+    expect(loaded?.paymentStatus).toBe("paid");
+    expect(loaded?.paidAt).toBe("2026-05-08T12:30:00.000Z");
   });
 });

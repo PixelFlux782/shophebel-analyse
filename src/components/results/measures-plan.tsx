@@ -25,13 +25,13 @@ export function MeasuresPlan({ measures }: MeasuresPlanProps) {
     <section className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-[0_28px_90px_-58px_rgba(15,23,42,0.32)] sm:p-7">
       <div className="max-w-3xl">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">
-          Massnahmen-Engine
+          Maßnahmen-Engine
         </p>
         <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
           Aus Problemen werden konkrete Handlungen.
         </h2>
         <p className="mt-3 text-base leading-8 text-slate-600">
-          Jede Massnahme entsteht automatisch aus einem gefundenen Problem und ist nach Aufwand, Wirkung und Prioritaet sortiert.
+          Jede Maßnahme entsteht automatisch aus einem gefundenen Problem und ist nach Aufwand, Wirkung und Priorität sortiert.
         </p>
       </div>
 
@@ -46,7 +46,7 @@ export function MeasuresPlan({ measures }: MeasuresPlanProps) {
                 <h3 className="mt-2 text-xl font-bold text-slate-950">{measure.title}</h3>
               </div>
               <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-bold text-white">
-                Prioritaet {measure.priority}
+                Priorität {measure.priority}
               </span>
             </div>
             <p className="mt-3 text-sm leading-7 text-slate-700">{measure.description}</p>

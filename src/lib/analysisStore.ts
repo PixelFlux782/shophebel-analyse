@@ -1,12 +1,14 @@
 import { randomUUID } from "crypto";
 
-import { AnalysisResult } from "@/types/analysis";
+import { AnalysisResult, AnalysisScreenshots } from "@/types/analysis";
 
 export interface StoredAnalysisResult {
   id: string;
   analysis: AnalysisResult;
   createdAt: string;
   isDemo?: boolean;
+  paymentStatus?: string | null;
+  paidAt?: string | null;
 }
 
 type SaveAnalysisResultInput = {
@@ -19,6 +21,9 @@ type SupabaseAnalysisRow = {
   created_at: string;
   is_demo?: boolean;
   result: AnalysisResult;
+  screenshots?: AnalysisScreenshots | null;
+  payment_status?: string | null;
+  paid_at?: string | null;
 };
 
 declare global {
@@ -57,10 +62,91 @@ function assertPersistenceConfigured() {
 function toStoredAnalysisResult(row: SupabaseAnalysisRow): StoredAnalysisResult {
   return {
     id: row.id,
-    analysis: row.result,
+    analysis: normalizeAnalysisResult(row.result, row.screenshots),
     createdAt: row.created_at,
     isDemo: row.is_demo,
+    paymentStatus: row.payment_status ?? null,
+    paidAt: row.paid_at ?? null,
   };
+}
+
+function normalizeScreenshots(screenshots: AnalysisResult["screenshots"] | null | undefined) {
+  if (!screenshots || Array.isArray(screenshots)) {
+    return undefined;
+  }
+
+  const normalized = {
+    fullPage: typeof screenshots.fullPage === "string" && screenshots.fullPage ? screenshots.fullPage : undefined,
+    viewport: typeof screenshots.viewport === "string" && screenshots.viewport ? screenshots.viewport : undefined,
+    mobile: typeof screenshots.mobile === "string" && screenshots.mobile ? screenshots.mobile : undefined,
+    hero: typeof screenshots.hero === "string" && screenshots.hero ? screenshots.hero : undefined,
+  };
+
+  return normalized.fullPage || normalized.viewport || normalized.mobile || normalized.hero
+    ? normalized
+    : undefined;
+}
+
+function hasVisualPreview(screenshots: AnalysisResult["screenshots"]) {
+  return Boolean(screenshots?.viewport || screenshots?.fullPage || screenshots?.hero || screenshots?.mobile);
+}
+
+function normalizeAnalysisResult(
+  analysis: AnalysisResult,
+  fallbackScreenshots?: AnalysisScreenshots | null,
+): AnalysisResult {
+  const screenshots =
+    normalizeScreenshots(analysis.screenshots) ?? normalizeScreenshots(fallbackScreenshots);
+
+  return {
+    ...analysis,
+    screenshots,
+    visualPreviewAvailable: hasVisualPreview(screenshots),
+  };
+}
+
+function formatSupabaseRequestDebug({
+  operation,
+  requestUrl,
+  status,
+  responseText,
+  error,
+}: {
+  operation: string;
+  requestUrl: string;
+  status?: number;
+  responseText?: string;
+  error?: unknown;
+}) {
+  const supabaseUrlSet = Boolean(process.env.SUPABASE_URL?.trim());
+  const serviceRoleKeySet = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim());
+  const networkErrorMessage = error instanceof Error ? error.message : String(error ?? "");
+  const cause = error instanceof Error ? error.cause : undefined;
+  const causeMessage = cause instanceof Error ? cause.message : "";
+  const parts = [
+    `${operation}: Supabase request failed`,
+    `SUPABASE_URL set: ${supabaseUrlSet}`,
+    `SUPABASE_SERVICE_ROLE_KEY set: ${serviceRoleKeySet}`,
+    `Request URL: ${requestUrl}`,
+  ];
+
+  if (status !== undefined) {
+    parts.push(`HTTP status: ${status}`);
+  }
+
+  if (responseText) {
+    parts.push(`Response text: ${responseText}`);
+  }
+
+  if (networkErrorMessage) {
+    parts.push(`Network error: ${networkErrorMessage}`);
+  }
+
+  if (causeMessage) {
+    parts.push(`Network cause: ${causeMessage}`);
+  }
+
+  return parts.join(" | ");
 }
 
 async function saveAnalysisResultSupabase(
@@ -75,36 +161,53 @@ async function saveAnalysisResultSupabase(
 
   const id = randomUUID();
   const now = new Date().toISOString();
+  const analysis = normalizeAnalysisResult(input.analysis);
   const payload = {
     id,
     created_at: now,
     updated_at: now,
-    requested_url: input.analysis.requestedUrl,
-    final_url: input.analysis.finalUrl || input.analysis.url,
-    overall_score: input.analysis.overallScore,
-    analysis_mode: input.analysis.analysisMode,
+    requested_url: analysis.requestedUrl,
+    final_url: analysis.finalUrl || analysis.url,
+    overall_score: analysis.overallScore,
+    analysis_mode: analysis.analysisMode,
     is_demo: Boolean(input.isDemo),
-    result: input.analysis,
-    screenshots: input.analysis.screenshots ?? null,
-    visual_preview_available: Boolean(input.analysis.visualPreviewAvailable),
+    result: analysis,
+    screenshots: analysis.screenshots ?? null,
+    visual_preview_available: analysis.visualPreviewAvailable,
     metadata: {},
   };
 
-  const response = await fetch(`${config.url}/rest/v1/analysis_results`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: config.serviceRoleKey,
-      Authorization: `Bearer ${config.serviceRoleKey}`,
-      Prefer: "return=representation",
-    },
-    body: JSON.stringify(payload),
-    cache: "no-store",
-  });
+  const requestUrl = `${config.url}/rest/v1/analysis_results`;
+  let response: Response;
+
+  try {
+    response = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    });
+  } catch (error) {
+    throw new Error(formatSupabaseRequestDebug({
+      operation: "supabase_analysis_insert_failed",
+      requestUrl,
+      error,
+    }));
+  }
 
   if (!response.ok) {
     const details = await response.text();
-    throw new Error(`supabase_analysis_insert_failed: ${response.status} ${details}`);
+    throw new Error(formatSupabaseRequestDebug({
+      operation: "supabase_analysis_insert_failed",
+      requestUrl,
+      status: response.status,
+      responseText: details,
+    }));
   }
 
   const parsed = (await response.json()) as SupabaseAnalysisRow[];
@@ -113,7 +216,7 @@ async function saveAnalysisResultSupabase(
   if (!row) {
     return {
       id,
-      analysis: input.analysis,
+      analysis,
       createdAt: now,
       isDemo: input.isDemo,
     };
@@ -127,8 +230,10 @@ function saveAnalysisResultMemory(input: SaveAnalysisResultInput): StoredAnalysi
   const record: StoredAnalysisResult = {
     id,
     createdAt: new Date().toISOString(),
-    analysis: input.analysis,
+    analysis: normalizeAnalysisResult(input.analysis),
     isDemo: input.isDemo,
+    paymentStatus: null,
+    paidAt: null,
   };
 
   getMemoryStore().set(id, record);
@@ -144,21 +249,37 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
     return getMemoryStore().get(id) ?? null;
   }
 
-  const response = await fetch(
-    `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=id,created_at,is_demo,result&limit=1`,
-    {
-      method: "GET",
-      headers: {
-        apikey: config.serviceRoleKey,
-        Authorization: `Bearer ${config.serviceRoleKey}`,
+  const requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=id,created_at,is_demo,result,screenshots,payment_status,paid_at&limit=1`;
+  let response: Response;
+
+  try {
+    response = await fetch(
+      requestUrl,
+      {
+        method: "GET",
+        headers: {
+          apikey: config.serviceRoleKey,
+          Authorization: `Bearer ${config.serviceRoleKey}`,
+        },
+        cache: "no-store",
       },
-      cache: "no-store",
-    },
-  );
+    );
+  } catch (error) {
+    throw new Error(formatSupabaseRequestDebug({
+      operation: "supabase_analysis_select_failed",
+      requestUrl,
+      error,
+    }));
+  }
 
   if (!response.ok) {
     const details = await response.text();
-    throw new Error(`supabase_analysis_select_failed: ${response.status} ${details}`);
+    throw new Error(formatSupabaseRequestDebug({
+      operation: "supabase_analysis_select_failed",
+      requestUrl,
+      status: response.status,
+      responseText: details,
+    }));
   }
 
   const parsed = (await response.json()) as SupabaseAnalysisRow[];

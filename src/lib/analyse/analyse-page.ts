@@ -25,6 +25,10 @@ type StaticDocument = Awaited<ReturnType<typeof fetchHtml>>;
 
 export class AnalysePageError extends Error {}
 
+function shouldPreferRenderedAnalysis() {
+  return process.env.NODE_ENV === "development" && process.env.SHOPHEBEL_RENDERED_ANALYSIS !== "false";
+}
+
 async function buildResultFromDocument(
   document: StaticDocument | FetchRenderedHtmlResult,
   input: {
@@ -113,8 +117,9 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     html: staticDocument?.html,
     staticFetchFailed: Boolean(staticError),
   });
+  const preferRenderedAnalysis = shouldPreferRenderedAnalysis();
 
-  if (!useRenderedFallback && staticDocument) {
+  if (!useRenderedFallback && staticDocument && !preferRenderedAnalysis) {
     technicalNotes.push("Seite wurde per statischem HTML analysiert.");
 
     return buildResultFromDocument(staticDocument, {
@@ -133,7 +138,19 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     );
   }
 
+  if (preferRenderedAnalysis && staticDocument && !useRenderedFallback) {
+    technicalNotes.push(
+      "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht fuer Screenshots.",
+    );
+  }
+
   try {
+    console.info("[analysis] rendered analysis started", {
+      reason: preferRenderedAnalysis ? "development_screenshot_preview" : "static_fallback_needed",
+      staticFetchFailed: Boolean(staticError),
+      hadStaticDocument: Boolean(staticDocument),
+    });
+
     const renderedDocument = await fetchRenderedHtml(inputUrl);
     technicalNotes.push(
       "Die Analyse basiert auf der Seite, wie sie im Browser sichtbar wird.",
@@ -158,6 +175,9 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     });
   } catch (error) {
     if (staticDocument) {
+      console.warn("[analysis] fallback to static because rendered analysis failed", {
+        reason: error instanceof Error ? error.message : "unknown",
+      });
       technicalNotes.push(
         "Der Browser-Fallback war nicht erfolgreich. Es wird die statische HTML-Auswertung verwendet.",
       );

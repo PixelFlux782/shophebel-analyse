@@ -23,7 +23,7 @@ export function PremiumUpgradeCard({
           Du siehst die komplette Analyse
         </h2>
         <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
-          Alle Findings und Empfehlungen sind freigeschaltet. Diese Ansicht eignet sich als priorisierte Arbeitsgrundlage fuer die naechsten Optimierungsschritte.
+          Alle Findings und Empfehlungen sind freigeschaltet. Diese Ansicht eignet sich als priorisierte Arbeitsgrundlage für die nächsten Optimierungsschritte.
         </p>
       </section>
     );
@@ -41,17 +41,17 @@ export function PremiumUpgradeCard({
             Mehr Klarheit mit der Vollanalyse
           </h2>
           <p className="mt-4 text-base leading-8 text-slate-200">
-            Du siehst aktuell nur einen Teil der Analyse. Noch {hiddenFindingsCount} weitere Optimierungen warten auf dich, inklusive konkretem Massnahmenplan.
+            Du siehst aktuell nur einen Teil der Analyse. Noch {hiddenFindingsCount} weitere Optimierungen warten auf dich, inklusive konkretem Maßnahmenplan.
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
               Vollstaendige Analyse statt Ausschnitt
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
-              Konkrete To-do-Liste fuer die naechsten Schritte
+              Konkrete To-do-Liste für die nächsten Schritte
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
-              Priorisierte Massnahmen nach Hebel und Aufwand
+              Priorisierte Maßnahmen nach Hebel und Aufwand
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
               Mehr Umsatzpotenzial frueher erkennen
@@ -65,7 +65,7 @@ export function PremiumUpgradeCard({
           </p>
           <p className="mt-3 text-5xl font-semibold">9,99 EUR</p>
           <p className="mt-3 text-sm leading-7 text-slate-200">
-            Ein sinnvoller naechster Schritt, wenn du aus dieser Analyse konkrete Prioritaeten und mehr Sicherheit fuer die Optimierung ableiten willst.
+            Ein sinnvoller nächster Schritt, wenn du aus dieser Analyse konkrete Prioritäten und mehr Sicherheit für die Optimierung ableiten willst.
           </p>
           <CheckoutButton
             analysisId={analysisId}

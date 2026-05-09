@@ -95,11 +95,24 @@ export async function fetchRenderedHtml(
 
     try {
       screenshots = await captureAnalysisScreenshots(page, `analysis-${randomUUID()}`);
+      const screenshotCount = Object.values(screenshots).filter(Boolean).length;
+
+      if (screenshotCount > 0) {
+        console.info("[analysis] screenshots captured", {
+          count: screenshotCount,
+          variants: Object.keys(screenshots).filter((key) => Boolean(screenshots?.[key as keyof AnalysisScreenshots])),
+        });
+      } else {
+        console.info("[analysis] screenshot capture skipped because no screenshot storage URL was returned");
+      }
     } catch (error) {
       screenshotError =
         error instanceof Error
           ? error.message
           : "Die visuelle Vorschau konnte nicht erstellt werden.";
+      console.warn("[analysis] screenshot capture skipped because capture failed", {
+        reason: screenshotError,
+      });
     }
 
     return {

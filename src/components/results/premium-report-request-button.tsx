@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { buildCheckoutRequestPayload } from "@/lib/checkout-client";
+
 interface PremiumReportRequestButtonProps {
   analysisId: string;
   url: string;
@@ -18,33 +20,44 @@ export function PremiumReportRequestButton({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
 
+  void url;
+
   async function handleRequest() {
     setStatus("loading");
     setMessage("");
 
     try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          analysisId,
-          url,
-          productType: "premium_report",
-          topic: "Premium Report",
-        }),
-      });
-
-      const payload = (await response.json()) as { error?: string };
-
-      if (!response.ok) {
-        throw new Error(payload.error || "Anfrage konnte nicht gespeichert werden.");
+      if (!analysisId) {
+        throw new Error("Keine Analyse-ID für den Checkout vorhanden.");
       }
 
-      setStatus("success");
-      setMessage("Anfrage gespeichert. Wir melden uns mit dem nächsten Schritt zum Premium-Report.");
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(buildCheckoutRequestPayload({
+          analysisId,
+          productType: "premium_report",
+          plan: "premium_report",
+        })),
+      });
+
+      const payload = (await response.json()) as { url?: string; error?: string; demo?: boolean };
+
+      if (!response.ok || !payload.url || payload.demo) {
+        console.error("[premium-report-checkout] Checkout konnte nicht gestartet werden.", {
+          status: response.status,
+          error: payload.error,
+          hasUrl: Boolean(payload.url),
+          demo: Boolean(payload.demo),
+        });
+        throw new Error(payload.error || "Checkout konnte nicht gestartet werden.");
+      }
+
+      window.location.assign(payload.url);
     } catch (error) {
+      console.error("[premium-report-checkout] Checkout request failed.", error);
       setStatus("error");
-      setMessage(error instanceof Error ? error.message : "Anfrage konnte nicht gespeichert werden.");
+      setMessage(error instanceof Error ? error.message : "Checkout konnte nicht gestartet werden.");
     }
   }
 
@@ -56,7 +69,7 @@ export function PremiumReportRequestButton({
         disabled={status === "loading" || status === "success"}
         className={`inline-flex items-center justify-center rounded-2xl bg-cyan-300 px-5 py-4 text-base font-bold text-slate-950 shadow-[0_18px_42px_-24px_rgba(34,211,238,0.85)] hover:-translate-y-0.5 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-70 ${className}`}
       >
-        {status === "loading" ? "Anfrage wird gespeichert..." : status === "success" ? "Report angefragt" : label}
+        {status === "loading" ? "Checkout wird vorbereitet..." : status === "success" ? "Report angefragt" : label}
       </button>
       {message ? (
         <p

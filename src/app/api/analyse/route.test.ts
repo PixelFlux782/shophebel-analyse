@@ -135,6 +135,54 @@ describe("POST /api/analyse", () => {
     expect(payload.recommendations.every((entry) => typeof entry.weight === "number")).toBe(true);
   });
 
+  it("liefert die Analyse auch dann zurueck, wenn die Supabase-Speicherung fehlschlaegt", async () => {
+    process.env.SUPABASE_URL = "https://example.supabase.co";
+    process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        url: "https://shop.test/",
+        headers: {
+          get: (name: string) =>
+            name.toLowerCase() === "content-type" ? "text/html; charset=utf-8" : null,
+        },
+        text: async () => sampleHtml,
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        url: "https://shop.test/robots.txt",
+        headers: {
+          get: () => "text/plain",
+        },
+        text: async () => "",
+      })
+      .mockRejectedValueOnce(new Error("unable to verify the first certificate"));
+
+    vi.stubGlobal("fetch", fetchMock);
+
+    const response = await POST(createRequest({ url: "shop.test" }));
+    const payload = (await response.json()) as {
+      id?: string;
+      url: string;
+      overallScore: number;
+      error?: string;
+    };
+
+    expect(response.status).toBe(200);
+    expect(payload.error).toBeUndefined();
+    expect(payload.id).toBeTruthy();
+    expect(payload.url).toBe("https://shop.test/");
+    expect(payload.overallScore).toBeGreaterThan(0);
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      "analysis_persistence_failed",
+      expect.any(Error),
+    );
+  });
+
   it("gibt bei ungueltiger URL einen 400-Fehler zurueck", async () => {
     const response = await POST(createRequest({ url: "" }));
     const payload = (await response.json()) as { error: string };

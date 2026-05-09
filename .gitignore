@@ -52,3 +52,4 @@ public/generated-screenshots/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.env.local

@@ -25,7 +25,7 @@ export function ScoreGrid({ result }: ScoreGridProps) {
       <ScoreCard
         title="Klarheit"
         score={clarityScore}
-        description="Wie schnell Angebot, Nutzen und naechster Schritt verstanden werden."
+        description="Wie schnell Angebot, Nutzen und nächster Schritt verstanden werden."
       />
       <ScoreCard
         title="Mobile UX"
@@ -35,7 +35,7 @@ export function ScoreGrid({ result }: ScoreGridProps) {
       <ScoreCard
         title="CTA"
         score={categories.conversion.score}
-        description="Wie klar Besucher zur naechsten Handlung gefuehrt werden."
+        description="Wie klar Besucher zur nächsten Handlung geführt werden."
       />
       <ScoreCard
         title="Design"

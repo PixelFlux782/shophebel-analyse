@@ -51,7 +51,7 @@ export function FreeAuditPreview({
     <section className="grid gap-6 lg:grid-cols-2">
       <div className="rounded-[1.8rem] border border-white/70 bg-white/90 p-6 shadow-[0_24px_80px_-52px_rgba(15,23,42,0.28)]">
         <p className="text-sm font-bold uppercase tracking-[0.18em] text-cyan-700">Kostenlose Ergebnisse</p>
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">3 Quick Wins</h2>
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-slate-950">3 schnelle Hebel</h2>
         <div className="mt-5 space-y-3">
           {visibleQuickWins.map((item) => (
             <article key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">

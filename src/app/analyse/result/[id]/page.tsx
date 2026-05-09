@@ -4,11 +4,14 @@ import { notFound } from "next/navigation";
 import { AnalysisSummary } from "@/components/results/analysis-summary";
 import { MeasuresPlan } from "@/components/results/measures-plan";
 import { PremiumPreviewLock } from "@/components/results/premium-preview-lock";
+import { PremiumReportSection } from "@/components/results/premium-report-section";
 import { PremiumReportRequestButton } from "@/components/results/premium-report-request-button";
 import { RevenueBlockersReport } from "@/components/results/revenue-blockers-report";
 import { ScoreGrid } from "@/components/results/score-grid";
 import { VisualAuditSection } from "@/components/results/visual-audit-section";
 import { getAnalysisResult } from "@/lib/analysisStore";
+import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
+import { getOrCreatePremiumReport } from "@/lib/premium/premiumReportStore";
 import { getAnalysisSummary, getOverallStatusLabel, getScoreTone } from "@/lib/result-ui";
 
 interface AnalyseResultPageProps {
@@ -33,6 +36,10 @@ export default async function AnalyseResultPage({
   }
 
   const analysis = result.analysis;
+  const canViewPremium = canViewPremiumReport(result.paymentStatus);
+  const premiumReport = canViewPremium
+    ? await getOrCreatePremiumReport({ analysis: result })
+    : null;
   const overallTone = getScoreTone(analysis.overallScore);
   const diagnosis = getAnalysisSummary(analysis);
 
@@ -87,12 +94,26 @@ export default async function AnalyseResultPage({
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-400">
                   Nächster Schritt
                 </p>
-                <PremiumReportRequestButton
-                  analysisId={result.id}
-                  url={analysis.url}
-                  label="Premium-Report freischalten"
-                  className="mt-4 w-full"
-                />
+                {canViewPremium ? (
+                  <div className="mt-4 space-y-3">
+                    <p className="rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100">
+                      Premium-Report freigeschaltet
+                    </p>
+                    <Link
+                      href={`/api/premium-report/${encodeURIComponent(result.id)}/pdf`}
+                      className="inline-flex w-full items-center justify-center rounded-2xl border border-cyan-300/40 bg-cyan-400 px-4 py-3 text-center text-sm font-bold text-slate-950 shadow-lg transition-all hover:bg-cyan-300"
+                    >
+                      Premium-Report als PDF herunterladen
+                    </Link>
+                  </div>
+                ) : (
+                  <PremiumReportRequestButton
+                    analysisId={result.id}
+                    url={analysis.url}
+                    label="Premium-Report freischalten"
+                    className="mt-4 w-full"
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -106,25 +127,37 @@ export default async function AnalyseResultPage({
           <ScoreGrid result={analysis} />
         </section>
 
-        <section className="mt-10">
-          <MeasuresPlan measures={analysis.measures ?? []} />
-        </section>
+        {canViewPremium ? (
+          <>
+            {premiumReport ? (
+              <section className="mt-10">
+                <PremiumReportSection report={premiumReport} analysisId={result.id} />
+              </section>
+            ) : null}
 
-        <section className="mt-10">
-          <RevenueBlockersReport
-            analysisId={result.id}
-            url={analysis.url}
-            blockers={analysis.revenueBlockers ?? []}
-          />
-        </section>
+            <section className="mt-10">
+              <MeasuresPlan measures={analysis.measures ?? []} />
+            </section>
+
+            <section className="mt-10">
+              <RevenueBlockersReport
+                analysisId={result.id}
+                url={analysis.url}
+                blockers={analysis.revenueBlockers ?? []}
+              />
+            </section>
+          </>
+        ) : null}
 
         <section className="mt-10">
           <AnalysisSummary result={analysis} />
         </section>
 
-        <section className="mt-10">
-          <PremiumPreviewLock analysisId={result.id} url={analysis.url} />
-        </section>
+        {!canViewPremium ? (
+          <section className="mt-10">
+            <PremiumPreviewLock analysisId={result.id} url={analysis.url} />
+          </section>
+        ) : null}
 
         <section className="mt-10 mb-16 flex justify-end">
           <Link

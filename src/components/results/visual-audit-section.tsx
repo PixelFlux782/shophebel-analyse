@@ -29,7 +29,7 @@ const toneBadgeClasses: Record<VisualProblemTone, string> = {
 const friendlyTitleMap: Record<string, string> = {
   "Title/Description": "Erster Eindruck in Such- und Linkvorschauen",
   "Suchergebnis-Klarheit": "Erster Eindruck in Such- und Linkvorschauen",
-  "H1/H2-Struktur": "Klarheit der Ueberschriften",
+  "H1/H2-Struktur": "Klarheit der Überschriften",
   "Klarheit der Seitenbotschaft": "Klarheit der Seitenbotschaft",
   "Alt-Texte": "Bildverstaendnis",
   Bildverstaendnis: "Bildverstaendnis",
@@ -41,37 +41,37 @@ const friendlyTitleMap: Record<string, string> = {
   "Sicheres Laden": "Sicheres Laden",
   Ladezeit: "Ladegefuehl",
   Ladegefuehl: "Ladegefuehl",
-  "Core Web Vitals": "Gefuehlte Performance",
+  "Core Web Vitals": "Gefühlte Performance",
   "Stabilitaet beim Laden": "Stabilitaet beim Laden",
   Impressum: "Rechtliches Vertrauen",
   Datenschutz: "Datenschutz-Vertrauen",
   Kontaktvertrauen: "Kontakt sichtbar",
   "Bewertungen/Siegel/Zahlungsarten": "Kaufvertrauen",
   Vertrauensbelege: "Kaufvertrauen",
-  "CTA-Erkennung": "Naechster Schritt",
-  "Naechster Schritt": "Naechster Schritt",
+  "CTA-Erkennung": "Nächster Schritt",
+  "Naechster Schritt": "Nächster Schritt",
   "Formular/Lead-Erfassung": "Anfrageweg",
   "Einfacher Anfrageweg": "Anfrageweg",
   Angebotsklarheit: "Angebot sofort verstehen",
-  "Screenshot/Visual-Check": "Visuelle Pruefung",
-  "Visuelle Seitenpruefung": "Visuelle Pruefung",
-  "Layout-Signale": "Layout-Fuehrung",
+  "Screenshot/Visual-Check": "Visuelle Prüfung",
+  "Visuelle Seitenpruefung": "Visuelle Prüfung",
+  "Layout-Signale": "Layout-Führung",
   Blickfuehrung: "Blickfuehrung",
   "Lesbarkeit/Content-Dichte": "Lesbarkeit und Dichte",
   "Lesbarkeit und Inhaltstiefe": "Lesbarkeit und Inhaltstiefe",
-  "Strukturierte Daten": "AI-Verstaendlichkeit",
-  "Verstaendliche Daten fuer Google und KI": "AI-Verstaendlichkeit",
+  "Strukturierte Daten": "AI-Verständlichkeit",
+  "Verstaendliche Daten fuer Google und KI": "AI-Verständlichkeit",
   "Klare Unternehmensbeschreibung": "Marke klar erkennbar",
-  "Produkt-/Serviceverstaendlichkeit": "Angebot fuer KI-Systeme",
+  "Produkt-/Serviceverstaendlichkeit": "Angebot für KI-Systeme",
   "FAQ-Bereiche": "Antwort-Potenzial",
   "Kundenfragen als Antworten": "Antwort-Potenzial",
   "About-Seite": "Unternehmenssignale",
   "Lokale Signale": "Lokale Einordnung",
   "robots.txt / AI-Crawler-Hinweise": "AI-Crawler-Hinweise",
-  "Regeln fuer KI-Systeme": "Regeln fuer KI-Systeme",
+  "Regeln fuer KI-Systeme": "Regeln für KI-Systeme",
   "Kontakt-/Standortdaten": "Kontakt und Standort",
-  "Semantische Ueberschriftenstruktur": "Inhalte fuer KI-Systeme",
-  "Klare Themenstruktur": "Inhalte fuer KI-Systeme",
+  "Semantische Ueberschriftenstruktur": "Inhalte für KI-Systeme",
+  "Klare Themenstruktur": "Inhalte für KI-Systeme",
 };
 
 function checkTone(status: AuditCheckStatus): VisualProblemTone | null {
@@ -224,7 +224,7 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
             Hier sieht man sofort, wo die Seite Reibung erzeugt.
           </h2>
           <p className="mt-3 text-base leading-8 text-slate-600">
-            Die Markierungen und Karten uebersetzen den Check in klare Problemzonen: Was stoert Vertrauen, Klarheit, mobile Nutzung und den naechsten Klick?
+            Die Markierungen und Karten übersetzen den Check in klare Problemzonen: Was stört Vertrauen, Klarheit, mobile Nutzung und den nächsten Klick?
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">

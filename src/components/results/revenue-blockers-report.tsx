@@ -84,7 +84,7 @@ export function RevenueBlockersReport({
                 <h3 className="mt-1 text-2xl font-bold tracking-tight">{blocker.problem}</h3>
               </div>
               <div className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-bold">
-                Prioritaet {blocker.priority}
+                Priorität {blocker.priority}
               </div>
             </div>
 
@@ -99,7 +99,7 @@ export function RevenueBlockersReport({
               </div>
               <div className="rounded-2xl border border-white bg-white p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-                  Konkrete Massnahme
+                  Konkrete Maßnahme
                 </p>
                 <p className="mt-2 text-sm leading-7 text-slate-700">
                   {blocker.action}

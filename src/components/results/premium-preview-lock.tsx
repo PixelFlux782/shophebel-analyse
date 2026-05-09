@@ -16,10 +16,10 @@ const premiumItems = [
 ];
 
 const premiumPreviewItems = [
-  "Problemuebersicht: 18 Punkte",
-  "Top-Massnahme: Vertrauen frueher sichtbar machen",
+  "Problemübersicht: 18 Punkte",
+  "Top-Maßnahme: Vertrauen früher sichtbar machen",
   "Wettbewerber: klarere Kategorie-Texte",
-  "To-do: Informationen fuer Google und KI klar auszeichnen",
+  "To-do: Informationen für Google und KI klar auszeichnen",
 ];
 
 export function PremiumPreviewLock({ analysisId, url }: PremiumPreviewLockProps) {
@@ -32,7 +32,7 @@ export function PremiumPreviewLock({ analysisId, url }: PremiumPreviewLockProps)
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-200">Premium-Vorschau</p>
           <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">Aus dem Schnellcheck wird ein konkreter Arbeitsplan.</h2>
           <p className="mt-4 max-w-3xl text-base leading-8 text-slate-200">
-            Der kostenlose Check zeigt den Wert. Der Premium-Report macht daraus eine priorisierte Umsetzungsliste mit Texten, klaren To-dos und persoenlicher Einordnung.
+            Der kostenlose Check zeigt den Wert. Der Premium-Report macht daraus eine priorisierte Umsetzungsliste mit Texten, klaren To-dos und persönlicher Einordnung.
           </p>
 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">

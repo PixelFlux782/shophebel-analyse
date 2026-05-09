@@ -24,7 +24,7 @@ export function RecommendationsList({
         Empfehlungen
       </p>
       <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-        Empfohlene naechste Schritte
+        Empfohlene nächste Schritte
       </h2>
       {!isPremium && hiddenRecommendationCount > 0 ? (
         <p className="mt-3 text-sm leading-7 text-slate-600">
@@ -34,7 +34,7 @@ export function RecommendationsList({
 
       {visibleRecommendations.length === 0 ? (
         <div className="mt-6 rounded-[1.45rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-sm leading-7 text-slate-600">
-          Aktuell liegen keine konkreten Empfehlungen vor. Fuehre bei Bedarf eine neue Analyse aus oder nutze die Vollanalyse fuer mehr Tiefe.
+          Aktuell liegen keine konkreten Empfehlungen vor. Führe bei Bedarf eine neue Analyse aus oder nutze die Vollanalyse für mehr Tiefe.
         </div>
       ) : (
         <div className="mt-6 grid gap-4">

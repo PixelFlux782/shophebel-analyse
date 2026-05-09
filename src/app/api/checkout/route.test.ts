@@ -84,11 +84,26 @@ describe("POST /api/checkout", () => {
 
     const { POST } = await import("@/app/api/checkout/route");
 
-    const response = await POST(createRequest({ analysisId: "analysis-456" }));
+    const response = await POST(createRequest({
+      analysisId: "analysis-456",
+      productType: "premium_report",
+      plan: "premium_report",
+    }));
     const payload = (await response.json()) as { url: string };
 
     expect(response.status).toBe(200);
     expect(createMockSession).toHaveBeenCalledOnce();
+    expect(createMockSession).toHaveBeenCalledWith(expect.objectContaining({
+      success_url: expect.stringContaining(
+        "/checkout/success?analysisId=analysis-456",
+      ),
+      cancel_url: expect.stringContaining("/analyse/result/analysis-456"),
+      metadata: {
+        analysisId: "analysis-456",
+        productType: "premium_report",
+        plan: "premium_report",
+      },
+    }));
     expect(payload.url).toBe("https://checkout.stripe.com/pay/test-session");
   });
 
