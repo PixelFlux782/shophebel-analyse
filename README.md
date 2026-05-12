@@ -1,5 +1,25 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Rendered Analysis And Screenshots
+
+The analysis API uses static HTML by default in production unless rendered mode is explicitly enabled. For screenshot previews set one of these environment variables:
+
+```bash
+SHOPHEBEL_RENDERED_ANALYSIS=true
+# or
+SHOPHEBEL_ANALYSIS_MODE=rendered
+```
+
+Rendered mode starts Puppeteer and calls `captureAnalysisScreenshots(...)` for `viewport`, `fullPage`, and `mobile`. Screenshot errors are logged server-side and do not abort the analysis. If the browser cannot start and static HTML is available, the API falls back to `analysisMode: "static"`.
+
+Screenshot storage:
+
+- Development writes to `public/generated-screenshots`.
+- Production writes to Supabase Storage. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_SCREENSHOT_BUCKET`.
+- `SUPABASE_SCREENSHOT_PUBLIC_BASE_URL` can override the generated public URL base.
+
+On Vercel Serverless, local screenshot files are not persistent. If Puppeteer cannot use the bundled browser, set `PUPPETEER_EXECUTABLE_PATH` to a compatible Chromium runtime or keep rendered mode disabled. In that case the API logs the browser/storage reason, completes the static analysis when possible, stores `screenshots: null`, and leaves `visualPreviewAvailable` false.
+
 ## Getting Started
 
 First, run the development server:

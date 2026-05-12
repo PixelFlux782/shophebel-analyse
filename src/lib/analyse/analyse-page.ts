@@ -25,8 +25,27 @@ type StaticDocument = Awaited<ReturnType<typeof fetchHtml>>;
 
 export class AnalysePageError extends Error {}
 
-function shouldPreferRenderedAnalysis() {
-  return process.env.NODE_ENV === "development" && process.env.SHOPHEBEL_RENDERED_ANALYSIS !== "false";
+function isEnvEnabled(value: string | undefined) {
+  return ["1", "true", "yes", "on", "rendered"].includes(value?.trim().toLowerCase() ?? "");
+}
+
+function isEnvDisabled(value: string | undefined) {
+  return ["0", "false", "no", "off", "static"].includes(value?.trim().toLowerCase() ?? "");
+}
+
+export function shouldPreferRenderedAnalysis() {
+  const explicitMode = process.env.SHOPHEBEL_ANALYSIS_MODE;
+  const renderedAnalysis = process.env.SHOPHEBEL_RENDERED_ANALYSIS;
+
+  if (isEnvDisabled(explicitMode) || isEnvDisabled(renderedAnalysis)) {
+    return false;
+  }
+
+  if (isEnvEnabled(explicitMode) || isEnvEnabled(renderedAnalysis)) {
+    return true;
+  }
+
+  return process.env.NODE_ENV === "development";
 }
 
 async function buildResultFromDocument(
@@ -146,9 +165,10 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
 
   try {
     console.info("[analysis] rendered analysis started", {
-      reason: preferRenderedAnalysis ? "development_screenshot_preview" : "static_fallback_needed",
+      reason: preferRenderedAnalysis ? "rendered_analysis_enabled" : "static_fallback_needed",
       staticFetchFailed: Boolean(staticError),
       hadStaticDocument: Boolean(staticDocument),
+      environment: process.env.VERCEL ? "vercel" : process.env.NODE_ENV,
     });
 
     const renderedDocument = await fetchRenderedHtml(inputUrl);

@@ -69,6 +69,11 @@ describe("screenshot-storage", () => {
     expect(writeFileMock).not.toHaveBeenCalled();
     expect(warnSpy).toHaveBeenCalledWith(
       "[screenshot-storage] Supabase screenshot storage is not configured.",
+      {
+        supabaseUrlSet: false,
+        serviceRoleKeySet: false,
+        screenshotBucketSet: false,
+      },
     );
   });
 
@@ -165,5 +170,30 @@ describe("screenshot-storage", () => {
     expect(page.screenshot).toHaveBeenCalledTimes(3);
     expect(mkdirMock).not.toHaveBeenCalled();
     expect(writeFileMock).not.toHaveBeenCalled();
+  });
+
+  it("behaelt erfolgreiche Varianten, wenn ein Screenshot fehlschlaegt", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const page = createScreenshotPage();
+    page.screenshot
+      .mockResolvedValueOnce(new Uint8Array([1, 2, 3]))
+      .mockRejectedValueOnce(new Error("full page too large"))
+      .mockResolvedValueOnce(new Uint8Array([4, 5, 6]));
+
+    const result = await captureAnalysisScreenshots(
+      page as never,
+      "analysis-test",
+    );
+
+    expect(result.viewport).toMatch(/^\/generated-screenshots\/analysis-test-viewport-/);
+    expect(result.fullPage).toBeUndefined();
+    expect(result.mobile).toMatch(/^\/generated-screenshots\/analysis-test-mobile-/);
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[analysis] screenshot variant capture failed",
+      {
+        variant: "fullPage",
+        reason: "full page too large",
+      },
+    );
   });
 });

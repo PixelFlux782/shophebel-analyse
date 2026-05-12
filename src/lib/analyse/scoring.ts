@@ -60,6 +60,13 @@ interface BuildAnalysisResultInput {
 
 export function buildAnalysisResult(input: BuildAnalysisResultInput): AnalysisResult {
   const createdAt = new Date().toISOString();
+  const screenshots =
+    input.screenshots?.viewport ||
+    input.screenshots?.fullPage ||
+    input.screenshots?.mobile ||
+    input.screenshots?.hero
+      ? input.screenshots
+      : undefined;
   const categories =
     input.categories ??
     ({
@@ -109,9 +116,9 @@ export function buildAnalysisResult(input: BuildAnalysisResultInput): AnalysisRe
     analysisMode: input.analysisMode,
     finalUrl: input.finalUrl,
     technicalNotes: input.technicalNotes ?? [],
-    screenshots: input.screenshots,
+    screenshots,
     visualPreviewAvailable: Boolean(
-      input.screenshots?.viewport || input.screenshots?.fullPage || input.screenshots?.hero,
+      screenshots?.viewport || screenshots?.fullPage || screenshots?.mobile || screenshots?.hero,
     ),
     visualMap: input.visualMap,
     isPremium: false,

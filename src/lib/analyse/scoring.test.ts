@@ -45,4 +45,40 @@ describe("analysis scoring", () => {
     expect(result.overallScore).toBe(65);
     expect(result.aiSuggestions).toEqual([]);
   });
+
+  it("setzt visualPreviewAvailable auch fuer mobile-only Screenshots", () => {
+    const result = buildAnalysisResult({
+      requestedUrl: "https://shop.test",
+      finalUrl: "https://shop.test/",
+      analysisMode: "rendered",
+      screenshots: {
+        mobile: "https://example.supabase.co/storage/v1/object/public/screenshots/mobile.png",
+      },
+      categoryScores: {
+        seo: createCategoryScore("seo", 80),
+      },
+      findings: [],
+      recommendations: [],
+    });
+
+    expect(result.screenshots?.mobile).toContain("mobile.png");
+    expect(result.visualPreviewAvailable).toBe(true);
+  });
+
+  it("entfernt leere Screenshot-Objekte aus dem AnalysisResult", () => {
+    const result = buildAnalysisResult({
+      requestedUrl: "https://shop.test",
+      finalUrl: "https://shop.test/",
+      analysisMode: "rendered",
+      screenshots: {},
+      categoryScores: {
+        seo: createCategoryScore("seo", 80),
+      },
+      findings: [],
+      recommendations: [],
+    });
+
+    expect(result.screenshots).toBeUndefined();
+    expect(result.visualPreviewAvailable).toBe(false);
+  });
 });

@@ -68,9 +68,25 @@ export async function captureAnalysisScreenshots(
   page: Page,
   prefix: string,
 ): Promise<AnalysisScreenshots> {
-  const viewport = await captureViewportScreenshot(page, prefix);
-  const fullPage = await capturePageScreenshot(page, prefix);
-  const mobile = await captureMobileScreenshot(page, prefix);
+  const captureVariant = async (
+    variant: keyof AnalysisScreenshots,
+    capture: () => Promise<string | undefined>,
+  ) => {
+    try {
+      return await capture();
+    } catch (error) {
+      console.warn("[analysis] screenshot variant capture failed", {
+        variant,
+        reason: error instanceof Error ? error.message : "unknown",
+      });
+
+      return undefined;
+    }
+  };
+
+  const viewport = await captureVariant("viewport", () => captureViewportScreenshot(page, prefix));
+  const fullPage = await captureVariant("fullPage", () => capturePageScreenshot(page, prefix));
+  const mobile = await captureVariant("mobile", () => captureMobileScreenshot(page, prefix));
 
   return {
     viewport,

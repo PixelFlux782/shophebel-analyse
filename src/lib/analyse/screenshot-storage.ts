@@ -61,7 +61,11 @@ async function saveScreenshotBufferSupabase(input: {
   const config = getSupabaseScreenshotConfig();
 
   if (!config) {
-    console.warn("[screenshot-storage] Supabase screenshot storage is not configured.");
+    console.warn("[screenshot-storage] Supabase screenshot storage is not configured.", {
+      supabaseUrlSet: Boolean(process.env.SUPABASE_URL?.trim()),
+      serviceRoleKeySet: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+      screenshotBucketSet: Boolean(process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()),
+    });
     return undefined;
   }
 
@@ -113,6 +117,12 @@ export async function saveScreenshotBuffer(input: {
   variant: string;
 }) {
   if (process.env.NODE_ENV === "production") {
+    if (process.env.VERCEL && !process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()) {
+      console.warn(
+        "[screenshot-storage] Vercel production cannot persist generated screenshots locally. Set SUPABASE_SCREENSHOT_BUCKET to enable visual previews.",
+      );
+    }
+
     return saveScreenshotBufferSupabase(input);
   }
 
