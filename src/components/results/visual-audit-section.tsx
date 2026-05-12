@@ -1,4 +1,6 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
 
 import { AnalysisResult, AuditCheckStatus, ScoreBlock } from "@/types/analysis";
 import { getVisualHotspots } from "@/lib/result-ui";
@@ -155,6 +157,12 @@ function MobileScreenshotCard({
   src?: string;
   problems: VisualProblem[];
 }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   return (
     <article className="rounded-[1.6rem] border border-slate-200 bg-slate-50 p-4">
       <div className="flex items-center justify-between gap-3">
@@ -170,15 +178,14 @@ function MobileScreenshotCard({
           Mobile UX
         </span>
       </div>
-      {src ? (
+      {src && !failed ? (
         <div className="relative mx-auto mt-4 max-w-[280px] overflow-hidden rounded-[2rem] border-[10px] border-slate-950 bg-white shadow-[0_24px_80px_-52px_rgba(15,23,42,0.5)]">
-          <Image
+          <img
             src={src}
             alt="Mobile Vorschau der analysierten Seite"
-            width={390}
-            height={844}
+            loading="lazy"
+            onError={() => setFailed(true)}
             className="h-auto w-full object-top"
-            unoptimized
           />
           <div className="pointer-events-none absolute inset-0">
             {problems.slice(0, 3).map((problem, index) => (

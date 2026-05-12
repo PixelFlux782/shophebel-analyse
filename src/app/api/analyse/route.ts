@@ -26,10 +26,11 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as AnalysisRequest;
     const analysis = await analysePage(body.url);
     const record = await persistAnalysisBestEffort(analysis);
+    const responseAnalysis = record?.analysis ?? analysis;
 
     return NextResponse.json({
       ...(record ? { id: record.id } : {}),
-      ...analysis,
+      ...responseAnalysis,
     });
   } catch (error) {
     const message =

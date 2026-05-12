@@ -1,6 +1,9 @@
-import Image from "next/image";
+"use client";
+
+import { useEffect, useState } from "react";
 
 import { AnalysisScreenshots } from "@/types/analysis";
+import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
 
 interface ScreenshotGalleryProps {
   screenshots: AnalysisScreenshots;
@@ -16,21 +19,29 @@ function ScreenshotImage({
   alt: string;
   title: string;
 }) {
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [src]);
+
   return (
     <article className="rounded-[1.45rem] border border-slate-200 bg-slate-50/80 p-4">
       <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
         {title}
       </p>
       <div className="mt-4 overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-        <Image
-          src={src}
-          alt={alt}
-          width={1600}
-          height={900}
-          sizes="(max-width: 1024px) 100vw, 960px"
-          className="h-auto w-full object-top"
-          unoptimized
-        />
+        {failed ? (
+          <ScreenshotFallback />
+        ) : (
+          <img
+            src={src}
+            alt={alt}
+            loading="lazy"
+            onError={() => setFailed(true)}
+            className="h-auto w-full object-top"
+          />
+        )}
       </div>
     </article>
   );

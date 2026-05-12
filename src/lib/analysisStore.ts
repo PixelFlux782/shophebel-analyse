@@ -27,6 +27,8 @@ type SupabaseAnalysisRow = {
   paid_at?: string | null;
 };
 
+type SupabaseConfig = { url: string; serviceRoleKey: string };
+
 declare global {
   var __shophebelAnalysisStore: Map<string, StoredAnalysisResult> | undefined;
 }
@@ -39,7 +41,7 @@ function getMemoryStore() {
   return global.__shophebelAnalysisStore;
 }
 
-function getSupabaseConfig(): { url: string; serviceRoleKey: string } | null {
+function getSupabaseConfig(): SupabaseConfig | null {
   const url = process.env.SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
 
@@ -48,6 +50,127 @@ function getSupabaseConfig(): { url: string; serviceRoleKey: string } | null {
   }
 
   return { url, serviceRoleKey };
+}
+
+function parseSupabasePublicStorageUrl(value: string, config: SupabaseConfig) {
+  let url: URL;
+
+  try {
+    url = new URL(value);
+  } catch {
+    return null;
+  }
+
+  const supabaseUrl = new URL(config.url);
+
+  if (url.origin !== supabaseUrl.origin) {
+    return null;
+  }
+
+  const prefix = "/storage/v1/object/public/";
+
+  if (!url.pathname.startsWith(prefix)) {
+    return null;
+  }
+
+  const [bucket, ...pathParts] = url.pathname.slice(prefix.length).split("/");
+  const storagePath = pathParts.map(decodeURIComponent).join("/");
+
+  if (!bucket || !storagePath) {
+    return null;
+  }
+
+  return {
+    bucket: decodeURIComponent(bucket),
+    storagePath,
+  };
+}
+
+async function createSignedScreenshotUrl(value: string, config: SupabaseConfig) {
+  const parsed = parseSupabasePublicStorageUrl(value, config);
+
+  if (!parsed) {
+    return value;
+  }
+
+  const requestUrl = `${config.url.replace(/\/+$/, "")}/storage/v1/object/sign/${encodeURIComponent(parsed.bucket)}/${parsed.storagePath
+    .split("/")
+    .map(encodeURIComponent)
+    .join("/")}`;
+
+  try {
+    const response = await fetch(requestUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+      },
+      body: JSON.stringify({ expiresIn: 60 * 60 }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      const details = await response.text().catch(() => "");
+      console.warn("[analysis-store] screenshot signed URL creation failed", {
+        status: response.status,
+        details,
+        bucket: parsed.bucket,
+        storagePath: parsed.storagePath,
+      });
+      return value;
+    }
+
+    const payload = (await response.json()) as { signedURL?: string; signedUrl?: string };
+    const signedPath = payload.signedURL ?? payload.signedUrl;
+
+    if (!signedPath) {
+      console.warn("[analysis-store] screenshot signed URL response did not contain a URL", {
+        bucket: parsed.bucket,
+        storagePath: parsed.storagePath,
+      });
+      return value;
+    }
+
+    if (signedPath.startsWith("http")) {
+      return signedPath;
+    }
+
+    const normalizedSignedPath = signedPath.startsWith("/object/")
+      ? `/storage/v1${signedPath}`
+      : signedPath;
+
+    return `${config.url.replace(/\/+$/, "")}${normalizedSignedPath}`;
+  } catch (error) {
+    console.warn("[analysis-store] screenshot signed URL creation threw", {
+      reason: error instanceof Error ? error.message : "unknown",
+      bucket: parsed.bucket,
+      storagePath: parsed.storagePath,
+    });
+    return value;
+  }
+}
+
+async function resolveScreenshotUrls(
+  screenshots: AnalysisScreenshots | undefined,
+  config: SupabaseConfig,
+) {
+  if (!screenshots) {
+    return undefined;
+  }
+
+  const resolved: AnalysisScreenshots = {};
+  const entries: Array<keyof AnalysisScreenshots> = ["viewport", "fullPage", "mobile", "hero"];
+
+  await Promise.all(entries.map(async (key) => {
+    const value = screenshots[key];
+
+    if (value) {
+      resolved[key] = await createSignedScreenshotUrl(value, config);
+    }
+  }));
+
+  return normalizeScreenshots(resolved);
 }
 
 function shouldAllowMemoryFallback() {
@@ -60,10 +183,17 @@ function assertPersistenceConfigured() {
   }
 }
 
-function toStoredAnalysisResult(row: SupabaseAnalysisRow): StoredAnalysisResult {
+async function toStoredAnalysisResult(row: SupabaseAnalysisRow, config: SupabaseConfig): Promise<StoredAnalysisResult> {
+  const analysis = normalizeAnalysisResult(row.result, row.screenshots, row.metadata);
+  const screenshots = await resolveScreenshotUrls(analysis.screenshots, config);
+
   return {
     id: row.id,
-    analysis: normalizeAnalysisResult(row.result, row.screenshots, row.metadata),
+    analysis: {
+      ...analysis,
+      screenshots,
+      visualPreviewAvailable: hasVisualPreview(screenshots),
+    },
     createdAt: row.created_at,
     isDemo: row.is_demo,
     paymentStatus: row.payment_status ?? null,
@@ -226,7 +356,7 @@ async function saveAnalysisResultSupabase(
     };
   }
 
-  return toStoredAnalysisResult(row);
+  return toStoredAnalysisResult(row, config);
 }
 
 function saveAnalysisResultMemory(input: SaveAnalysisResultInput): StoredAnalysisResult {
@@ -289,7 +419,7 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
   const parsed = (await response.json()) as SupabaseAnalysisRow[];
   const row = parsed[0];
 
-  return row ? toStoredAnalysisResult(row) : null;
+  return row ? toStoredAnalysisResult(row, config) : null;
 }
 
 export async function saveAnalysisResult(input: SaveAnalysisResultInput): Promise<StoredAnalysisResult> {
