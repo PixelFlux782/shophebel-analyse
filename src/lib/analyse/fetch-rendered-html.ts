@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 
 import { PublicUrlError, assertPublicHttpUrl } from "@/lib/urlUtils";
-import { AnalysisScreenshots, PageRenderSignals, VisualMap } from "@/types/analysis";
+import { AnalysisMetadata, AnalysisScreenshots, PageRenderSignals, VisualMap } from "@/types/analysis";
 import { BrowserLaunchError, launchBrowser } from "@/lib/analyse/browser";
-import { captureAnalysisScreenshots } from "@/lib/analyse/screenshots";
+import { ScreenshotCaptureDiagnostics, captureAnalysisScreenshots } from "@/lib/analyse/screenshots";
 import { collectVisualMap } from "@/lib/analyse/visual-map";
 import { collectVisualSignals } from "@/lib/analyse/visual-signals";
 
@@ -22,6 +22,8 @@ export interface FetchRenderedHtmlResult {
   visualMap: VisualMap;
   screenshots?: AnalysisScreenshots;
   screenshotError?: string;
+  screenshotErrorSource?: AnalysisMetadata["screenshotErrorSource"];
+  screenshotVariantFailures?: AnalysisMetadata["screenshotVariantFailures"];
 }
 
 interface PageMetrics {
@@ -50,6 +52,9 @@ export async function fetchRenderedHtml(
   try {
     browser = await launchBrowser();
     page = await browser.newPage();
+    console.info("[analysis] browser page created", {
+      requestedUrl,
+    });
     page.setDefaultNavigationTimeout(NAVIGATION_TIMEOUT_MS);
     page.setDefaultTimeout(NAVIGATION_TIMEOUT_MS);
 
@@ -92,24 +97,60 @@ export async function fetchRenderedHtml(
 
     let screenshots: AnalysisScreenshots | undefined;
     let screenshotError: string | undefined;
+    let screenshotErrorSource: AnalysisMetadata["screenshotErrorSource"] | undefined;
+    let screenshotVariantFailures: AnalysisMetadata["screenshotVariantFailures"] | undefined;
+    const screenshotDiagnostics: ScreenshotCaptureDiagnostics = {
+      failures: [],
+      storageMisses: [],
+    };
 
     try {
-      screenshots = await captureAnalysisScreenshots(page, `analysis-${randomUUID()}`);
+      console.info("[analysis] captureAnalysisScreenshots starting", {
+        requestedUrl,
+        finalUrl: page.url() || requestedUrl,
+      });
+      screenshots = await captureAnalysisScreenshots(
+        page,
+        `analysis-${randomUUID()}`,
+        screenshotDiagnostics,
+      );
       const screenshotCount = Object.values(screenshots).filter(Boolean).length;
+      screenshotVariantFailures = screenshotDiagnostics.failures;
 
       if (screenshotCount > 0) {
         console.info("[analysis] screenshots captured", {
           count: screenshotCount,
           variants: Object.keys(screenshots).filter((key) => Boolean(screenshots?.[key as keyof AnalysisScreenshots])),
         });
+        if (screenshotDiagnostics.failures.length > 0) {
+          screenshotError = `Some screenshot variants failed: ${screenshotDiagnostics.failures
+            .map((entry) => `${entry.variant}: ${entry.reason}`)
+            .join("; ")}`;
+          screenshotErrorSource = "capture";
+        }
       } else {
-        console.info("[analysis] screenshot capture skipped because no screenshot storage URL was returned");
+        if (screenshotDiagnostics.failures.length > 0) {
+          screenshotError = `Screenshot capture failed for all variants: ${screenshotDiagnostics.failures
+            .map((entry) => `${entry.variant}: ${entry.reason}`)
+            .join("; ")}`;
+          screenshotErrorSource = "capture";
+        } else {
+          screenshotError = "Screenshot capture completed, but no screenshot storage URL was returned.";
+          screenshotErrorSource = "storage";
+        }
+        console.warn("[analysis] screenshot capture produced no stored screenshots", {
+          reason: screenshotError,
+          variantsAttempted: ["viewport", "fullPage", "mobile"],
+          variantFailures: screenshotDiagnostics.failures,
+          storageMisses: screenshotDiagnostics.storageMisses,
+        });
       }
     } catch (error) {
       screenshotError =
         error instanceof Error
           ? error.message
           : "Die visuelle Vorschau konnte nicht erstellt werden.";
+      screenshotErrorSource = "capture";
       console.warn("[analysis] screenshot capture skipped because capture failed", {
         reason: screenshotError,
       });
@@ -126,6 +167,8 @@ export async function fetchRenderedHtml(
       visualMap,
       screenshots,
       screenshotError,
+      screenshotErrorSource,
+      screenshotVariantFailures,
     };
   } catch (error) {
     if (error instanceof FetchRenderedHtmlError || error instanceof BrowserLaunchError) {

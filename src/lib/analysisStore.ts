@@ -22,6 +22,7 @@ type SupabaseAnalysisRow = {
   is_demo?: boolean;
   result: AnalysisResult;
   screenshots?: AnalysisScreenshots | null;
+  metadata?: AnalysisResult["metadata"] | null;
   payment_status?: string | null;
   paid_at?: string | null;
 };
@@ -62,7 +63,7 @@ function assertPersistenceConfigured() {
 function toStoredAnalysisResult(row: SupabaseAnalysisRow): StoredAnalysisResult {
   return {
     id: row.id,
-    analysis: normalizeAnalysisResult(row.result, row.screenshots),
+    analysis: normalizeAnalysisResult(row.result, row.screenshots, row.metadata),
     createdAt: row.created_at,
     isDemo: row.is_demo,
     paymentStatus: row.payment_status ?? null,
@@ -94,13 +95,16 @@ function hasVisualPreview(screenshots: AnalysisResult["screenshots"]) {
 function normalizeAnalysisResult(
   analysis: AnalysisResult,
   fallbackScreenshots?: AnalysisScreenshots | null,
+  fallbackMetadata?: AnalysisResult["metadata"] | null,
 ): AnalysisResult {
   const screenshots =
     normalizeScreenshots(analysis.screenshots) ?? normalizeScreenshots(fallbackScreenshots);
+  const metadata = analysis.metadata ?? fallbackMetadata ?? undefined;
 
   return {
     ...analysis,
     screenshots,
+    metadata,
     visualPreviewAvailable: hasVisualPreview(screenshots),
   };
 }
@@ -174,7 +178,7 @@ async function saveAnalysisResultSupabase(
     result: analysis,
     screenshots: analysis.screenshots ?? null,
     visual_preview_available: analysis.visualPreviewAvailable,
-    metadata: {},
+    metadata: analysis.metadata ?? {},
   };
 
   const requestUrl = `${config.url}/rest/v1/analysis_results`;
@@ -249,7 +253,7 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
     return getMemoryStore().get(id) ?? null;
   }
 
-  const requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=id,created_at,is_demo,result,screenshots,payment_status,paid_at&limit=1`;
+  const requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=id,created_at,is_demo,result,screenshots,metadata,payment_status,paid_at&limit=1`;
   let response: Response;
 
   try {

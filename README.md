@@ -12,13 +12,20 @@ SHOPHEBEL_ANALYSIS_MODE=rendered
 
 Rendered mode starts Puppeteer and calls `captureAnalysisScreenshots(...)` for `viewport`, `fullPage`, and `mobile`. Screenshot errors are logged server-side and do not abort the analysis. If the browser cannot start and static HTML is available, the API falls back to `analysisMode: "static"`.
 
+Browser runtime:
+
+- Local development uses the normal `puppeteer` package.
+- Production/Vercel uses `puppeteer-core` with `@sparticuz/chromium`.
+- `PUPPETEER_EXECUTABLE_PATH` overrides both strategies when a custom Chromium path is available.
+- `.npmrc` sets `puppeteer_skip_download=true` so Vercel does not download an unnecessary bundled Chromium during install. If a fresh local install has no browser, run `npx puppeteer browsers install chrome`.
+
 Screenshot storage:
 
 - Development writes to `public/generated-screenshots`.
 - Production writes to Supabase Storage. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_SCREENSHOT_BUCKET`.
 - `SUPABASE_SCREENSHOT_PUBLIC_BASE_URL` can override the generated public URL base.
 
-On Vercel Serverless, local screenshot files are not persistent. If Puppeteer cannot use the bundled browser, set `PUPPETEER_EXECUTABLE_PATH` to a compatible Chromium runtime or keep rendered mode disabled. In that case the API logs the browser/storage reason, completes the static analysis when possible, stores `screenshots: null`, and leaves `visualPreviewAvailable` false.
+On Vercel Serverless, local screenshot files are not persistent. If Chromium cannot start, the API logs the browser reason, completes the static analysis when possible, stores `screenshots: null`, leaves `visualPreviewAvailable` false, and writes `metadata.screenshotError` plus `metadata.screenshotErrorSource` to Supabase.
 
 ## Getting Started
 

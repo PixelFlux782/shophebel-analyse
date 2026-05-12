@@ -146,7 +146,13 @@ describe("screenshot-storage", () => {
 
     expect(result).toBeUndefined();
     expect(warnSpy).toHaveBeenCalledWith(
-      "[screenshot-storage] Supabase upload failed: 404 bucket not found",
+      "[screenshot-storage] Supabase upload failed",
+      expect.objectContaining({
+        status: 404,
+        details: "bucket not found",
+        bucket: "analysis-screenshots",
+        variant: "viewport",
+      }),
     );
     expect(mkdirMock).not.toHaveBeenCalled();
     expect(writeFileMock).not.toHaveBeenCalled();

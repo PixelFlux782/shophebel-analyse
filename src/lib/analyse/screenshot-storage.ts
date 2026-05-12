@@ -73,6 +73,13 @@ async function saveScreenshotBufferSupabase(input: {
   const storagePath = `analysis-results/${input.prefix}/${filename}`;
   const requestUrl = `${config.url}/storage/v1/object/${encodeURIComponent(config.bucket)}/${encodeStoragePath(storagePath)}`;
 
+  console.info("[screenshot-storage] Supabase upload started", {
+    bucket: config.bucket,
+    storagePath,
+    variant: input.variant,
+    bytes: input.buffer.byteLength,
+  });
+
   try {
     const response = await fetch(requestUrl, {
       method: "POST",
@@ -88,21 +95,39 @@ async function saveScreenshotBufferSupabase(input: {
 
     if (!response.ok) {
       const details = await response.text().catch(() => "");
-      console.warn(
-        `[screenshot-storage] Supabase upload failed: ${response.status}${details ? ` ${details}` : ""}`,
-      );
+      console.warn("[screenshot-storage] Supabase upload failed", {
+        status: response.status,
+        details,
+        bucket: config.bucket,
+        storagePath,
+        variant: input.variant,
+      });
       return undefined;
     }
 
-    return buildSupabaseStorageUrl({
+    const publicUrl = buildSupabaseStorageUrl({
       supabaseUrl: config.url,
       bucket: config.bucket,
       storagePath,
       publicBaseUrl: config.publicBaseUrl,
     });
+
+    console.info("[screenshot-storage] Supabase upload succeeded", {
+      bucket: config.bucket,
+      storagePath,
+      variant: input.variant,
+      publicUrl,
+    });
+
+    return publicUrl;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown upload error";
-    console.warn(`[screenshot-storage] Supabase upload failed: ${message}`);
+    console.warn("[screenshot-storage] Supabase upload failed", {
+      reason: message,
+      bucket: config.bucket,
+      storagePath,
+      variant: input.variant,
+    });
     return undefined;
   }
 }
@@ -132,6 +157,12 @@ export async function saveScreenshotBuffer(input: {
   const absolutePath = path.join(GENERATED_SCREENSHOT_DIR, filename);
 
   await writeFile(absolutePath, input.buffer);
+
+  console.info("[screenshot-storage] Local screenshot stored", {
+    path: absolutePath,
+    variant: input.variant,
+    bytes: input.buffer.byteLength,
+  });
 
   return `/generated-screenshots/${filename}`;
 }

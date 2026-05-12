@@ -102,6 +102,19 @@ export interface AnalysisScreenshots {
   hero?: string;
 }
 
+export interface AnalysisMetadata {
+  screenshotError?: string;
+  screenshotErrorSource?: "browser_launch" | "capture" | "storage" | "rendered_fallback";
+  screenshotVariantFailures?: Array<{
+    variant: string;
+    reason: string;
+  }>;
+  screenshotVariantsAttempted?: string[];
+  screenshotVariantsStored?: string[];
+  renderedModeRequested?: boolean;
+  runtime?: string;
+}
+
 export interface ElementBox {
   x: number;
   y: number;
@@ -144,6 +157,7 @@ export interface AnalysisResult {
   technicalNotes?: string[];
   screenshots?: AnalysisScreenshots;
   visualPreviewAvailable?: boolean;
+  metadata?: AnalysisMetadata;
   visualMap?: VisualMap;
   isPremium: boolean;
   totalFindings: number;

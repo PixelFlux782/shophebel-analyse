@@ -168,12 +168,48 @@ describe("analysisStore", () => {
       screenshots: typeof screenshots;
       visual_preview_available: boolean;
       result: AnalysisResult;
+      metadata: AnalysisResult["metadata"];
     };
 
     expect(payload.screenshots).toEqual(screenshots);
     expect(payload.result.screenshots).toEqual(screenshots);
     expect(payload.visual_preview_available).toBe(true);
     expect(payload.result.visualPreviewAvailable).toBe(true);
+  });
+
+  it("persistiert Screenshot-Fehler in Supabase metadata", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 201 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await saveAnalysisResult({
+      analysis: createAnalysisResult({
+        metadata: {
+          screenshotError: "Chromium executable not found",
+          screenshotErrorSource: "browser_launch",
+          renderedModeRequested: true,
+          runtime: "vercel",
+        },
+      }),
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const payload = JSON.parse(init.body as string) as {
+      metadata: AnalysisResult["metadata"];
+      result: AnalysisResult;
+    };
+
+    expect(payload.metadata).toEqual({
+      screenshotError: "Chromium executable not found",
+      screenshotErrorSource: "browser_launch",
+      renderedModeRequested: true,
+      runtime: "vercel",
+    });
+    expect(payload.result.metadata?.screenshotError).toBe("Chromium executable not found");
   });
 
   it("normalisiert alte Supabase-Ergebnisse mit leerem Screenshot-Array beim Lesen", async () => {
@@ -225,6 +261,30 @@ describe("analysisStore", () => {
 
     expect(loaded?.analysis.screenshots).toEqual(screenshots);
     expect(loaded?.analysis.visualPreviewAvailable).toBe(true);
+  });
+
+  it("liest Screenshot-Fehler aus dem separaten Supabase-Metadata-Feld", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const stored = {
+      id: "analysis-metadata",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult(),
+      metadata: {
+        screenshotError: "No usable Chromium executable",
+        screenshotErrorSource: "browser_launch",
+      },
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-metadata");
+
+    expect(loaded?.analysis.metadata?.screenshotError).toBe("No usable Chromium executable");
+    expect(loaded?.analysis.metadata?.screenshotErrorSource).toBe("browser_launch");
   });
 
   it("liest Payment-Status fuer Premium-Zugriff aus Supabase", async () => {

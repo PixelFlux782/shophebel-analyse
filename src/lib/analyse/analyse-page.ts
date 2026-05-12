@@ -5,6 +5,7 @@ import {
   FetchRenderedHtmlResult,
   fetchRenderedHtml,
 } from "@/lib/analyse/fetch-rendered-html";
+import { BrowserLaunchError } from "@/lib/analyse/browser";
 import { runConversionChecks } from "@/lib/analyse/checks/conversion-checks";
 import { runSeoChecks } from "@/lib/analyse/checks/seo-checks";
 import { runTrustChecks } from "@/lib/analyse/checks/trust-checks";
@@ -48,11 +49,20 @@ export function shouldPreferRenderedAnalysis() {
   return process.env.NODE_ENV === "development";
 }
 
+function getRuntimeLabel() {
+  if (process.env.VERCEL) {
+    return "vercel";
+  }
+
+  return process.env.NODE_ENV ?? "unknown";
+}
+
 async function buildResultFromDocument(
   document: StaticDocument | FetchRenderedHtmlResult,
   input: {
     analysisMode: "static" | "rendered";
     technicalNotes: string[];
+    metadata?: AnalysisResult["metadata"];
     pageSignals?: FetchRenderedHtmlResult["pageSignals"];
     screenshots?: FetchRenderedHtmlResult["screenshots"];
     visualMap?: FetchRenderedHtmlResult["visualMap"];
@@ -87,6 +97,7 @@ async function buildResultFromDocument(
     finalUrl: document.finalUrl,
     analysisMode: input.analysisMode,
     technicalNotes: input.technicalNotes,
+    metadata: input.metadata,
     screenshots: input.screenshots,
     visualMap: input.visualMap,
     categoryScores: {
@@ -137,6 +148,18 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     staticFetchFailed: Boolean(staticError),
   });
   const preferRenderedAnalysis = shouldPreferRenderedAnalysis();
+  const renderedModeRequested = preferRenderedAnalysis || useRenderedFallback;
+
+  console.info("[analysis] rendered mode decision", {
+    renderedModeRequested,
+    preferRenderedAnalysis,
+    useRenderedFallback,
+    staticFetchFailed: Boolean(staticError),
+    hadStaticDocument: Boolean(staticDocument),
+    envRenderedAnalysis: process.env.SHOPHEBEL_RENDERED_ANALYSIS ?? null,
+    envAnalysisMode: process.env.SHOPHEBEL_ANALYSIS_MODE ?? null,
+    runtime: getRuntimeLabel(),
+  });
 
   if (!useRenderedFallback && staticDocument && !preferRenderedAnalysis) {
     technicalNotes.push("Seite wurde per statischem HTML analysiert.");
@@ -192,11 +215,33 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
       pageSignals: renderedDocument.pageSignals,
       screenshots: renderedDocument.screenshots,
       visualMap: renderedDocument.visualMap,
+      metadata: renderedDocument.screenshotError
+        ? {
+            screenshotError: renderedDocument.screenshotError,
+            screenshotErrorSource: renderedDocument.screenshotErrorSource,
+            screenshotVariantFailures: renderedDocument.screenshotVariantFailures,
+            screenshotVariantsAttempted: ["viewport", "fullPage", "mobile"],
+            screenshotVariantsStored: Object.entries(renderedDocument.screenshots ?? {})
+              .filter(([, value]) => Boolean(value))
+              .map(([key]) => key),
+            renderedModeRequested: true,
+            runtime: getRuntimeLabel(),
+          }
+        : {
+            screenshotVariantsAttempted: ["viewport", "fullPage", "mobile"],
+            screenshotVariantsStored: Object.entries(renderedDocument.screenshots ?? {})
+              .filter(([, value]) => Boolean(value))
+              .map(([key]) => key),
+            renderedModeRequested: true,
+            runtime: getRuntimeLabel(),
+          },
     });
   } catch (error) {
     if (staticDocument) {
+      const screenshotError = error instanceof Error ? error.message : "unknown";
       console.warn("[analysis] fallback to static because rendered analysis failed", {
-        reason: error instanceof Error ? error.message : "unknown",
+        reason: screenshotError,
+        runtime: getRuntimeLabel(),
       });
       technicalNotes.push(
         "Der Browser-Fallback war nicht erfolgreich. Es wird die statische HTML-Auswertung verwendet.",
@@ -205,6 +250,12 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
       return buildResultFromDocument(staticDocument, {
         analysisMode: "static",
         technicalNotes,
+        metadata: {
+          screenshotError,
+          screenshotErrorSource: error instanceof BrowserLaunchError ? "browser_launch" : "rendered_fallback",
+          renderedModeRequested,
+          runtime: getRuntimeLabel(),
+        },
       });
     }
 

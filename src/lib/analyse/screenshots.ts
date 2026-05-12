@@ -1,7 +1,17 @@
-import { Page } from "puppeteer";
+import type { Page } from "puppeteer-core";
 
 import { AnalysisScreenshots } from "@/types/analysis";
 import { saveScreenshotBuffer } from "@/lib/analyse/screenshot-storage";
+
+export interface ScreenshotCaptureDiagnostics {
+  failures: Array<{
+    variant: keyof AnalysisScreenshots;
+    reason: string;
+  }>;
+  storageMisses: Array<{
+    variant: keyof AnalysisScreenshots;
+  }>;
+}
 
 export async function capturePageScreenshot(page: Page, prefix: string) {
   const buffer = await page.screenshot({
@@ -67,17 +77,42 @@ export async function captureMobileScreenshot(page: Page, prefix: string) {
 export async function captureAnalysisScreenshots(
   page: Page,
   prefix: string,
+  diagnostics?: ScreenshotCaptureDiagnostics,
 ): Promise<AnalysisScreenshots> {
+  console.info("[analysis] captureAnalysisScreenshots called", {
+    prefix,
+    variants: ["viewport", "fullPage", "mobile"],
+  });
+
   const captureVariant = async (
     variant: keyof AnalysisScreenshots,
     capture: () => Promise<string | undefined>,
   ) => {
     try {
-      return await capture();
+      const result = await capture();
+
+      if (result) {
+        console.info("[analysis] screenshot variant stored", {
+          variant,
+          url: result,
+        });
+      } else {
+        diagnostics?.storageMisses.push({ variant });
+        console.warn("[analysis] screenshot variant returned no storage URL", {
+          variant,
+        });
+      }
+
+      return result;
     } catch (error) {
+      const reason = error instanceof Error ? error.message : "unknown";
+      diagnostics?.failures.push({
+        variant,
+        reason,
+      });
       console.warn("[analysis] screenshot variant capture failed", {
         variant,
-        reason: error instanceof Error ? error.message : "unknown",
+        reason,
       });
 
       return undefined;

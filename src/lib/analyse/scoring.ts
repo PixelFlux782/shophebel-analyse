@@ -45,6 +45,7 @@ interface BuildAnalysisResultInput {
   analysisMode: AnalysisResult["analysisMode"];
   technicalNotes?: string[];
   screenshots?: AnalysisResult["screenshots"];
+  metadata?: AnalysisResult["metadata"];
   visualMap?: AnalysisResult["visualMap"];
   categoryScores: Partial<Record<AnalysisCategory, CategoryScore>>;
   categories?: AnalysisResultCategories;
@@ -120,6 +121,7 @@ export function buildAnalysisResult(input: BuildAnalysisResultInput): AnalysisRe
     visualPreviewAvailable: Boolean(
       screenshots?.viewport || screenshots?.fullPage || screenshots?.mobile || screenshots?.hero,
     ),
+    metadata: input.metadata,
     visualMap: input.visualMap,
     isPremium: false,
     totalFindings: input.findings.length,
