@@ -2,6 +2,16 @@ import type { Browser } from "puppeteer-core";
 
 export class BrowserLaunchError extends Error {}
 
+type SparticuzChromium = typeof import("@sparticuz/chromium")["default"] & {
+  defaultViewport?: {
+    width: number;
+    height: number;
+    deviceScaleFactor?: number;
+    isMobile?: boolean;
+  };
+  headless?: boolean | "shell";
+};
+
 function getRuntimeLabel() {
   if (process.env.VERCEL) {
     return "vercel";
@@ -28,34 +38,33 @@ export async function launchBrowser(): Promise<Browser> {
 
   try {
     if (useServerlessChromium) {
-      const [{ default: chromium }, puppeteer] = await Promise.all([
+      const [{ default: chromiumModule }, puppeteer] = await Promise.all([
         import("@sparticuz/chromium"),
         import("puppeteer-core"),
       ]);
+      const chromium = chromiumModule as SparticuzChromium;
       const executablePath = executablePathOverride ?? await chromium.executablePath();
+      const headless = chromium.headless ?? "shell";
+      const defaultViewport = chromium.defaultViewport ?? {
+        width: 1280,
+        height: 720,
+        deviceScaleFactor: 1,
+      };
 
       console.info("[analysis] browser executable resolved", {
         runtime,
         strategy: "puppeteer-core_sparticuz_chromium",
         executablePathSource: executablePathOverride ? "PUPPETEER_EXECUTABLE_PATH" : "@sparticuz/chromium",
         executablePath,
+        binDirectoryExpected: "node_modules/@sparticuz/chromium/bin",
+        headless,
       });
 
       return await puppeteer.launch({
-        args: [
-          ...chromium.args,
-          "--no-sandbox",
-          "--disable-setuid-sandbox",
-          "--disable-dev-shm-usage",
-          "--disable-background-networking",
-        ],
-        defaultViewport: {
-          width: 1280,
-          height: 720,
-          deviceScaleFactor: 1,
-        },
+        args: puppeteer.defaultArgs({ args: chromium.args, headless }),
+        defaultViewport,
         executablePath,
-        headless: true,
+        headless,
       });
     }
 
