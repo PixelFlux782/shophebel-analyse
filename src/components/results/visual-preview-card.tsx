@@ -14,10 +14,10 @@ export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
   const hasPreview = Boolean(
     screenshots?.viewport || screenshots?.fullPage || screenshots?.hero,
   );
-  const primaryVariant: keyof NonNullable<typeof screenshots> | null = screenshots?.fullPage
-    ? "fullPage"
-    : screenshots?.viewport
-      ? "viewport"
+  const primaryVariant: keyof NonNullable<typeof screenshots> | null = screenshots?.viewport
+    ? "viewport"
+    : screenshots?.fullPage
+      ? "fullPage"
       : screenshots?.hero
         ? "hero"
         : null;

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 
 import { getSuggestionForHotspot, VisualHotspot, VisualHotspotTarget } from "@/lib/result-ui";
 import { AiSuggestion, VisualMap } from "@/types/analysis";
@@ -51,8 +50,20 @@ export function VisualOverlay({
   suggestions,
 }: VisualOverlayProps) {
   const [showHotspots, setShowHotspots] = useState(true);
-  const baseWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
-  const baseHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+  const mappedWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
+  const mappedHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
+  const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
+  const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
+  const aspectRatio = `${baseWidth} / ${baseHeight}`;
+
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+    setNaturalSize(null);
+  }, [imageSrc]);
 
   return (
     <article className="rounded-[1.45rem] border border-slate-200 bg-slate-50/80 p-4">
@@ -79,18 +90,43 @@ export function VisualOverlay({
       </div>
 
       <div className="relative mt-4 overflow-x-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-        <div className="relative min-w-[42rem]">
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            width={Math.max(1200, Math.round(baseWidth))}
-            height={Math.max(900, Math.round(baseHeight))}
-            sizes="(max-width: 1024px) 100vw, 960px"
-            className="h-auto w-full object-top"
-            unoptimized
-          />
+        <div
+          className="relative min-w-[42rem] overflow-hidden bg-slate-100"
+          style={{ aspectRatio }}
+        >
+          {!imageFailed ? (
+            <img
+              src={imageSrc}
+              alt={imageAlt}
+              loading="lazy"
+              onLoad={(event) => {
+                const image = event.currentTarget;
+                setNaturalSize({
+                  width: image.naturalWidth,
+                  height: image.naturalHeight,
+                });
+                setImageLoaded(true);
+              }}
+              onError={() => {
+                setImageFailed(true);
+                setImageLoaded(false);
+              }}
+              className="absolute inset-0 h-full w-full object-fill object-top"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+              <div className="w-2/3 max-w-lg rounded-2xl border border-slate-200 bg-white/80 p-6 text-center">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Screenshot nicht geladen
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  Die Analyse ist vorhanden, aber die visuelle Vorschau konnte nicht angezeigt werden.
+                </p>
+              </div>
+            </div>
+          )}
 
-          {showHotspots && hotspots.length > 0 ? (
+          {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
             <div className="pointer-events-none absolute inset-0">
               {hotspots.map((hotspot) => {
                 const tone = getHotspotToneClasses(hotspot.tone);
