@@ -3,10 +3,41 @@ import { getVisualHotspots, VisualHotspotTarget } from "@/lib/result-ui";
 
 import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
 import { ScreenshotGallery } from "@/components/results/screenshot-gallery";
+import { ScreenshotLightboxNote } from "@/components/results/screenshot-lightbox";
 import { VisualOverlay } from "@/components/results/visual-overlay";
 
 interface VisualPreviewCardProps {
   result: AnalysisResult;
+}
+
+function notesForBlock(title: string, summary?: string, fallback?: string): ScreenshotLightboxNote[] {
+  return [
+    {
+      title,
+      text: summary || fallback || "Keine Hinweise fuer diese Ansicht vorhanden.",
+    },
+  ];
+}
+
+function buildScreenshotNotes(result: AnalysisResult) {
+  return {
+    viewport: [
+      ...notesForBlock("Klarheit und CTA", result.categories.conversion.summary),
+      ...notesForBlock("Vertrauen", result.categories.trust.summary),
+    ],
+    fullPage: [
+      ...notesForBlock("Gesamte Seitenwirkung", result.categories.design.summary),
+      ...notesForBlock("AI-Sichtbarkeit", result.categories.aiVisibility.summary),
+    ],
+    hero: [
+      ...notesForBlock("Erster Eindruck", result.categories.conversion.summary),
+      ...notesForBlock("Design-Signal", result.categories.design.summary),
+    ],
+    mobile: [
+      ...notesForBlock("Mobile Nutzung", result.categories.performance.summary),
+      ...notesForBlock("Ladegefuehl", result.categories.performance.checks[0]?.message),
+    ],
+  };
 }
 
 export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
@@ -32,6 +63,7 @@ export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
         (screenshots.hero && primaryVariant !== "hero") ||
         screenshots.mobile),
   );
+  const screenshotNotes = buildScreenshotNotes(result);
 
   return (
     <section className="rounded-[1.9rem] border border-white/70 bg-white/90 p-7 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
@@ -66,20 +98,23 @@ export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
             hotspots={hotspots}
             target={overlayTarget}
             suggestions={result.aiSuggestions}
+            notes={screenshotNotes[primaryVariant ?? "viewport"]}
           />
           {hasAdditionalImages ? (
             <ScreenshotGallery
               screenshots={screenshots}
               excludeVariant={primaryVariant ?? undefined}
+              notesByVariant={screenshotNotes}
             />
           ) : screenshots.mobile ? (
             <ScreenshotGallery
               screenshots={{ mobile: screenshots.mobile }}
+              notesByVariant={screenshotNotes}
             />
           ) : null}
         </div>
       ) : hasPreview && screenshots ? (
-        <ScreenshotGallery screenshots={screenshots} />
+        <ScreenshotGallery screenshots={screenshots} notesByVariant={screenshotNotes} />
       ) : (
         <div className="mt-6">
           <ScreenshotFallback />

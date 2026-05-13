@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { AnalysisResult, AuditCheckStatus, ScoreBlock } from "@/types/analysis";
 import { getVisualHotspots } from "@/lib/result-ui";
 import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
-import { ScreenshotLightbox } from "@/components/results/screenshot-lightbox";
+import {
+  ScreenshotLightbox,
+  ScreenshotLightboxNote,
+} from "@/components/results/screenshot-lightbox";
 import { VisualOverlay } from "@/components/results/visual-overlay";
 
 type VisualProblemTone = "Kritisch" | "Wichtig" | "Chance";
@@ -151,14 +154,28 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     .slice(0, 7);
 }
 
+function notesFromProblems(problems: VisualProblem[], scope: "desktop" | "mobile") {
+  const filteredProblems =
+    scope === "mobile"
+      ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefuehl")
+      : problems.filter((problem) => problem.category !== "Mobile UX");
+
+  return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, 5).map((problem) => ({
+    title: `${problem.tone}: ${problem.title}`,
+    text: problem.text,
+  }));
+}
+
 function MobileScreenshotCard({
   src,
   problems,
   title = "Mobile Vorschau",
+  notes,
 }: {
   src?: string;
   problems: VisualProblem[];
   title?: string;
+  notes?: ScreenshotLightboxNote[];
 }) {
   const [failed, setFailed] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -219,6 +236,7 @@ function MobileScreenshotCard({
               src,
               alt: "Mobile Vorschau der analysierten Seite",
               title,
+              notes: notes ?? notesFromProblems(problems, "mobile"),
             }]}
             currentIndex={0}
             isOpen={isLightboxOpen}
@@ -274,12 +292,14 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
               hotspots={hotspots}
               target={screenshots?.viewport ? "viewport" : "fullPage"}
               suggestions={result.aiSuggestions}
+              notes={notesFromProblems(problems, "desktop")}
             />
           ) : screenshots ? (
             <MobileScreenshotCard
               src={desktopImage}
               problems={problems}
               title="Desktop-Vorschau"
+              notes={notesFromProblems(problems, "desktop")}
             />
           ) : (
             <ScreenshotFallback />
@@ -288,6 +308,7 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
             src={screenshots?.mobile}
             problems={problems}
             title="Mobile Vorschau"
+            notes={notesFromProblems(problems, "mobile")}
           />
         </div>
 

@@ -7,11 +7,13 @@ import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
 import {
   ScreenshotLightbox,
   ScreenshotLightboxImage,
+  ScreenshotLightboxNote,
 } from "@/components/results/screenshot-lightbox";
 
 interface ScreenshotGalleryProps {
   screenshots: AnalysisScreenshots;
   excludeVariant?: keyof AnalysisScreenshots;
+  notesByVariant?: Partial<Record<keyof AnalysisScreenshots, ScreenshotLightboxNote[]>>;
 }
 
 function ScreenshotImage({
@@ -65,6 +67,7 @@ function ScreenshotImage({
 export function ScreenshotGallery({
   screenshots,
   excludeVariant,
+  notesByVariant,
 }: ScreenshotGalleryProps) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const galleryImages: ScreenshotLightboxImage[] = [];
@@ -74,6 +77,7 @@ export function ScreenshotGallery({
       src: screenshots.viewport,
       alt: "Desktop-Vorschau der analysierten Seite",
       title: "Desktop-Vorschau",
+      notes: notesByVariant?.viewport,
     });
   }
 
@@ -82,6 +86,7 @@ export function ScreenshotGallery({
       src: screenshots.fullPage,
       alt: "Gesamtscreenshot der analysierten Seite",
       title: "Gesamtansicht",
+      notes: notesByVariant?.fullPage,
     });
   }
 
@@ -90,6 +95,7 @@ export function ScreenshotGallery({
       src: screenshots.hero,
       alt: "Hero-Vorschau der analysierten Seite",
       title: "Hero-Vorschau",
+      notes: notesByVariant?.hero,
     });
   }
 
@@ -98,6 +104,7 @@ export function ScreenshotGallery({
       src: screenshots.mobile,
       alt: "Mobile Vorschau der analysierten Seite",
       title: "Mobile Vorschau",
+      notes: notesByVariant?.mobile,
     });
   }
 

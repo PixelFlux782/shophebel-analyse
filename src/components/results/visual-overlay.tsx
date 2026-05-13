@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 import { getSuggestionForHotspot, VisualHotspot, VisualHotspotTarget } from "@/lib/result-ui";
 import { AiSuggestion, VisualMap } from "@/types/analysis";
 import { HotspotSuggestionPopover } from "@/components/results/hotspot-suggestion-popover";
-import { ScreenshotLightbox } from "@/components/results/screenshot-lightbox";
+import {
+  ScreenshotLightbox,
+  ScreenshotLightboxNote,
+} from "@/components/results/screenshot-lightbox";
 
 interface VisualOverlayProps {
   imageSrc: string;
@@ -15,6 +18,20 @@ interface VisualOverlayProps {
   hotspots: VisualHotspot[];
   target: VisualHotspotTarget;
   suggestions?: AiSuggestion[];
+  notes?: ScreenshotLightboxNote[];
+}
+
+function buildHotspotNotes(
+  hotspots: VisualHotspot[],
+  suggestions: AiSuggestion[] | undefined,
+) {
+  return hotspots.slice(0, 6).map((hotspot) => {
+    const suggestion = getSuggestionForHotspot(suggestions, hotspot);
+    return {
+      title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
+      text: suggestion?.summary ?? hotspot.description,
+    };
+  });
 }
 
 function getHotspotToneClasses(tone: VisualHotspot["tone"]) {
@@ -49,6 +66,7 @@ export function VisualOverlay({
   hotspots,
   target,
   suggestions,
+  notes,
 }: VisualOverlayProps) {
   const [showHotspots, setShowHotspots] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -60,6 +78,7 @@ export function VisualOverlay({
   const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
   const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
   const aspectRatio = `${baseWidth} / ${baseHeight}`;
+  const lightboxNotes = notes ?? buildHotspotNotes(hotspots, suggestions);
 
   useEffect(() => {
     setImageLoaded(false);
@@ -185,7 +204,7 @@ export function VisualOverlay({
         </div>
       </div>
       <ScreenshotLightbox
-        images={[{ src: imageSrc, alt: imageAlt, title }]}
+        images={[{ src: imageSrc, alt: imageAlt, title, notes: lightboxNotes }]}
         currentIndex={0}
         isOpen={isLightboxOpen && !imageFailed}
         onClose={() => setIsLightboxOpen(false)}

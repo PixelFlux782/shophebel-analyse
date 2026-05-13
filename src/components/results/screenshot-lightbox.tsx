@@ -6,6 +6,12 @@ export type ScreenshotLightboxImage = {
   src: string;
   alt: string;
   title: string;
+  notes?: ScreenshotLightboxNote[];
+};
+
+export type ScreenshotLightboxNote = {
+  title: string;
+  text: string;
 };
 
 interface ScreenshotLightboxProps {
@@ -25,6 +31,7 @@ export function ScreenshotLightbox({
 }: ScreenshotLightboxProps) {
   const currentImage = images[currentIndex];
   const hasNavigation = images.length > 1;
+  const notes = currentImage?.notes ?? [];
 
   useEffect(() => {
     if (!isOpen) {
@@ -90,33 +97,58 @@ export function ScreenshotLightbox({
           </button>
         </div>
 
-        <div className="relative flex min-h-0 flex-1 items-center justify-center bg-slate-950/65 p-3 sm:p-5">
-          <img
-            src={currentImage.src}
-            alt={currentImage.alt}
-            className="max-h-full max-w-full rounded-xl border border-white/10 bg-white object-contain shadow-[0_26px_90px_-50px_rgba(0,0,0,0.9)]"
-          />
+        <div className="grid min-h-0 flex-1 gap-0 bg-slate-950/65 lg:grid-cols-[minmax(0,1fr)_22rem]">
+          <div className="relative flex min-h-0 items-center justify-center p-3 sm:p-5">
+            <img
+              src={currentImage.src}
+              alt={currentImage.alt}
+              className="max-h-full max-w-full rounded-xl border border-white/10 bg-white object-contain shadow-[0_26px_90px_-50px_rgba(0,0,0,0.9)]"
+            />
 
-          {hasNavigation ? (
-            <>
-              <button
-                type="button"
-                onClick={() => onSelect(previousIndex)}
-                aria-label="Vorherigen Screenshot anzeigen"
-                className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-slate-950/72 text-2xl font-semibold text-white shadow-xl backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 sm:left-5"
-              >
-                <span aria-hidden="true">&lt;</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onSelect(nextIndex)}
-                aria-label="Naechsten Screenshot anzeigen"
-                className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-slate-950/72 text-2xl font-semibold text-white shadow-xl backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 sm:right-5"
-              >
-                <span aria-hidden="true">&gt;</span>
-              </button>
-            </>
-          ) : null}
+            {hasNavigation ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onSelect(previousIndex)}
+                  aria-label="Vorherigen Screenshot anzeigen"
+                  className="absolute left-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-slate-950/72 text-2xl font-semibold text-white shadow-xl backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 sm:left-5"
+                >
+                  <span aria-hidden="true">&lt;</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onSelect(nextIndex)}
+                  aria-label="Naechsten Screenshot anzeigen"
+                  className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-slate-950/72 text-2xl font-semibold text-white shadow-xl backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 sm:right-5"
+                >
+                  <span aria-hidden="true">&gt;</span>
+                </button>
+              </>
+            ) : null}
+          </div>
+
+          <aside className="min-h-0 overflow-y-auto border-t border-white/10 bg-white/6 p-4 backdrop-blur-xl lg:border-l lg:border-t-0 sm:p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+              Hinweise
+            </p>
+            <div className="mt-4 grid gap-3">
+              {notes.length > 0 ? (
+                notes.map((note, index) => (
+                  <article
+                    key={`${note.title}-${index}`}
+                    className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
+                  >
+                    <h3 className="text-sm font-bold text-white">{note.title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-300">{note.text}</p>
+                  </article>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 text-sm leading-6 text-slate-400">
+                  Keine Hinweise fuer diese Ansicht vorhanden.
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
 
         {hasNavigation ? (
