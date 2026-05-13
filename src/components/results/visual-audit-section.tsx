@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { AnalysisResult, AuditCheckStatus, ScoreBlock } from "@/types/analysis";
 import { getVisualHotspots } from "@/lib/result-ui";
 import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
+import { ScreenshotLightbox } from "@/components/results/screenshot-lightbox";
 import { VisualOverlay } from "@/components/results/visual-overlay";
 
 type VisualProblemTone = "Kritisch" | "Wichtig" | "Chance";
@@ -153,11 +154,14 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
 function MobileScreenshotCard({
   src,
   problems,
+  title = "Mobile Vorschau",
 }: {
   src?: string;
   problems: VisualProblem[];
+  title?: string;
 }) {
   const [failed, setFailed] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
     setFailed(false);
@@ -179,29 +183,49 @@ function MobileScreenshotCard({
         </span>
       </div>
       {src && !failed ? (
-        <div className="relative mx-auto mt-4 max-w-[280px] overflow-hidden rounded-[2rem] border-[10px] border-slate-950 bg-white shadow-[0_24px_80px_-52px_rgba(15,23,42,0.5)]">
-          <img
-            src={src}
-            alt="Mobile Vorschau der analysierten Seite"
-            loading="lazy"
-            onError={() => setFailed(true)}
-            className="h-auto w-full object-top"
-          />
-          <div className="pointer-events-none absolute inset-0">
-            {problems.slice(0, 3).map((problem, index) => (
-              <div
-                key={`${problem.category}-${index}`}
-                className="absolute h-8 w-8 rounded-full border-2 border-white bg-rose-500/90 text-center text-xs font-bold leading-7 text-white shadow-[0_0_24px_rgba(244,63,94,0.75)]"
-                style={{
-                  left: `${[12, 70, 42][index]}%`,
-                  top: `${[16, 38, 62][index]}%`,
-                }}
-              >
-                {index + 1}
-              </div>
-            ))}
+        <>
+          <div className="relative mx-auto mt-4 max-w-[280px] overflow-hidden rounded-[2rem] border-[10px] border-slate-950 bg-white shadow-[0_24px_80px_-52px_rgba(15,23,42,0.5)]">
+            <img
+              src={src}
+              alt="Mobile Vorschau der analysierten Seite"
+              loading="lazy"
+              onError={() => setFailed(true)}
+              className="h-auto w-full object-top"
+            />
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(true)}
+              className="absolute right-2 top-2 rounded-full border border-white/50 bg-slate-950/78 px-3 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-[0_12px_32px_-14px_rgba(0,0,0,0.85)] backdrop-blur-md transition hover:border-cyan-200 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+            >
+              Vollansicht
+            </button>
+            <div className="pointer-events-none absolute inset-0">
+              {problems.slice(0, 3).map((problem, index) => (
+                <div
+                  key={`${problem.category}-${index}`}
+                  className="absolute h-8 w-8 rounded-full border-2 border-white bg-rose-500/90 text-center text-xs font-bold leading-7 text-white shadow-[0_0_24px_rgba(244,63,94,0.75)]"
+                  style={{
+                    left: `${[12, 70, 42][index]}%`,
+                    top: `${[16, 38, 62][index]}%`,
+                  }}
+                >
+                  {index + 1}
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+          <ScreenshotLightbox
+            images={[{
+              src,
+              alt: "Mobile Vorschau der analysierten Seite",
+              title,
+            }]}
+            currentIndex={0}
+            isOpen={isLightboxOpen}
+            onClose={() => setIsLightboxOpen(false)}
+            onSelect={() => undefined}
+          />
+        </>
       ) : (
         <div className="mt-4">
           <ScreenshotFallback />
@@ -252,11 +276,19 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
               suggestions={result.aiSuggestions}
             />
           ) : screenshots ? (
-            <MobileScreenshotCard src={desktopImage} problems={problems} />
+            <MobileScreenshotCard
+              src={desktopImage}
+              problems={problems}
+              title="Desktop-Vorschau"
+            />
           ) : (
             <ScreenshotFallback />
           )}
-          <MobileScreenshotCard src={screenshots?.mobile} problems={problems} />
+          <MobileScreenshotCard
+            src={screenshots?.mobile}
+            problems={problems}
+            title="Mobile Vorschau"
+          />
         </div>
 
         <div className="grid gap-3">

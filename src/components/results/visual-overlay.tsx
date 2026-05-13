@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { getSuggestionForHotspot, VisualHotspot, VisualHotspotTarget } from "@/lib/result-ui";
 import { AiSuggestion, VisualMap } from "@/types/analysis";
 import { HotspotSuggestionPopover } from "@/components/results/hotspot-suggestion-popover";
+import { ScreenshotLightbox } from "@/components/results/screenshot-lightbox";
 
 interface VisualOverlayProps {
   imageSrc: string;
@@ -52,6 +53,7 @@ export function VisualOverlay({
   const [showHotspots, setShowHotspots] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
   const mappedWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
   const mappedHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
@@ -78,15 +80,26 @@ export function VisualOverlay({
               : "Die Vorschau zeigt die sichtbare Seite ohne zusaetzliche Markierungen."}
           </p>
         </div>
-        {hotspots.length > 0 ? (
-          <button
-            type="button"
-            onClick={() => setShowHotspots((current) => !current)}
-            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-          >
-            {showHotspots ? "Markierungen ausblenden" : "Markierungen anzeigen"}
-          </button>
-        ) : null}
+        <div className="flex flex-wrap items-center gap-2">
+          {hotspots.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setShowHotspots((current) => !current)}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+            >
+              {showHotspots ? "Markierungen ausblenden" : "Markierungen anzeigen"}
+            </button>
+          ) : null}
+          {!imageFailed ? (
+            <button
+              type="button"
+              onClick={() => setIsLightboxOpen(true)}
+              className="rounded-full border border-slate-900/10 bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_14px_36px_-20px_rgba(15,23,42,0.8)] transition hover:border-cyan-300/60 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+            >
+              Vollansicht
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <div className="relative mt-4 overflow-x-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
@@ -171,6 +184,13 @@ export function VisualOverlay({
           ) : null}
         </div>
       </div>
+      <ScreenshotLightbox
+        images={[{ src: imageSrc, alt: imageAlt, title }]}
+        currentIndex={0}
+        isOpen={isLightboxOpen && !imageFailed}
+        onClose={() => setIsLightboxOpen(false)}
+        onSelect={() => undefined}
+      />
     </article>
   );
 }
