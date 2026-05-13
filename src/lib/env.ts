@@ -4,7 +4,7 @@ export const APP_URL =
 export const SHOPHEBEL_HOME_URL =
   process.env.NEXT_PUBLIC_HOMEPAGE_URL ||
   process.env.NEXT_PUBLIC_SHOPHEBEL_HOME_URL ||
-  (process.env.NODE_ENV === "production" ? "https://www.shophebel.de" : "http://localhost:3000");
+  "https://shophebel.vercel.app";
 export const ANALYSE_TOOL_URL =
   process.env.NEXT_PUBLIC_ANALYSE_APP_URL ||
   process.env.NEXT_PUBLIC_ANALYSE_TOOL_URL ||
