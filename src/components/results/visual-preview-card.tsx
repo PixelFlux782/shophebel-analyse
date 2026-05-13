@@ -10,11 +10,19 @@ interface VisualPreviewCardProps {
   result: AnalysisResult;
 }
 
-function notesForBlock(title: string, summary?: string, fallback?: string): ScreenshotLightboxNote[] {
+function notesForBlock(
+  title: string,
+  summary: string | undefined,
+  category: string,
+  badge: string,
+  fallback?: string,
+): ScreenshotLightboxNote[] {
   return [
     {
       title,
       text: summary || fallback || "Keine Hinweise fuer diese Ansicht vorhanden.",
+      category,
+      badge,
     },
   ];
 }
@@ -22,20 +30,20 @@ function notesForBlock(title: string, summary?: string, fallback?: string): Scre
 function buildScreenshotNotes(result: AnalysisResult) {
   return {
     viewport: [
-      ...notesForBlock("Klarheit und CTA", result.categories.conversion.summary),
-      ...notesForBlock("Vertrauen", result.categories.trust.summary),
+      ...notesForBlock("CTA und erster Eindruck", result.categories.conversion.summary, "CTA Klarheit", "Desktop"),
+      ...notesForBlock("Vertrauen sichtbar machen", result.categories.trust.summary, "Vertrauen", "Trust"),
     ],
     fullPage: [
-      ...notesForBlock("Gesamte Seitenwirkung", result.categories.design.summary),
-      ...notesForBlock("AI-Sichtbarkeit", result.categories.aiVisibility.summary),
+      ...notesForBlock("Struktur der Gesamtseite", result.categories.design.summary, "Visuelle Hierarchie", "Fullpage"),
+      ...notesForBlock("Inhalte fuer KI und Suche", result.categories.aiVisibility.summary, "KI-Sichtbarkeit", "Struktur"),
     ],
     hero: [
-      ...notesForBlock("Erster Eindruck", result.categories.conversion.summary),
-      ...notesForBlock("Design-Signal", result.categories.design.summary),
+      ...notesForBlock("Above the Fold", result.categories.conversion.summary, "Above the Fold", "Hero"),
+      ...notesForBlock("Visuelles Signal", result.categories.design.summary, "Visuelle Hierarchie", "Design"),
     ],
     mobile: [
-      ...notesForBlock("Mobile Nutzung", result.categories.performance.summary),
-      ...notesForBlock("Ladegefuehl", result.categories.performance.checks[0]?.message),
+      ...notesForBlock("Mobile Nutzung", result.categories.performance.summary, "Mobile UX", "Mobile"),
+      ...notesForBlock("Ladegefuehl", result.categories.performance.checks[0]?.message, "Ladegefuehl", "Tempo"),
     ],
   };
 }

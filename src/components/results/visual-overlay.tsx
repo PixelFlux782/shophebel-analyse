@@ -27,11 +27,34 @@ function buildHotspotNotes(
 ) {
   return hotspots.slice(0, 6).map((hotspot) => {
     const suggestion = getSuggestionForHotspot(suggestions, hotspot);
+    const category =
+      hotspot.label?.includes("Oberer") ? "Above the Fold" :
+      hotspot.title.toLowerCase().includes("cta") ? "CTA Klarheit" :
+      hotspot.title.toLowerCase().includes("trust") || hotspot.title.toLowerCase().includes("vertrauen") ? "Vertrauen" :
+      "Visuelle Hierarchie";
+
     return {
       title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
       text: suggestion?.summary ?? hotspot.description,
+      category,
+      badge: hotspot.tone === "problem" ? "Prioritaet" : hotspot.tone === "good" ? "Staerke" : "Hebel",
     };
   });
+}
+
+function mergeNotes(
+  primaryNotes: ScreenshotLightboxNote[] | undefined,
+  hotspotNotes: ScreenshotLightboxNote[],
+) {
+  const seen = new Set<string>();
+  return [...(primaryNotes ?? []), ...hotspotNotes].filter((note) => {
+    const key = `${note.category ?? ""}:${note.title}:${note.text}`;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  }).slice(0, 8);
 }
 
 function getHotspotToneClasses(tone: VisualHotspot["tone"]) {
@@ -78,7 +101,7 @@ export function VisualOverlay({
   const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
   const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
   const aspectRatio = `${baseWidth} / ${baseHeight}`;
-  const lightboxNotes = notes ?? buildHotspotNotes(hotspots, suggestions);
+  const lightboxNotes = mergeNotes(notes, buildHotspotNotes(hotspots, suggestions));
 
   useEffect(() => {
     setImageLoaded(false);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export type ScreenshotLightboxImage = {
   src: string;
@@ -12,6 +12,8 @@ export type ScreenshotLightboxImage = {
 export type ScreenshotLightboxNote = {
   title: string;
   text: string;
+  category?: string;
+  badge?: string;
 };
 
 interface ScreenshotLightboxProps {
@@ -32,6 +34,13 @@ export function ScreenshotLightbox({
   const currentImage = images[currentIndex];
   const hasNavigation = images.length > 1;
   const notes = currentImage?.notes ?? [];
+  const [showNotes, setShowNotes] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShowNotes(true);
+    }
+  }, [currentIndex, isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -87,17 +96,30 @@ export function ScreenshotLightbox({
             </p>
             <p className="mt-1 truncate text-sm text-slate-300">{currentImage.title}</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Vollansicht schliessen"
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/15 bg-white/8 text-lg font-semibold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
-          >
-            <span aria-hidden="true">X</span>
-          </button>
+          <div className="flex shrink-0 items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowNotes((current) => !current)}
+              className="rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+            >
+              {showNotes ? "Hinweise ausblenden" : "Hinweise anzeigen"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Vollansicht schliessen"
+              className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/8 text-lg font-semibold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+            >
+              <span aria-hidden="true">X</span>
+            </button>
+          </div>
         </div>
 
-        <div className="grid min-h-0 flex-1 gap-0 bg-slate-950/65 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div
+          className={`grid min-h-0 flex-1 gap-0 bg-slate-950/65 transition-[grid-template-columns] duration-300 ease-out ${
+            showNotes ? "lg:grid-cols-[minmax(0,1fr)_23rem]" : "lg:grid-cols-[minmax(0,1fr)_0rem]"
+          }`}
+        >
           <div className="relative flex min-h-0 items-center justify-center p-3 sm:p-5">
             <img
               src={currentImage.src}
@@ -127,26 +149,52 @@ export function ScreenshotLightbox({
             ) : null}
           </div>
 
-          <aside className="min-h-0 overflow-y-auto border-t border-white/10 bg-white/6 p-4 backdrop-blur-xl lg:border-l lg:border-t-0 sm:p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
-              Hinweise
-            </p>
-            <div className="mt-4 grid gap-3">
-              {notes.length > 0 ? (
-                notes.map((note, index) => (
-                  <article
-                    key={`${note.title}-${index}`}
-                    className="rounded-2xl border border-white/10 bg-slate-950/45 p-4"
-                  >
-                    <h3 className="text-sm font-bold text-white">{note.title}</h3>
-                    <p className="mt-2 text-sm leading-6 text-slate-300">{note.text}</p>
-                  </article>
-                ))
-              ) : (
-                <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 text-sm leading-6 text-slate-400">
-                  Keine Hinweise fuer diese Ansicht vorhanden.
-                </div>
-              )}
+          <aside
+            aria-hidden={!showNotes}
+            className={`min-h-0 overflow-hidden border-t border-white/10 bg-white/6 backdrop-blur-xl transition-all duration-300 ease-out lg:border-l lg:border-t-0 ${
+              showNotes
+                ? "max-h-[38vh] opacity-100 lg:max-h-none"
+                : "max-h-0 border-t-0 opacity-0 lg:border-l-0"
+            }`}
+          >
+            <div className="h-full overflow-y-auto p-4 sm:p-5">
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
+                  Visual Audit
+                </p>
+                <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-100">
+                  {notes.length || 0} Hinweise
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3">
+                {notes.length > 0 ? (
+                  notes.map((note, index) => (
+                    <article
+                      key={`${note.title}-${index}`}
+                      className="rounded-2xl border border-white/10 bg-slate-950/55 p-4 shadow-[0_18px_60px_-44px_rgba(34,211,238,0.75)]"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-200/80">
+                            {note.category ?? "Visual Audit"}
+                          </p>
+                          <h3 className="mt-2 text-sm font-bold text-white">{note.title}</h3>
+                        </div>
+                        {note.badge ? (
+                          <span className="shrink-0 rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-200">
+                            {note.badge}
+                          </span>
+                        ) : null}
+                      </div>
+                      <p className="mt-3 text-sm leading-6 text-slate-300">{note.text}</p>
+                    </article>
+                  ))
+                ) : (
+                  <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 text-sm leading-6 text-slate-400">
+                    Fuer diese Ansicht sind aktuell keine zusaetzlichen Hinweise vorhanden.
+                  </div>
+                )}
+              </div>
             </div>
           </aside>
         </div>

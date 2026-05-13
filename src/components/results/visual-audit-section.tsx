@@ -154,15 +154,38 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     .slice(0, 7);
 }
 
-function notesFromProblems(problems: VisualProblem[], scope: "desktop" | "mobile") {
+function noteCategory(category: string, title: string) {
+  const text = `${category} ${title}`.toLowerCase();
+  if (text.includes("mobile")) return "Mobile UX";
+  if (text.includes("lade")) return "Ladegefuehl";
+  if (text.includes("vertrauen")) return "Vertrauen";
+  if (text.includes("cta") || text.includes("naechster")) return "CTA Klarheit";
+  if (text.includes("design") || text.includes("blick") || text.includes("layout")) return "Visuelle Hierarchie";
+  if (text.includes("klarheit")) return "Above the Fold";
+  return category;
+}
+
+function noteText(problem: VisualProblem) {
+  if (problem.text.length > 180) {
+    return `${problem.text.slice(0, 177)}...`;
+  }
+
+  return problem.text;
+}
+
+function notesFromProblems(problems: VisualProblem[], scope: "desktop" | "mobile" | "fullPage") {
   const filteredProblems =
     scope === "mobile"
       ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefuehl")
-      : problems.filter((problem) => problem.category !== "Mobile UX");
+      : scope === "fullPage"
+        ? problems.filter((problem) => problem.category !== "Mobile UX")
+        : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefuehl");
 
   return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, 5).map((problem) => ({
-    title: `${problem.tone}: ${problem.title}`,
-    text: problem.text,
+    title: problem.title,
+    text: noteText(problem),
+    category: noteCategory(problem.category, problem.title),
+    badge: problem.tone,
   }));
 }
 
@@ -261,6 +284,7 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
     result.visualMap && desktopImage
       ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage")
       : [];
+  const desktopScope = screenshots?.viewport ? "desktop" : "fullPage";
 
   return (
     <section className="rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-[0_28px_90px_-58px_rgba(15,23,42,0.35)] sm:p-7">
@@ -292,14 +316,14 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
               hotspots={hotspots}
               target={screenshots?.viewport ? "viewport" : "fullPage"}
               suggestions={result.aiSuggestions}
-              notes={notesFromProblems(problems, "desktop")}
+              notes={notesFromProblems(problems, desktopScope)}
             />
           ) : screenshots ? (
             <MobileScreenshotCard
               src={desktopImage}
               problems={problems}
               title="Desktop-Vorschau"
-              notes={notesFromProblems(problems, "desktop")}
+              notes={notesFromProblems(problems, desktopScope)}
             />
           ) : (
             <ScreenshotFallback />
