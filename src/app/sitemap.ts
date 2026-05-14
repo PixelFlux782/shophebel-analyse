@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { APP_URL } from "@/lib/env";
 
-const publicRoutes = ["/analyse"];
+const publicRoutes = ["/analyse", "/website-analyse", "/conversion-optimierung"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();
