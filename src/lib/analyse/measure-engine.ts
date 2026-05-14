@@ -4,7 +4,7 @@ type MeasureTemplate = Omit<ActionMeasure, "priority" | "sourceProblem">;
 
 const categoryByBlock: Record<keyof AnalysisResultCategories, ActionMeasure["category"]> = {
   seo: "Klarheit",
-  performance: "Ladegefuehl",
+  performance: "Ladegefühl",
   trust: "Vertrauen",
   conversion: "CTA",
   design: "Design",
@@ -13,49 +13,49 @@ const categoryByBlock: Record<keyof AnalysisResultCategories, ActionMeasure["cat
 
 const defaultByCategory: Record<ActionMeasure["category"], Omit<MeasureTemplate, "category">> = {
   Vertrauen: {
-    title: "Vertrauen frueher sichtbar machen",
+    title: "Vertrauen früher sichtbar machen",
     description:
       "Ergaenze sichtbare Belege wie Kontakt, Bewertungen, rechtliche Links oder Sicherheitsargumente in kaufnahen Bereichen.",
     effort: "mittel",
     impact: "hoch",
   },
   Klarheit: {
-    title: "Hauptbotschaft schaerfen",
+    title: "Hauptbotschaft schärfen",
     description:
-      "Formuliere klarer, was angeboten wird, fuer wen es gedacht ist und welcher Nutzen sofort verstanden werden soll.",
+      "Formuliere klarer, was angeboten wird, für wen es gedacht ist und welcher Nutzen sofort verstanden werden soll.",
     effort: "mittel",
     impact: "hoch",
   },
   "Mobile UX": {
     title: "Mobile Nutzung vereinfachen",
     description:
-      "Optimiere Lesbarkeit, Abstaende, Button-Groessen und sichtbare Reihenfolge fuer kleine Bildschirme.",
+      "Optimiere Lesbarkeit, Abstände, Button-Größen und sichtbare Reihenfolge für kleine Bildschirme.",
     effort: "mittel",
     impact: "hoch",
   },
   CTA: {
-    title: "Hauptbutton klarer fuehren",
+    title: "Hauptbutton klarer führen",
     description:
       "Formuliere den wichtigsten Button konkreter und platziere ihn an mehreren entscheidenden Stellen.",
     effort: "niedrig",
     impact: "hoch",
   },
   Design: {
-    title: "Visuelle Fuehrung verbessern",
+    title: "Visuelle Führung verbessern",
     description:
-      "Ordne Hero, Trust-Elemente, Bilder und Inhaltsbloecke so, dass Blick und Handlung klar gefuehrt werden.",
+      "Ordne Hero, Trust-Elemente, Bilder und Inhaltsbloecke so, dass Blick und Handlung klar geführt werden.",
     effort: "mittel",
     impact: "mittel",
   },
-  Ladegefuehl: {
+  Ladegefühl: {
     title: "Ladebremsen reduzieren",
     description:
-      "Pruefe grosse Bilder, Skripte und externe Ressourcen und verschlanke die kritischsten Ladepfade.",
+      "Prüfe große Bilder, Skripte und externe Ressourcen und verschlanke die kritischsten Ladepfade.",
     effort: "mittel",
     impact: "hoch",
   },
   "AI-Sichtbarkeit": {
-    title: "Fuer KI-Antworten verstaendlicher werden",
+    title: "Für KI-Antworten verständlicher werden",
     description:
       "Ergaenze klare Kundenfragen, gut ausgezeichnete Informationen und eindeutig benannte Angaben zu Marke, Leistungen und Standort.",
     effort: "mittel",
@@ -92,15 +92,15 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     category: "Vertrauen",
     title: "Kontaktweg prominenter machen",
     description:
-      "Zeige Kontaktmoeglichkeiten frueher auf der Seite und wiederhole sie an Stellen, an denen Nutzer Rueckfragen haben koennten.",
+      "Zeige Kontaktmöglichkeiten früher auf der Seite und wiederhole sie an Stellen, an denen Nutzer Rückfragen haben könnten.",
     effort: "niedrig",
     impact: "hoch",
   },
-  "Naechster Schritt": {
+  "Nächster Schritt": {
     category: "CTA",
     title: "Hauptbutton klarer formulieren und oefter platzieren",
     description:
-      "Nutze einen eindeutigen primaeren CTA wie 'Angebot anfragen', 'Website pruefen' oder 'Termin buchen' und wiederhole ihn im Seitenverlauf.",
+      "Nutze einen eindeutigen primären CTA wie 'Angebot anfragen', 'Website prüfen' oder 'Termin buchen' und wiederhole ihn im Seitenverlauf.",
     effort: "niedrig",
     impact: "hoch",
   },
@@ -114,9 +114,9 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
   },
   Angebotsklarheit: {
     category: "Klarheit",
-    title: "Angebot in einem Satz verstaendlich machen",
+    title: "Angebot in einem Satz verständlich machen",
     description:
-      "Ueberarbeite Hero und erste Textbloecke so, dass Besucher sofort Angebot, Zielgruppe und Nutzen verstehen.",
+      "Überarbeite Hero und erste Textblöcke so, dass Besucher sofort Angebot, Zielgruppe und Nutzen verstehen.",
     effort: "mittel",
     impact: "hoch",
   },
@@ -130,7 +130,7 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
   },
   "Suchergebnis-Klarheit": {
     category: "Klarheit",
-    title: "Suchvorschau verstaendlicher formulieren",
+    title: "Suchvorschau verständlicher formulieren",
     description:
       "Formuliere Seitenname und Kurzbeschreibung so, dass Angebot, Nutzen und Klickgrund sofort erkennbar sind.",
     effort: "niedrig",
@@ -148,23 +148,23 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     category: "Mobile UX",
     title: "Mobile Darstellung angenehm machen",
     description:
-      "Pruefe die mobile Ansicht und verbessere Abstaende, Schriftgroessen und klickbare Elemente fuer kleine Bildschirme.",
+      "Prüfe die mobile Ansicht und verbessere Abstände, Schriftgrößen und klickbare Elemente für kleine Bildschirme.",
     effort: "mittel",
     impact: "hoch",
   },
-  Ladegefuehl: {
-    category: "Ladegefuehl",
+  Ladegefühl: {
+    category: "Ladegefühl",
     title: "Mobile Ladezeit verbessern",
     description:
-      "Komprimiere grosse Medien, reduziere unnoetige Skripte und priorisiere Inhalte, die oberhalb des ersten Scrolls gebraucht werden.",
+      "Komprimiere große Medien, reduziere unnötige Skripte und priorisiere Inhalte, die oberhalb des ersten Scrolls gebraucht werden.",
     effort: "mittel",
     impact: "hoch",
   },
-  Blickfuehrung: {
+  Blickführung: {
     category: "Design",
-    title: "Layout auf Blickfuehrung ausrichten",
+    title: "Layout auf Blickführung ausrichten",
     description:
-      "Ordne Headline, CTA, Trust-Elemente und Bilder so, dass der naechste Schritt visuell eindeutig ist.",
+      "Ordne Headline, CTA, Trust-Elemente und Bilder so, dass der nächste Schritt visuell eindeutig ist.",
     effort: "mittel",
     impact: "mittel",
   },
@@ -172,13 +172,13 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     category: "Design",
     title: "Textbereiche besser strukturieren",
     description:
-      "Kuerze unklare Textbloecke, ergaenze Zwischenueberschriften und hebe Nutzenargumente visuell hervor.",
+      "Kürze unklare Textblöcke, ergänze Zwischenüberschriften und hebe Nutzenargumente visuell hervor.",
     effort: "mittel",
     impact: "mittel",
   },
-  "Verstaendliche Daten fuer Google und KI": {
+  "Verständliche Daten für Google und KI": {
     category: "AI-Sichtbarkeit",
-    title: "Informationen fuer Google und KI klar auszeichnen",
+    title: "Informationen für Google und KI klar auszeichnen",
     description:
       "Zeichne Unternehmen, Standort, Produkte, Leistungen oder Kundenfragen so aus, dass Systeme sie leichter verstehen.",
     effort: "mittel",
@@ -188,15 +188,15 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     category: "AI-Sichtbarkeit",
     title: "Kundenfragen sichtbar beantworten",
     description:
-      "Sammle echte Kundenfragen, beantworte sie kompakt und zeichne den Bereich bei Eignung fuer Google und KI klar aus.",
+      "Sammle echte Kundenfragen, beantworte sie kompakt und zeichne den Bereich bei Eignung für Google und KI klar aus.",
     effort: "mittel",
     impact: "mittel",
   },
-  "Produkt-/Serviceverstaendlichkeit": {
+  "Produkt-/Serviceverständlichkeit": {
     category: "AI-Sichtbarkeit",
     title: "Produkte und Leistungen klarer beschreiben",
     description:
-      "Benenne Leistungen, Produkte, Zielgruppen, Nutzen und typische Anwendungsfaelle so, dass Menschen und KI-Systeme sie eindeutig einordnen koennen.",
+      "Benenne Leistungen, Produkte, Zielgruppen, Nutzen und typische Anwendungsfaelle so, dass Menschen und KI-Systeme sie eindeutig einordnen können.",
     effort: "mittel",
     impact: "hoch",
   },
@@ -218,9 +218,9 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
   },
   "Lokale Signale": {
     category: "AI-Sichtbarkeit",
-    title: "Lokale Signale ergaenzen",
+    title: "Lokale Signale ergänzen",
     description:
-      "Ergaenze Adresse, Einzugsgebiet, Standortseiten, Oeffnungszeiten und lokale Begriffe, falls dein Angebot regional relevant ist.",
+      "Ergaenze Adresse, Einzugsgebiet, Standortseiten, Öffnungszeiten und lokale Begriffe, falls dein Angebot regional relevant ist.",
     effort: "mittel",
     impact: "mittel",
   },
@@ -232,11 +232,11 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     effort: "niedrig",
     impact: "mittel",
   },
-  "Regeln fuer KI-Systeme": {
+  "Regeln für KI-Systeme": {
     category: "AI-Sichtbarkeit",
-    title: "Zugriff fuer Such- und KI-Systeme bewusst festlegen",
+    title: "Zugriff für Such- und KI-Systeme bewusst festlegen",
     description:
-      "Pruefe, welche Such- oder KI-Systeme deine Inhalte abrufen duerfen, und lege diese Entscheidung bewusst fest.",
+      "Prüfe, welche Such- oder KI-Systeme deine Inhalte abrufen duerfen, und lege diese Entscheidung bewusst fest.",
     effort: "niedrig",
     impact: "mittel",
   },

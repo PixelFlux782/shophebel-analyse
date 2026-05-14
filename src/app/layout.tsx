@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: "Shophebel Analyse",
   description:
-    "Shophebel findet digitale Schwaechen bei Websites und Onlineshops - und zeigt konkrete Hebel fuer mehr Sichtbarkeit, Vertrauen und Umsatz.",
+    "Shophebel findet digitale Schwächen bei Websites und Onlineshops - und zeigt konkrete Hebel für mehr Sichtbarkeit, Vertrauen und Umsatz.",
 };
 
 export default function RootLayout({

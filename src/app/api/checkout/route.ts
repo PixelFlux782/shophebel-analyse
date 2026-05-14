@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
     if (!body.analysisId) {
       return NextResponse.json(
-        { error: "Keine Analyse-ID fuer den Checkout uebergeben." },
+        { error: "Keine Analyse-ID für den Checkout übergeben." },
         { status: 400 },
       );
     }

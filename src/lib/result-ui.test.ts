@@ -105,7 +105,7 @@ describe("result-ui helpers", () => {
     ]);
   });
 
-  it("zeigt in Premium alle Findings und liefert gesperrte Vorschau fuer Free", () => {
+  it("zeigt in Premium alle Findings und liefert gesperrte Vorschau für Free", () => {
     const findings = [
       createFinding("High 1", "high"),
       createFinding("High 2", "high"),
@@ -141,12 +141,12 @@ describe("result-ui helpers", () => {
     ]);
   });
 
-  it("leitet Labels fuer Empfehlungen aus Impact und Effort ab", () => {
+  it("leitet Labels für Empfehlungen aus Impact und Effort ab", () => {
     expect(getRecommendationLabel(createRecommendation("A", "high", "low", 0))).toBe(
       "Schnellster Hebel",
     );
     expect(getRecommendationLabel(createRecommendation("B", "high", "medium", 1))).toBe(
-      "Groesster Impact",
+      "Größter Impact",
     );
     expect(getRecommendationLabel(createRecommendation("C", "medium", "high", 12))).toBe(
       "Langfristige Optimierung",

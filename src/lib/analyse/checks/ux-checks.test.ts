@@ -9,8 +9,8 @@ const strongUxHtml = `
     <main>
       <h1>Shophebel Startseite</h1>
       <h2>Mehr Umsatz</h2>
-      <h3>Die naechsten Schritte</h3>
-      ${"<p>Das ist ein strukturierter Absatz mit relevanten Inhalten fuer Nutzer und Orientierung.</p>".repeat(30)}
+      <h3>Die nächsten Schritte</h3>
+      ${"<p>Das ist ein strukturierter Absatz mit relevanten Inhalten für Nutzer und Orientierung.</p>".repeat(30)}
       <img src="/hero.jpg" alt="Hero" />
       <img src="/team.jpg" alt="Team" />
       <a href="/produkte">Produkte</a>

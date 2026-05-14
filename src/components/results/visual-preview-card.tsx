@@ -20,7 +20,7 @@ function notesForBlock(
   return [
     {
       title,
-      text: summary || fallback || "Keine Hinweise fuer diese Ansicht vorhanden.",
+      text: summary || fallback || "Keine Hinweise für diese Ansicht vorhanden.",
       category,
       badge,
     },
@@ -35,7 +35,7 @@ function buildScreenshotNotes(result: AnalysisResult) {
     ],
     fullPage: [
       ...notesForBlock("Struktur der Gesamtseite", result.categories.design.summary, "Visuelle Hierarchie", "Fullpage"),
-      ...notesForBlock("Inhalte fuer KI und Suche", result.categories.aiVisibility.summary, "KI-Sichtbarkeit", "Struktur"),
+      ...notesForBlock("Inhalte für KI und Suche", result.categories.aiVisibility.summary, "KI-Sichtbarkeit", "Struktur"),
     ],
     hero: [
       ...notesForBlock("Above the Fold", result.categories.conversion.summary, "Above the Fold", "Hero"),
@@ -43,7 +43,7 @@ function buildScreenshotNotes(result: AnalysisResult) {
     ],
     mobile: [
       ...notesForBlock("Mobile Nutzung", result.categories.performance.summary, "Mobile UX", "Mobile"),
-      ...notesForBlock("Ladegefuehl", result.categories.performance.checks[0]?.message, "Ladegefuehl", "Tempo"),
+      ...notesForBlock("Ladegefühl", result.categories.performance.checks[0]?.message, "Ladegefühl", "Tempo"),
     ],
   };
 }
@@ -84,7 +84,7 @@ export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
       <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
         {result.analysisMode === "rendered"
           ? "Diese Vorschau zeigt, wie die Seite im Browser wirkt. So lassen sich Layout, Buttons und sichtbare Elemente besser einordnen."
-          : "Wenn eine echte Browseransicht verfuegbar ist, erscheint hier eine visuelle Vorschau der Seite."}
+          : "Wenn eine echte Browseransicht verfügbar ist, erscheint hier eine visuelle Vorschau der Seite."}
       </p>
       <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-500">
         Die markierten Bereiche helfen dir, Probleme, Chancen und starke Signale direkt in deinem sichtbaren Layout nachzuvollziehen.

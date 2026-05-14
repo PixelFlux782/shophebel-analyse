@@ -104,12 +104,12 @@ export function ScreenshotLightbox({
               disabled={!hasNotes}
               className="rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 disabled:cursor-not-allowed disabled:opacity-55"
             >
-              {hasNotes ? (showNotes ? "Hinweise ausblenden" : "Hinweise anzeigen") : "Keine Hinweise verfuegbar"}
+              {hasNotes ? (showNotes ? "Hinweise ausblenden" : "Hinweise anzeigen") : "Keine Hinweise verfügbar"}
             </button>
             <button
               type="button"
               onClick={onClose}
-              aria-label="Vollansicht schliessen"
+              aria-label="Vollansicht schließen"
               className="grid h-10 w-10 place-items-center rounded-full border border-white/15 bg-white/8 text-lg font-semibold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
             >
               <span aria-hidden="true">X</span>
@@ -142,7 +142,7 @@ export function ScreenshotLightbox({
                 <button
                   type="button"
                   onClick={() => onSelect(nextIndex)}
-                  aria-label="Naechsten Screenshot anzeigen"
+                  aria-label="Nächsten Screenshot anzeigen"
                   className="absolute right-3 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-full border border-white/15 bg-slate-950/72 text-2xl font-semibold text-white shadow-xl backdrop-blur-md transition hover:border-cyan-300/50 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 sm:right-5"
                 >
                   <span aria-hidden="true">&gt;</span>
@@ -193,7 +193,7 @@ export function ScreenshotLightbox({
                   ))
                 ) : (
                   <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 text-sm leading-6 text-slate-400">
-                    Fuer diese Ansicht sind aktuell keine zusaetzlichen Hinweise vorhanden.
+                    Für diese Ansicht sind aktuell keine zusätzlichen Hinweise vorhanden.
                   </div>
                 )}
               </div>

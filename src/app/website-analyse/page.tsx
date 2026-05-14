@@ -15,7 +15,7 @@ const faqs = [
   {
     question: "Was ist eine Website-Analyse von Shophebel?",
     answer:
-      "Shophebel prueft Website, Shop oder Landingpage auf sichtbare Umsatzbremsen: Vertrauen, Klarheit, mobile Wirkung, Conversion-Signale, technische Reibung und KI-Sichtbarkeit.",
+      "Shophebel prüft Website, Shop oder Landingpage auf sichtbare Umsatzbremsen: Vertrauen, Klarheit, mobile Wirkung, Conversion-Signale, technische Reibung und KI-Sichtbarkeit.",
   },
   {
     question: "Ist die Analyse nur ein SEO-Check?",
@@ -25,22 +25,22 @@ const faqs = [
   {
     question: "Brauche ich technische Daten oder Tracking-Zugriff?",
     answer:
-      "Fuer den Start reicht die URL. Die Analyse bewertet oeffentlich sichtbare Signale und macht die wichtigsten Hebel ohne Login, Registrierung oder Analytics-Zugriff sichtbar.",
+      "Für den Start reicht die URL. Die Analyse bewertet öffentlich sichtbare Signale und macht die wichtigsten Hebel ohne Login, Registrierung oder Analytics-Zugriff sichtbar.",
   },
   {
     question: "Was bekomme ich im Premium-Report?",
     answer:
-      "Der Premium-Report erweitert die Sofortanalyse um priorisierte Massnahmen, visuelle Befunde, konkrete Text- und Strukturhinweise sowie einen kompakten Umsetzungsplan.",
+      "Der Premium-Report erweitert die Sofortanalyse um priorisierte Maßnahmen, visuelle Befunde, konkrete Text- und Strukturhinweise sowie einen kompakten Umsetzungsplan.",
   },
 ];
 
 const analysisAreas = [
-  ["Trust", "Beweise, Sicherheit, Markenwirkung und Einwaende, die vor der Anfrage entstehen."],
-  ["Conversion", "CTA-Klarheit, Entscheidungswege, Reibung und Prioritaet der naechsten Aktion."],
+  ["Trust", "Beweise, Sicherheit, Markenwirkung und Einwände, die vor der Anfrage entstehen."],
+  ["Conversion", "CTA-Klarheit, Entscheidungswege, Reibung und Priorität der nächsten Aktion."],
   ["Mobile", "Erster Eindruck, Lesbarkeit, Above-the-fold Wirkung und Kontaktfaehigkeit unterwegs."],
-  ["Content", "Nutzenversprechen, Angebotslogik, Suchintention und Antworttiefe fuer kaufnahe Besucher."],
-  ["Performance", "Gefuehlte Geschwindigkeit, Stabilitaet und visuelle Ruhe auf kritischen Einstiegsseiten."],
-  ["AI Visibility", "Struktur, Entitaeten, semantische Eindeutigkeit und Zitierbarkeit fuer KI-Antwortsysteme."],
+  ["Content", "Nutzenversprechen, Angebotslogik, Suchintention und Antworttiefe für kaufnahe Besucher."],
+  ["Performance", "Gefühlte Geschwindigkeit, Stabilitaet und visuelle Ruhe auf kritischen Einstiegsseiten."],
+  ["AI Visibility", "Struktur, Entitäten, semantische Eindeutigkeit und Zitierbarkeit für KI-Antwortsysteme."],
 ];
 
 const blockers = [
@@ -50,12 +50,12 @@ const blockers = [
     signal: "Hero, Angebot, CTA",
   },
   {
-    issue: "Vertrauen entsteht erst zu spaet.",
+    issue: "Vertrauen entsteht erst zu spät.",
     impact: "Anfragen bleiben aus, weil Beweise, Referenzen oder Sicherheit fehlen.",
     signal: "Trust, Social Proof",
   },
   {
-    issue: "Mobile Seiten fuehlen sich nach Arbeit an.",
+    issue: "Mobile Seiten fühlen sich nach Arbeit an.",
     impact: "Lokale und kaufnahe Nutzer brechen ab, bevor sie Kontakt aufnehmen.",
     signal: "Mobile UX",
   },
@@ -67,10 +67,10 @@ const blockers = [
 ];
 
 const processSteps = [
-  ["01", "URL analysieren", "Shophebel liest die oeffentlich sichtbaren Signale deiner Website."],
+  ["01", "URL analysieren", "Shophebel liest die öffentlich sichtbaren Signale deiner Website."],
   ["02", "Blocker priorisieren", "Die Analyse trennt Kosmetik von Hebeln mit echter Business-Wirkung."],
   ["03", "Visuell verstehen", "Screenshots, Scores und Befunde machen sichtbar, wo Vertrauen verloren geht."],
-  ["04", "Premium planen", "Der Report verdichtet die naechsten Schritte zu einem klaren Massnahmenplan."],
+  ["04", "Premium planen", "Der Report verdichtet die nächsten Schritte zu einem klaren Maßnahmenplan."],
 ];
 
 function SectionIntro({
@@ -185,14 +185,14 @@ function FaqSchema() {
 }
 
 export const metadata: Metadata = {
-  title: "Website Analyse fuer mehr Umsatz | Shophebel",
+  title: "Website Analyse für mehr Umsatz | Shophebel",
   description:
-    "Premium Website-Analyse fuer Trust, Conversion, mobile Wirkung und AI Visibility. Erkenne Umsatzbremsen und starte direkt mit dem Shophebel Audit.",
+    "Premium Website-Analyse für Trust, Conversion, mobile Wirkung und AI Visibility. Erkenne Umsatzbremsen und starte direkt mit dem Shophebel Audit.",
   alternates: {
     canonical: canonicalPath,
   },
   openGraph: {
-    title: "Website Analyse fuer mehr Umsatz | Shophebel",
+    title: "Website Analyse für mehr Umsatz | Shophebel",
     description:
       "Shophebel zeigt, welche Website-Probleme Vertrauen, Sichtbarkeit und Conversion kosten - inklusive visuellem Audit und Premium-Report.",
     url: pageUrl,
@@ -201,9 +201,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Website Analyse fuer mehr Umsatz | Shophebel",
+    title: "Website Analyse für mehr Umsatz | Shophebel",
     description:
-      "Finde Revenue Blockers, Trust-Luecken und AI-Visibility-Probleme mit einer hochwertigen Website-Analyse.",
+      "Finde Revenue Blockers, Trust-Lücken und AI-Visibility-Probleme mit einer hochwertigen Website-Analyse.",
   },
 };
 
@@ -223,7 +223,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
           <div>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300 shadow-2xl backdrop-blur-xl">
               <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
-              Website Intelligence fuer Wachstumsteams
+              Website Intelligence für Wachstumsteams
             </div>
 
             <h1 className="mt-7 max-w-5xl text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl lg:leading-[0.98]">
@@ -266,7 +266,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
         <div className="mx-auto grid max-w-7xl gap-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-500 sm:grid-cols-3">
           <p className="text-slate-300">Keine Registrierung</p>
           <p>Visuelle Befunde statt Tabellenfriedhof</p>
-          <p>Premium-Report fuer Umsetzung</p>
+          <p>Premium-Report für Umsetzung</p>
         </div>
       </section>
 
@@ -274,7 +274,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
         <div className="mx-auto max-w-7xl">
           <SectionIntro
             eyebrow="Analyseumfang"
-            title="Ein Audit fuer die Dinge, die Besucher wirklich entscheiden lassen."
+            title="Ein Audit für die Dinge, die Besucher wirklich entscheiden lassen."
             copy="Die Website-Analyse verbindet technische Signale mit Wahrnehmung, Vertrauen und Suchintention. So entsteht ein Bild, das Geschaeftsfuehrer, Marketing und Umsetzungsteams gemeinsam verstehen."
           />
 
@@ -300,7 +300,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
               Die teuersten Probleme sehen selten technisch aus.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300">
-              Schlechte Rankings sind oft nur das Symptom. Die groesseren Verluste entstehen, wenn Besucher nicht sofort verstehen, warum sie bleiben, vertrauen oder handeln sollen.
+              Schlechte Rankings sind oft nur das Symptom. Die größeren Verluste entstehen, wenn Besucher nicht sofort verstehen, warum sie bleiben, vertrauen oder handeln sollen.
             </p>
           </div>
 
@@ -347,7 +347,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
               Sichtbarkeit endet nicht mehr bei Google.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300">
-              Kaufentscheidungen entstehen zunehmend in KI-Antworten, Vergleichen und Zusammenfassungen. Shophebel prueft, ob dein Angebot klar genug ist, um als relevante Antwort verstanden zu werden.
+              Kaufentscheidungen entstehen zunehmend in KI-Antworten, Vergleichen und Zusammenfassungen. Shophebel prüft, ob dein Angebot klar genug ist, um als relevante Antwort verstanden zu werden.
             </p>
           </div>
 
@@ -355,7 +355,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
             <div className="rounded-2xl border border-white/10 bg-slate-950/70 p-5">
               <p className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Antwortsysteme erkennen</p>
               <div className="mt-5 space-y-3">
-                {["Was bietet die Marke an?", "Fuer wen ist das Angebot relevant?", "Welche Beweise stuetzen die Aussage?", "Welche Region, Branche oder Kategorie passt?"].map((item) => (
+                {["Was bietet die Marke an?", "Für wen ist das Angebot relevant?", "Welche Beweise stuetzen die Aussage?", "Welche Region, Branche oder Kategorie passt?"].map((item) => (
                   <div key={item} className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
                     <span className="h-2 w-2 rounded-full bg-cyan-300" />
                     <span className="text-sm font-medium text-slate-200">{item}</span>
@@ -375,11 +375,11 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
               Aus Diagnose wird ein klarer Umsetzungsplan.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
-              Der Premium-Report ist fuer Teams gedacht, die nicht noch ein Dashboard brauchen, sondern eine belastbare Priorisierung: was aendern, warum es wirkt und womit starten.
+              Der Premium-Report ist für Teams gedacht, die nicht noch ein Dashboard brauchen, sondern eine belastbare Priorisierung: was ändern, warum es wirkt und womit starten.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {["Priorisierte Umsatzhebel", "Screenshot-Befunde", "Konkrete Copy- und Strukturhinweise", "7-Tage-Massnahmenplan"].map((item) => (
+              {["Priorisierte Umsatzhebel", "Screenshot-Befunde", "Konkrete Copy- und Strukturhinweise", "7-Tage-Maßnahmenplan"].map((item) => (
                 <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-sm font-semibold text-slate-200">
                   {item}
                 </div>
@@ -412,7 +412,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
                 <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4">
                   <p className="text-sm font-semibold text-amber-100">Erste Empfehlung</p>
                   <p className="mt-2 text-sm leading-6 text-slate-300">
-                    Hero und Trust-Beweise zusammenfuehren, damit Besucher Nutzen und Sicherheit in einem Blick verstehen.
+                    Hero und Trust-Beweise zusammenführen, damit Besucher Nutzen und Sicherheit in einem Blick verstehen.
                   </p>
                 </div>
               </div>
@@ -425,7 +425,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
         <div className="mx-auto max-w-7xl">
           <SectionIntro
             eyebrow="Prozess"
-            title="Schnell genug fuer den ersten Impuls. Praezise genug fuer Entscheidungen."
+            title="Schnell genug für den ersten Impuls. Präzise genug für Entscheidungen."
             copy="Die Analyse ist bewusst schlank im Einstieg und tief genug im Ergebnis, damit daraus konkrete Arbeit entstehen kann."
           />
           <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -465,12 +465,12 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
 
       <section className="px-4 pb-24 pt-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 text-center shadow-2xl sm:p-10 lg:p-14">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-300">Startpunkt fuer bessere Entscheidungen</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-300">Startpunkt für bessere Entscheidungen</p>
           <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-            Lass deine Website nicht nur sichtbar sein. Lass sie ueberzeugen.
+            Lass deine Website nicht nur sichtbar sein. Lass sie überzeugen.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-300">
-            Starte mit der kostenlosen Analyse und entscheide danach, ob du den Premium-Report fuer die Umsetzung brauchst.
+            Starte mit der kostenlosen Analyse und entscheide danach, ob du den Premium-Report für die Umsetzung brauchst.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <a

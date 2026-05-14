@@ -40,12 +40,12 @@ export function getVisibleAiSuggestions(
 export function getCategoryLabel(category: AnalysisCategory) {
   const labels: Record<AnalysisCategory, string> = {
     seo: "Auffindbarkeit",
-    performance: "Ladegefuehl",
+    performance: "Ladegefühl",
     trust: "Vertrauen",
     conversion: "Anfragen",
     design: "Design",
     aiVisibility: "KI-Sichtbarkeit",
-    ux: "Nutzerfuehrung",
+    ux: "Nutzerführung",
   };
 
   return labels[category];
@@ -65,8 +65,8 @@ function createFallbackTemplate(finding: Finding): SuggestionTemplate {
       "Setze dieses Thema zuerst in eine klar sichtbare Optimierung um, damit die Seite schneller Vertrauen, Orientierung oder Conversion gewinnt.",
     actionSteps: [
       "Den betroffenen Bereich auf der Startseite klar identifizieren.",
-      "Eine sichtbare, konkrete Verbesserung fuer Nutzer und Kaufentscheidung umsetzen.",
-      "Nach der Aenderung erneut pruefen, ob das Signal jetzt klar erkennbar ist.",
+      "Eine sichtbare, konkrete Verbesserung für Nutzer und Kaufentscheidung umsetzen.",
+      "Nach der Änderung erneut prüfen, ob das Signal jetzt klar erkennbar ist.",
     ],
     expectedImpact: finding.priority,
   };
@@ -77,7 +77,7 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (text.includes("meta description") || text.includes("kurzbeschreibung")) {
     return {
-      title: "Kurzbeschreibung fuer Google und KI ergaenzen",
+      title: "Kurzbeschreibung für Google und KI ergänzen",
       summary:
         "Ergaenze eine klare Kurzbeschreibung, damit Suchende und KI-Systeme den Nutzen deiner Seite schneller verstehen.",
       actionSteps: [
@@ -91,12 +91,12 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (text.includes("title") || text.includes("seitenname")) {
     return {
-      title: "Seitennamen schaerfen",
+      title: "Seitennamen schärfen",
       summary:
-        "Ein klarer Seitenname macht dein Angebot in Suchergebnissen sofort verstaendlich.",
+        "Ein klarer Seitenname macht dein Angebot in Suchergebnissen sofort verständlich.",
       actionSteps: [
         "Zentrale Leistung oder Produktkategorie an den Anfang setzen.",
-        "Markenname nur ergaenzen, wenn noch Platz bleibt.",
+        "Markenname nur ergänzen, wenn noch Platz bleibt.",
         "Kurz, konkret und gut lesbar formulieren.",
       ],
       expectedImpact: "high",
@@ -105,13 +105,13 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (text.includes("cta") || text.includes("call to action") || text.includes("hero")) {
     return {
-      title: "Primaeren CTA im sichtbaren Bereich platzieren",
+      title: "Primären CTA im sichtbaren Bereich platzieren",
       summary:
-        "Platziere im Hero einen klaren ersten Handlungsimpuls, damit Nutzer sofort wissen, was der naechste Schritt ist.",
+        "Platziere im Hero einen klaren ersten Handlungsimpuls, damit Nutzer sofort wissen, was der nächste Schritt ist.",
       actionSteps: [
-        "Einen primaeren CTA oberhalb des Folds platzieren.",
+        "Einen primären CTA oberhalb des Folds platzieren.",
         "Eine konkrete Formulierung wie 'Jetzt Analyse starten' oder 'Kostenlos testen' verwenden.",
-        "Farbe und Groesse so waehlen, dass der CTA klar heraussticht.",
+        "Farbe und Größe so wählen, dass der CTA klar heraussticht.",
       ],
       expectedImpact: "high",
     };
@@ -124,8 +124,8 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
         "Rechtliche und kontaktbezogene Links sollten ohne Suchen auffindbar sein, damit die Seite sofort serioeser wirkt.",
       actionSteps: [
         "Impressum, Datenschutz und Kontakt im Header oder Footer klar verlinken.",
-        "Kontaktmoeglichkeiten mit E-Mail oder Telefonnummer sichtbar ergaenzen.",
-        "Die Links auf allen wichtigen Seiten konsistent verfuegbar machen.",
+        "Kontaktmöglichkeiten mit E-Mail oder Telefonnummer sichtbar ergänzen.",
+        "Die Links auf allen wichtigen Seiten konsistent verfügbar machen.",
       ],
       expectedImpact: "high",
     };
@@ -145,15 +145,15 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
     };
   }
 
-  if (text.includes("h1") || text.includes("h2") || text.includes("ueberschrift") || text.includes("struktur")) {
+  if (text.includes("h1") || text.includes("h2") || text.includes("überschrift") || text.includes("struktur")) {
     return {
-      title: "Seitenstruktur mit klaren Ueberschriften ordnen",
+      title: "Seitenstruktur mit klaren Überschriften ordnen",
       summary:
-        "Klare Botschaften und Abschnitte machen die Seite fuer Besucher, Google und KI leichter erfassbar.",
+        "Klare Botschaften und Abschnitte machen die Seite für Besucher, Google und KI leichter erfassbar.",
       actionSteps: [
-        "Eine eindeutige Hauptbotschaft fuer das wichtigste Versprechen setzen.",
+        "Eine eindeutige Hauptbotschaft für das wichtigste Versprechen setzen.",
         "Inhalte in logische, gut benannte Abschnitte gliedern.",
-        "Jede Ueberschrift so formulieren, dass sie Nutzen oder Thema direkt vermittelt.",
+        "Jede Überschrift so formulieren, dass sie Nutzen oder Thema direkt vermittelt.",
       ],
       expectedImpact: "high",
     };
@@ -165,7 +165,7 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
       summary:
         "Zeige Sicherheit und Service nicht nur implizit, sondern direkt sichtbar in der kaufnahen Zone deiner Startseite.",
       actionSteps: [
-        "Bewertungen, Siegel oder Kundenzitate im sichtbaren Bereich ergaenzen.",
+        "Bewertungen, Siegel oder Kundenzitate im sichtbaren Bereich ergänzen.",
         "Versand, Rueckgabe und sichere Zahlung in kurzen Trust-Bullets hervorheben.",
         "Kundenservice oder Erreichbarkeit als konkretes Signal sichtbar machen.",
       ],
@@ -177,10 +177,10 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
     return {
       title: "Formulare klarer und reibungsarm gestalten",
       summary:
-        "Ein schlankes, gut erklaertes Formular senkt Huerden und steigert die Abschlusswahrscheinlichkeit.",
+        "Ein schlankes, gut erklärtes Formular senkt Hürden und steigert die Abschlusswahrscheinlichkeit.",
       actionSteps: [
-        "Nur die wirklich noetigen Felder abfragen.",
-        "Nutzen und naechsten Schritt direkt ueber dem Formular erklaeren.",
+        "Nur die wirklich nötigen Felder abfragen.",
+        "Nutzen und nächsten Schritt direkt über dem Formular erklären.",
         "Den Absende-Button mit einer klaren Handlungsformulierung versehen.",
       ],
       expectedImpact: "medium",
@@ -189,12 +189,12 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (finding.category === "seo") {
     return {
-      title: "Auffindbarkeit und Verstaendlichkeit staerken",
+      title: "Auffindbarkeit und Verständlichkeit staerken",
       summary:
         "Klare Seitensignale helfen Besuchern, Google und KI, dein Angebot schneller richtig einzuordnen.",
       actionSteps: [
         "Seitenname, Kurzbeschreibung und Hauptbotschaft auf ein klares Kernthema ausrichten.",
-        "Struktur und interne Verlinkung fuer Besucher und Suchsysteme konsistent halten.",
+        "Struktur und interne Verlinkung für Besucher und Suchsysteme konsistent halten.",
         "Linkvorschauen und Hauptseiten-Signale bewusst pflegen.",
       ],
       expectedImpact: finding.priority,
@@ -217,13 +217,13 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (finding.category === "conversion") {
     return {
-      title: "Handlungsfuehrung auf Conversion ausrichten",
+      title: "Handlungsführung auf Conversion ausrichten",
       summary:
-        "Eine klare Nutzerfuehrung macht aus Aufmerksamkeit schneller echte Klicks und Anfragen.",
+        "Eine klare Nutzerführung macht aus Aufmerksamkeit schneller echte Klicks und Anfragen.",
       actionSteps: [
         "Den wichtigsten CTA klar priorisieren.",
         "Nutzenargumente direkt am CTA oder im Hero verankern.",
-        "Ablenkende Elemente reduzieren, damit der naechste Schritt eindeutig bleibt.",
+        "Ablenkende Elemente reduzieren, damit der nächste Schritt eindeutig bleibt.",
       ],
       expectedImpact: "high",
     };
@@ -231,13 +231,13 @@ export function mapFindingToSuggestionTemplate(finding: Finding): SuggestionTemp
 
   if (finding.category === "ux") {
     return {
-      title: "Nutzerfuehrung und Lesbarkeit verbessern",
+      title: "Nutzerführung und Lesbarkeit verbessern",
       summary:
         "Eine klarere Struktur hilft Besuchern, Inhalte schneller zu erfassen und sicherer weiterzugehen.",
       actionSteps: [
         "Wichtige Inhalte in klar erkennbare Abschnitte gliedern.",
-        "Visuelle Hierarchien mit Ueberschriften, Abstaenden und Bildern schaerfen.",
-        "Den oberen Bereich so gestalten, dass Nutzen und naechster Schritt sofort sichtbar sind.",
+        "Visuelle Hierarchien mit Überschriften, Abständen und Bildern schärfen.",
+        "Den oberen Bereich so gestalten, dass Nutzen und nächster Schritt sofort sichtbar sind.",
       ],
       expectedImpact: "medium",
     };

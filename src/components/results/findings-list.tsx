@@ -62,7 +62,7 @@ export function FindingsList({
                 Premium Vorschau
               </p>
               <h3 className="mt-2 text-xl font-semibold text-slate-950">
-                Weitere {hiddenFindingsCount} Optimierungen verfuegbar
+                Weitere {hiddenFindingsCount} Optimierungen verfügbar
               </h3>
               <p className="mt-2 text-sm leading-7 text-slate-600">
                 Vollanalyse freischalten, um alle Optimierungen zu sehen und sauber zu priorisieren.

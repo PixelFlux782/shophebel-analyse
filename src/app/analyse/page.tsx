@@ -25,18 +25,18 @@ export default async function AnalysePage({ searchParams }: AnalysePageProps) {
           <section>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-300 shadow-2xl backdrop-blur-xl">
               <span className="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_18px_rgba(34,211,238,0.9)]" />
-              Website Intelligence fuer Shops
+              Website Intelligence für Shops
             </div>
 
             <h1 className="mt-7 max-w-4xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.03]">
               Finde in 60 Sekunden heraus, warum dein Shop nicht mehr verkauft.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-              Shophebel analysiert Vertrauen, Klarheit, Ladegefuehl, mobile Wirkung und KI-Sichtbarkeit - und zeigt konkrete Hebel statt abstrakter SEO-Daten.
+              Shophebel analysiert Vertrauen, Klarheit, Ladegefühl, mobile Wirkung und KI-Sichtbarkeit - und zeigt konkrete Hebel statt abstrakter SEO-Daten.
             </p>
 
             <Link href={SHOPHEBEL_HOME_URL} className="mt-6 inline-flex rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-sm font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white backdrop-blur-md">
-              Zurueck zu Shophebel
+              Zurück zu Shophebel
             </Link>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-3">
@@ -53,9 +53,9 @@ export default async function AnalysePage({ searchParams }: AnalysePageProps) {
                 </p>
               </div>
               <div className="group rounded-[1.75rem] border border-white/10 bg-slate-900/40 p-5 shadow-2xl backdrop-blur-xl transition-all hover:border-cyan-500/30 hover:bg-slate-900/60">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-400">Prioritaeten</h2>
+                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-400">Prioritäten</h2>
                 <p className="mt-3 text-sm leading-6 text-slate-400 transition-colors group-hover:text-slate-300">
-                  Du bekommst konkrete naechste Schritte statt Tabellen, die niemand umsetzt.
+                  Du bekommst konkrete nächste Schritte statt Tabellen, die niemand umsetzt.
                 </p>
               </div>
             </div>

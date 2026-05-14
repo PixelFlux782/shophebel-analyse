@@ -14,9 +14,9 @@ const recommendationRules: RecommendationRule[] = [
       finding.title === "Google und KI bekommen keine klare Kurzbeschreibung" ||
       finding.title === "Meta Description fehlt",
     create: () => ({
-      title: "Klare Kurzbeschreibung fuer Google und KI ergaenzen",
+      title: "Klare Kurzbeschreibung für Google und KI ergänzen",
       description:
-        "Formuliere in einem kurzen Text, was du anbietest, fuer wen es ist und warum jemand klicken oder Kontakt aufnehmen sollte.",
+        "Formuliere in einem kurzen Text, was du anbietest, für wen es ist und warum jemand klicken oder Kontakt aufnehmen sollte.",
       impact: "high",
       effort: "low",
       category: "seo",
@@ -64,10 +64,10 @@ const recommendationRules: RecommendationRule[] = [
   },
   {
     matches: (finding) =>
-      finding.title === "Bilder erklaeren sich nicht gut genug" ||
+      finding.title === "Bilder erklären sich nicht gut genug" ||
       finding.title === "Bilder ohne Alt-Text",
     create: () => ({
-      title: "Wichtige Bilder verstaendlich beschreiben",
+      title: "Wichtige Bilder verständlich beschreiben",
       description:
         "Beschreibe relevante Bilder kurz und konkret, damit Besucher mit Hilfssystemen, Google und KI den Bildinhalt besser verstehen.",
       impact: "medium",
@@ -93,7 +93,7 @@ const recommendationRules: RecommendationRule[] = [
       finding.title === "Kaum Trust-Signale erkennbar",
     create: () => ({
       title: "Vertrauen vor Kauf oder Anfrage sichtbarer machen",
-      description: "Hebe Versand, Rueckgabe, sichere Zahlung, Kundenservice oder Bewertungen frueher und klarer hervor.",
+      description: "Hebe Versand, Rueckgabe, sichere Zahlung, Kundenservice oder Bewertungen früher und klarer hervor.",
       impact: "high",
       effort: "medium",
       category: "trust",
@@ -104,7 +104,7 @@ const recommendationRules: RecommendationRule[] = [
     matches: (finding) => finding.title === "Sehr wenig Content auf der Startseite",
     create: () => ({
       title: "Startseite inhaltlich ausbauen",
-      description: "Ergaenze mehr Nutzenargumente, Struktur und orientierende Inhalte, damit die Seite nicht zu duenn wirkt.",
+      description: "Ergaenze mehr Nutzenargumente, Struktur und orientierende Inhalte, damit die Seite nicht zu dünn wirkt.",
       impact: "high",
       effort: "medium",
       category: "ux",
@@ -117,7 +117,7 @@ const recommendationRules: RecommendationRule[] = [
       finding.title === "Visuelle Struktur ist ausbaufaehig",
     create: () => ({
       title: "Inhalte klarer strukturieren",
-      description: "Arbeite mit klaren Ueberschriften, Abschnitten und visuellen Elementen, damit Besucher schneller Orientierung finden.",
+      description: "Arbeite mit klaren Überschriften, Abschnitten und visuellen Elementen, damit Besucher schneller Orientierung finden.",
       impact: "medium",
       effort: "medium",
       category: "ux",

@@ -48,7 +48,7 @@ function createResult(): AnalysisResult {
         category: "conversion",
         status: "warning",
         title: "Keine klare CTA sichtbar",
-        description: "Im oberen Bereich ist kein primaerer Call to Action sichtbar.",
+        description: "Im oberen Bereich ist kein primärer Call to Action sichtbar.",
         priority: "high",
       },
     ],

@@ -25,7 +25,7 @@ const premiumReport = {
   analysisId: "analysis-123",
   report: { isPaid: true },
   consultantNotes: {
-    executiveComment: "Manuell geprueft.",
+    executiveComment: "Manuell geprüft.",
   },
   status: "refined",
 };
@@ -56,7 +56,7 @@ describe("/api/admin/premium-reports/[analysisId]", () => {
     saveConsultantNotesForAnalysisMock.mockResolvedValue({
       ...premiumReport,
       consultantNotes: {
-        executiveComment: "Neu geprueft.",
+        executiveComment: "Neu geprüft.",
       },
     });
   });
@@ -66,7 +66,7 @@ describe("/api/admin/premium-reports/[analysisId]", () => {
     vi.restoreAllMocks();
   });
 
-  it("laedt Premium-Report und Consultant Notes fuer Admins", async () => {
+  it("laedt Premium-Report und Consultant Notes für Admins", async () => {
     const { GET } = await import("@/app/api/admin/premium-reports/[analysisId]/route");
 
     const response = await GET(createAdminRequest("GET"), createContext());
@@ -76,17 +76,17 @@ describe("/api/admin/premium-reports/[analysisId]", () => {
 
     expect(response.status).toBe(200);
     expect(payload.premiumReport.consultantNotes).toEqual({
-      executiveComment: "Manuell geprueft.",
+      executiveComment: "Manuell geprüft.",
     });
   });
 
-  it("speichert Consultant Notes fuer Admins", async () => {
+  it("speichert Consultant Notes für Admins", async () => {
     const { PATCH } = await import("@/app/api/admin/premium-reports/[analysisId]/route");
 
     const response = await PATCH(createAdminRequest("PATCH", {
       consultantNotes: {
-        executiveComment: "Neu geprueft.",
-        customActionItems: "CTA testen\nTrust ergaenzen",
+        executiveComment: "Neu geprüft.",
+        customActionItems: "CTA testen\nTrust ergänzen",
         internalNotes: "Nur intern",
       },
     }), createContext());
@@ -96,14 +96,14 @@ describe("/api/admin/premium-reports/[analysisId]", () => {
     expect(saveConsultantNotesForAnalysisMock).toHaveBeenCalledWith({
       analysisId: "analysis-123",
       consultantNotes: {
-        executiveComment: "Neu geprueft.",
+        executiveComment: "Neu geprüft.",
         priorityOverrideNotes: "",
-        customActionItems: ["CTA testen", "Trust ergaenzen"],
+        customActionItems: ["CTA testen", "Trust ergänzen"],
         upsellRecommendation: "",
         internalNotes: "Nur intern",
       },
     });
-    expect(payload.premiumReport.consultantNotes.executiveComment).toBe("Neu geprueft.");
+    expect(payload.premiumReport.consultantNotes.executiveComment).toBe("Neu geprüft.");
   });
 
   it("blockt Admin-Zugriff ohne Token", async () => {

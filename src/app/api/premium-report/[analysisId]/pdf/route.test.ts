@@ -79,8 +79,8 @@ function createPremiumReport(overrides: Partial<PremiumReport> = {}): PremiumRep
         title: "CTA nicht sichtbar genug",
         category: "Conversion",
         severity: "kritisch",
-        whyItMatters: "Besucher erkennen den naechsten Schritt nicht.",
-        likelyBusinessImpact: "Mehr Abbrueche im oberen Seitenbereich.",
+        whyItMatters: "Besucher erkennen den nächsten Schritt nicht.",
+        likelyBusinessImpact: "Mehr Abbrüche im oberen Seitenbereich.",
         recommendedFix: "Primären CTA im sichtbaren Startbereich schärfen.",
         effort: "niedrig",
         priority: 1,
@@ -145,7 +145,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     expect(getOrCreatePremiumReportMock).not.toHaveBeenCalled();
   });
 
-  it("gibt fuer bezahlte Reports ein PDF zurueck", async () => {
+  it("gibt für bezahlte Reports ein PDF zurück", async () => {
     const { GET } = await import("@/app/api/premium-report/[analysisId]/pdf/route");
 
     const response = await GET(new Request("http://localhost:3001/api/premium-report/analysis-123/pdf"), createContext());
@@ -157,7 +157,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     expect(body.subarray(0, 4).toString()).toBe("%PDF");
   });
 
-  it("erstellt fuer bezahlte Reports ein PDF, auch wenn premium_reports vorher fehlt", async () => {
+  it("erstellt für bezahlte Reports ein PDF, auch wenn premium_reports vorher fehlt", async () => {
     getPremiumReportRecordByAnalysisIdMock.mockResolvedValue(null);
     getOrCreatePremiumReportMock.mockResolvedValue(createPremiumReport());
     const { GET } = await import("@/app/api/premium-report/[analysisId]/pdf/route");
@@ -187,7 +187,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
       analysisId: "analysis-123",
       report: {
         premiumSummary: {
-          headline: "Unvollstaendiger Report",
+          headline: "Unvollständiger Report",
         },
       },
       consultantNotes: {},
@@ -203,7 +203,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     expect(body.subarray(0, 4).toString()).toBe("%PDF");
   });
 
-  it("gibt bei PDF-Renderfehlern keine internen Dateipfade zurueck", async () => {
+  it("gibt bei PDF-Renderfehlern keine internen Dateipfade zurück", async () => {
     vi.resetModules();
     vi.doMock("@/lib/premium/premiumReportPdf", () => ({
       renderPremiumReportPdf: vi.fn().mockRejectedValue(

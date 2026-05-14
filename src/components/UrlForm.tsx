@@ -33,7 +33,7 @@ const DEMO_OPTIONS = [
 const TRUST_BADGES = [
   "Keine Registrierung",
   "Ergebnis sofort sichtbar",
-  "Konkrete Massnahmen",
+  "Konkrete Maßnahmen",
   "Premium-Report optional",
 ];
 
@@ -48,7 +48,7 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
     event.preventDefault();
 
     if (!url.trim()) {
-      setError("Bitte gib eine gueltige URL ein.");
+      setError("Bitte gib eine gültige URL ein.");
       return;
     }
 
@@ -124,10 +124,10 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
             Kostenloser Website-Check
           </p>
           <h2 className="mt-3 text-2xl font-semibold tracking-tight text-white">
-            Gib deine URL ein. Shophebel zeigt dir die groessten Hebel.
+            Gib deine URL ein. Shophebel zeigt dir die größten Hebel.
           </h2>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            Analyse fuer UX, Vertrauen, Ladegefuehl, mobile Wirkung und KI-Sichtbarkeit.
+            Analyse für UX, Vertrauen, Ladegefühl, mobile Wirkung und KI-Sichtbarkeit.
           </p>
 
           <label htmlFor="url" className="mt-7 block text-sm font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -172,7 +172,7 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">Beispiel-Analyse</h3>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Sieh dir zuerst ein fertiges Ergebnis an und pruefe, wie der Report aufgebaut ist.
+              Sieh dir zuerst ein fertiges Ergebnis an und prüfe, wie der Report aufgebaut ist.
             </p>
           </div>
           <button
@@ -212,7 +212,7 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
       <div className="rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.06] p-5 backdrop-blur-xl">
         <p className="text-sm font-semibold text-cyan-100">Premium-Report</p>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Willst du wissen, was du konkret aendern solltest? Der Premium-Report ergaenzt Screenshots, Prioritaeten und einen 7-Tage-Massnahmenplan.
+          Willst du wissen, was du konkret ändern solltest? Der Premium-Report ergänzt Screenshots, Prioritäten und einen 7-Tage-Maßnahmenplan.
         </p>
       </div>
     </div>

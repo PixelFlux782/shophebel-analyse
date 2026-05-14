@@ -56,14 +56,14 @@ export function RevenueBlockersReport({
             Report-Typ
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Die 5 groessten Umsatzbremsen deiner Website
+            Die 5 größten Umsatzbremsen deiner Website
           </h2>
           <p className="mt-3 max-w-3xl text-base leading-8 text-slate-600">
-            Dieser Report uebersetzt den Check in konkrete Bremsen: was Besucher kostet, was zu tun ist und womit du anfangen solltest. Die Struktur ist bewusst PDF-freundlich vorbereitet.
+            Dieser Report übersetzt den Check in konkrete Bremsen: was Besucher kostet, was zu tun ist und womit du anfangen solltest. Die Struktur ist bewusst PDF-freundlich vorbereitet.
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700 print:hidden">
-          Webansicht, spaeter PDF-exportierbar
+          Webansicht, später PDF-exportierbar
         </div>
       </div>
 
@@ -107,7 +107,7 @@ export function RevenueBlockersReport({
               </div>
               <div className="rounded-2xl border border-white bg-white p-4">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                  Einschaetzung
+                  Einschätzung
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <BlockerMetaBadge

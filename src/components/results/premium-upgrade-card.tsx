@@ -45,7 +45,7 @@ export function PremiumUpgradeCard({
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
-              Vollstaendige Analyse statt Ausschnitt
+              Vollständige Analyse statt Ausschnitt
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
               Konkrete To-do-Liste für die nächsten Schritte
@@ -54,7 +54,7 @@ export function PremiumUpgradeCard({
               Priorisierte Maßnahmen nach Hebel und Aufwand
             </div>
             <div className="rounded-[1.3rem] border border-white/10 bg-white/8 px-4 py-4 backdrop-blur">
-              Mehr Umsatzpotenzial frueher erkennen
+              Mehr Umsatzpotenzial früher erkennen
             </div>
           </div>
         </div>

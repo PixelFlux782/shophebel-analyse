@@ -14,11 +14,11 @@ const sampleHtml = `
 <!doctype html>
 <html lang="de">
   <head>
-    <title>Shophebel Testshop fuer bessere Conversion</title>
-    <meta name="description" content="Teste deinen Shop mit einer klaren Analyse fuer SEO, Vertrauen, Conversion und UX mit sichtbaren Optimierungspotenzialen." />
+    <title>Shophebel Testshop für bessere Conversion</title>
+    <meta name="description" content="Teste deinen Shop mit einer klaren Analyse für SEO, Vertrauen, Conversion und UX mit sichtbaren Optimierungspotenzialen." />
     <link rel="canonical" href="https://shop.test/" />
     <meta property="og:title" content="Shophebel Testshop" />
-    <meta property="og:description" content="Mehr Klarheit fuer deinen Shop." />
+    <meta property="og:description" content="Mehr Klarheit für deinen Shop." />
   </head>
   <body>
     <header>
@@ -27,12 +27,12 @@ const sampleHtml = `
       <a href="/datenschutz">Datenschutz</a>
     </header>
     <main>
-      <h1>Mehr Umsatz fuer deinen Shop</h1>
-      <h2>Vorteile im Ueberblick</h2>
+      <h1>Mehr Umsatz für deinen Shop</h1>
+      <h2>Vorteile im Überblick</h2>
       <p>Unser Angebot ist professionell, einfach und effizient. Kunden lieben die schnelle Umsetzung.</p>
       <p>Sichere Zahlung, Versand, Rueckgabe und Kundenservice sind klar sichtbar.</p>
       <p>Bewertungen und Erfahrungen helfen bei der Kaufentscheidung.</p>
-      ${"<p>Zusatzinhalt fuer eine aussagekraeftige statische Analyse mit ausreichend Text und Struktur.</p>".repeat(20)}
+      ${"<p>Zusatzinhalt für eine aussagekraeftige statische Analyse mit ausreichend Text und Struktur.</p>".repeat(20)}
       <a href="/starten">Jetzt starten</a>
       <button>Jetzt bestellen</button>
       <img src="/hero.jpg" alt="Hero Bild" />
@@ -135,7 +135,7 @@ describe("POST /api/analyse", () => {
     expect(payload.recommendations.every((entry) => typeof entry.weight === "number")).toBe(true);
   });
 
-  it("liefert die Analyse auch dann zurueck, wenn die Supabase-Speicherung fehlschlaegt", async () => {
+  it("liefert die Analyse auch dann zurück, wenn die Supabase-Speicherung fehlschlaegt", async () => {
     process.env.SUPABASE_URL = "https://example.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "test-service-role-key";
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -183,7 +183,7 @@ describe("POST /api/analyse", () => {
     );
   });
 
-  it("ignoriert ungueltige Lead-IDs ohne die Analyse abzubrechen", async () => {
+  it("ignoriert ungültige Lead-IDs ohne die Analyse abzubrechen", async () => {
     const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
     const response = await POST(createRequest({
@@ -215,7 +215,7 @@ describe("POST /api/analyse", () => {
     );
   });
 
-  it("gibt bei ungueltiger URL einen 400-Fehler zurueck", async () => {
+  it("gibt bei ungültiger URL einen 400-Fehler zurück", async () => {
     const response = await POST(createRequest({ url: "" }));
     const payload = (await response.json()) as { error: string };
 
@@ -223,7 +223,7 @@ describe("POST /api/analyse", () => {
     expect(payload.error).toContain("URL");
   });
 
-  it("gibt bei Abrufproblemen einen 500-Fehler zurueck", async () => {
+  it("gibt bei Abrufproblemen einen 500-Fehler zurück", async () => {
     vi.stubGlobal(
       "fetch",
       vi.fn().mockResolvedValue({

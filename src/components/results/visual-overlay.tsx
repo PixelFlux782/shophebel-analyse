@@ -37,7 +37,7 @@ function buildHotspotNotes(
       title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
       text: suggestion?.summary ?? hotspot.description,
       category,
-      badge: hotspot.tone === "problem" ? "Prioritaet" : hotspot.tone === "good" ? "Staerke" : "Hebel",
+      badge: hotspot.tone === "problem" ? "Priorität" : hotspot.tone === "good" ? "Staerke" : "Hebel",
     };
   });
 }

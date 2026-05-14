@@ -69,7 +69,7 @@ export default async function AdminPremiumReportPage({
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-300">Admin</p>
           <h1 className="mt-3 text-3xl font-bold">Zugriff geschuetzt</h1>
           <p className="mt-4 text-sm leading-7 text-slate-300">
-            Oeffne diese Seite mit `Authorization: Bearer ADMIN_API_TOKEN` oder `x-admin-token`.
+            Öffne diese Seite mit `Authorization: Bearer ADMIN_API_TOKEN` oder `x-admin-token`.
             Ohne gesetztes `ADMIN_API_TOKEN` werden keine Premium-Daten geladen.
           </p>
         </div>
@@ -128,7 +128,7 @@ export default async function AdminPremiumReportPage({
                 href={`/api/premium-report/${analysisId}/pdf`}
                 className="rounded-2xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300"
               >
-                PDF pruefen
+                PDF prüfen
               </Link>
             </div>
             {saved ? (

@@ -41,7 +41,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "success",
       title: "Ausreichend Textinhalt vorhanden",
-      description: `Die Startseite enthaelt rund ${wordCount} Woerter und wirkt nicht zu duenn.`,
+      description: `Die Startseite enthält rund ${wordCount} Woerter und wirkt nicht zu dünn.`,
       priority: "low",
     });
   } else if (wordCount >= 120) {
@@ -69,7 +69,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "success",
       title: "Headings sind strukturiert",
-      description: "Die Seite nutzt mehrere Ueberschriftenebenen fuer Orientierung.",
+      description: "Die Seite nutzt mehrere Überschriftenebenen für Orientierung.",
       priority: "low",
     });
   } else {
@@ -78,7 +78,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "warning",
       title: "Wenig visuelle Struktur durch Headings",
-      description: "Die Seite hat nur wenige oder kaum gegliederte Ueberschriften.",
+      description: "Die Seite hat nur wenige oder kaum gegliederte Überschriften.",
       priority: "medium",
     });
   }
@@ -97,7 +97,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "warning",
       title: "Keine visuellen Elemente gefunden",
-      description: "Ohne Bilder wirkt die Startseite schnell textlastig oder unvollstaendig.",
+      description: "Ohne Bilder wirkt die Startseite schnell textlastig oder unvollständig.",
       priority: "medium",
     });
   }
@@ -136,7 +136,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "error",
       title: "Seite wirkt sehr leer",
-      description: "Sehr wenig Text, keine Bilder und kaum Struktur lassen die Startseite duenn wirken.",
+      description: "Sehr wenig Text, keine Bilder und kaum Struktur lassen die Startseite dünn wirken.",
       priority: "high",
     });
   } else if (structuredHeadings === 0 || imageCount === 0) {
@@ -145,7 +145,7 @@ export function runUxChecks(html: string, context: CheckContext): CheckResult {
       category: "ux",
       status: "warning",
       title: "Visuelle Struktur ist ausbaufaehig",
-      description: "Die Startseite koennte Inhalte klarer gliedern oder visueller unterstuetzen.",
+      description: "Die Startseite könnte Inhalte klarer gliedern oder visueller unterstuetzen.",
       priority: "medium",
     });
   } else {

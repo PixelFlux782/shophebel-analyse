@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
   try {
     body = (await request.json()) as ContactRequestBody;
   } catch {
-    return NextResponse.json({ error: "Ungueltige Anfrage." }, { status: 400 });
+    return NextResponse.json({ error: "Ungültige Anfrage." }, { status: 400 });
   }
 
   const analysisId = body.analysisId?.trim();

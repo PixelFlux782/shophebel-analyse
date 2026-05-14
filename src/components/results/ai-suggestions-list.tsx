@@ -35,7 +35,7 @@ export function AiSuggestionsList({
 
       {visibleSuggestions.length === 0 ? (
         <div className="mt-6 rounded-[1.45rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-sm leading-7 text-slate-600">
-          Fuer diese Analyse sind aktuell noch keine konkreten Optimierungsvorschlaege verfuegbar.
+          Für diese Analyse sind aktuell noch keine konkreten Optimierungsvorschlaege verfügbar.
         </div>
       ) : (
         <div className="mt-6 grid gap-4">

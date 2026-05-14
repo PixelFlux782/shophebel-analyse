@@ -68,7 +68,7 @@ export interface RevenueBlocker {
   estimatedEffort: "niedrig" | "mittel" | "hoch";
   estimatedImpact: "niedrig" | "mittel" | "hoch";
   priority: 1 | 2 | 3 | 4 | 5;
-  category: "Vertrauen" | "Klarheit" | "Mobile UX" | "CTA" | "Design" | "Ladegefuehl" | "AI-Sichtbarkeit";
+  category: "Vertrauen" | "Klarheit" | "Mobile UX" | "CTA" | "Design" | "Ladegefühl" | "AI-Sichtbarkeit";
   sourceCheck: string;
 }
 
@@ -78,7 +78,7 @@ export interface ActionMeasure {
   effort: "niedrig" | "mittel" | "hoch";
   impact: "niedrig" | "mittel" | "hoch";
   priority: 1 | 2 | 3 | 4 | 5;
-  category: "Vertrauen" | "Klarheit" | "Mobile UX" | "CTA" | "Design" | "Ladegefuehl" | "AI-Sichtbarkeit";
+  category: "Vertrauen" | "Klarheit" | "Mobile UX" | "CTA" | "Design" | "Ladegefühl" | "AI-Sichtbarkeit";
   sourceProblem: string;
 }
 

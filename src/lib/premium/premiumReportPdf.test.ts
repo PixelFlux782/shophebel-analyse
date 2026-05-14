@@ -59,38 +59,38 @@ function createReport(): PremiumReport {
     isPaid: true,
     premiumSummary: {
       headline: "Premium Conversion- und Trust-Audit",
-      mainReason: "Der wahrscheinlich groesste Bremsfaktor ist Die Seite erklaert Angebot und Nutzen nicht schnell genug.",
-      firstFocus: "Rueckgabe und Formularnaehe frueher erklaeren.",
-      businessRelevance: "Besucher zoegern laenger und Abschluesse werden unwahrscheinlicher.",
-      fastestWin: "Rueckgabe frueher erklaeren",
+      mainReason: "Der wahrscheinlich größte Bremsfaktor ist Die Seite erklärt Angebot und Nutzen nicht schnell genug.",
+      firstFocus: "Rueckgabe und Formularnaehe früher erklären.",
+      businessRelevance: "Besucher zoegern laenger und Abschlüsse werden unwahrscheinlicher.",
+      fastestWin: "Rueckgabe früher erklären",
     },
     topRevenueBlockers: [
       {
-        title: "Die Seite erklaert Angebot und Nutzen nicht schnell genug",
+        title: "Die Seite erklärt Angebot und Nutzen nicht schnell genug",
         category: "Conversion",
         severity: "kritisch",
         whyItMatters: "Besucher zoegern laenger.",
-        likelyBusinessImpact: "Abschluesse sinken.",
-        recommendedFix: "Rueckgabe und Formularnaehe frueher erklaeren.",
+        likelyBusinessImpact: "Abschlüsse sinken.",
+        recommendedFix: "Rueckgabe und Formularnaehe früher erklären.",
         effort: "niedrig",
         priority: 1,
       },
     ],
-    priorityRoadmap: ["Rueckgabe und Formularnaehe frueher erklaeren."],
+    priorityRoadmap: ["Rueckgabe und Formularnaehe früher erklären."],
     quickImplementationPlan: [
       {
         days: "Tag 1-2",
         focus: "Rueckgabe und Formularnaehe",
-        actions: ["Rueckgabe frueher erklaeren.", "Abschluesse nicht durch Formularnaehe bremsen."],
+        actions: ["Rueckgabe früher erklären.", "Abschlüsse nicht durch Formularnaehe bremsen."],
       },
     ],
     visualAuditNotes: [
       {
         area: "Sichtbarer Startbereich",
-        note: "Angebot frueher erklaeren.",
+        note: "Angebot früher erklären.",
       },
     ],
-    conversionHypothesis: "Wenn die Seite Angebot und Nutzen frueher erklaert, zoegern Besucher kuerzer.",
+    conversionHypothesis: "Wenn die Seite Angebot und Nutzen früher erklärt, zoegern Besucher kürzer.",
   };
 }
 
@@ -99,9 +99,9 @@ describe("premiumReportPdf consultant notes", () => {
     const sections = getCustomerFacingConsultantSections({
       executiveComment: "Der Hero braucht mehr Klarheit.",
       priorityOverrideNotes: "CTA zuerst, Trust danach.",
-      customActionItems: ["CTA-Text schaerfen"],
+      customActionItems: ["CTA-Text schärfen"],
       upsellRecommendation: "Optional: Landingpage-Sprint.",
-      internalNotes: "Marge intern pruefen.",
+      internalNotes: "Marge intern prüfen.",
     });
     const text = JSON.stringify(sections);
 
@@ -123,7 +123,7 @@ describe("premiumReportPdf consultant notes", () => {
     expect(text).not.toContain("internalNotes");
   });
 
-  it("verwendet deutsche Premium-Labels fuer den PDF-Report", () => {
+  it("verwendet deutsche Premium-Labels für den PDF-Report", () => {
     const labels = getPremiumReportPdfStaticLabels().join(" ");
 
     expect(labels).toContain("Management-Zusammenfassung");
@@ -135,7 +135,7 @@ describe("premiumReportPdf consultant notes", () => {
     expect(labels).not.toContain("Executive Summary");
     expect(labels).not.toContain("Visual Audit Notes");
     expect(labels).not.toContain("Above the fold");
-    expect(labels).not.toMatch(/\b(?:Pruefung|Massnahmen)\b/);
+    expect(labels).not.toMatch(/\b(?:Prüfung|Maßnahmen)\b/);
   });
 
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {
@@ -155,16 +155,16 @@ describe("premiumReportPdf consultant notes", () => {
 
   it("normalisiert bekannte deutsche Umschreibungen vor der PDF-Struktur", () => {
     const sections = getCustomerFacingConsultantSections({
-      executiveComment: "Rueckgabe frueher erklaeren, damit Besucher nicht laenger zoegern.",
-      priorityOverrideNotes: "Abschluesse und Formularnaehe zuerst pruefen.",
-      customActionItems: ["Rueckgabe erklaeren"],
+      executiveComment: "Rueckgabe früher erklären, damit Besucher nicht laenger zoegern.",
+      priorityOverrideNotes: "Abschlüsse und Formularnaehe zuerst prüfen.",
+      customActionItems: ["Rueckgabe erklären"],
     });
     const text = JSON.stringify(sections);
 
     expect(text).toContain("Rückgabe früher erklären");
     expect(text).toContain("länger zögern");
     expect(text).toContain("Abschlüsse und Formularnähe");
-    expect(text).not.toMatch(/erklaert|erklaeren|frueher|Rueckgabe|Abschluesse|Formularnaehe|zoegern|laenger/);
+    expect(text).not.toMatch(/erklärt|erklären|früher|Rueckgabe|Abschlüsse|Formularnaehe|zoegern|laenger/);
   });
 
   it("rendert PDF-Footer auf bestehenden Seiten ohne Extra-Seiten", async () => {

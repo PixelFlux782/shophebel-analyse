@@ -30,7 +30,7 @@ export function ScoreGrid({ result }: ScoreGridProps) {
       <ScoreCard
         title="Mobile UX"
         score={mobileUxScore}
-        description="Wie gut die Seite auf kleinen Screens wirkt und fuehrt."
+        description="Wie gut die Seite auf kleinen Screens wirkt und führt."
       />
       <ScoreCard
         title="CTA"
@@ -43,9 +43,9 @@ export function ScoreGrid({ result }: ScoreGridProps) {
         description={categories.design.summary}
       />
       <ScoreCard
-        title="Ladegefuehl"
+        title="Ladegefühl"
         score={categories.performance.score}
-        description="Wie schnell und stabil sich die Seite im Check anfuehlt."
+        description="Wie schnell und stabil sich die Seite im Check anfühlt."
       />
       <ScoreCard
         title="AI-Sichtbarkeit"

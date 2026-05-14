@@ -20,7 +20,7 @@ const faqs = [
   {
     question: "Brauche ich erst mehr Traffic?",
     answer:
-      "Nicht unbedingt. Wenn die Seite nicht ueberzeugt, macht mehr Traffic nur mehr Streuverlust sichtbar. Shophebel zeigt zuerst, welche Umsatzbremsen vorhandene Besucher am Handeln hindern.",
+      "Nicht unbedingt. Wenn die Seite nicht überzeugt, macht mehr Traffic nur mehr Streuverlust sichtbar. Shophebel zeigt zuerst, welche Umsatzbremsen vorhandene Besucher am Handeln hindern.",
   },
   {
     question: "Ist das ein klassischer CRO-Test?",
@@ -30,7 +30,7 @@ const faqs = [
   {
     question: "Was liefert der Premium-Report?",
     answer:
-      "Der Premium-Report verdichtet die Analyse zu einem Massnahmenplan mit priorisierten Conversion-Hebeln, Screenshot-Befunden, konkreten CTA- und Formularhinweisen sowie naechsten Umsetzungsschritten.",
+      "Der Premium-Report verdichtet die Analyse zu einem Maßnahmenplan mit priorisierten Conversion-Hebeln, Screenshot-Befunden, konkreten CTA- und Formularhinweisen sowie nächsten Umsetzungsschritten.",
   },
 ];
 
@@ -46,12 +46,12 @@ const conversionBrakes = [
     signal: "Trust",
   },
   {
-    issue: "CTAs konkurrieren statt zu fuehren.",
-    impact: "Die naechste Aktion wirkt beliebig und Klicks verteilen sich ohne klare Prioritaet.",
+    issue: "CTAs konkurrieren statt zu führen.",
+    impact: "Die nächste Aktion wirkt beliebig und Klicks verteilen sich ohne klare Priorität.",
     signal: "CTA Flow",
   },
   {
-    issue: "Formulare fuehlen sich nach Aufwand an.",
+    issue: "Formulare fühlen sich nach Aufwand an.",
     impact: "Qualifizierte Anfragen brechen kurz vor dem Abschluss ab.",
     signal: "Lead Form",
   },
@@ -60,17 +60,17 @@ const conversionBrakes = [
 const trustFactors = [
   ["Klarheit", "Besucher verstehen in Sekunden, was sie bekommen und warum es relevant ist."],
   ["Beweise", "Referenzen, Ergebnisse, Garantien und konkrete Signale reduzieren Entscheidungsschmerz."],
-  ["Fokus", "Layout, CTA und Text fuehren zu einer dominanten Handlung statt zu fuenf Nebenwegen."],
-  ["Sicherheit", "Preise, Ablauf, Kontakt und Erwartung werden so klar, dass kein Risiko-Gefuehl bleibt."],
+  ["Fokus", "Layout, CTA und Text führen zu einer dominanten Handlung statt zu fuenf Nebenwegen."],
+  ["Sicherheit", "Preise, Ablauf, Kontakt und Erwartung werden so klar, dass kein Risiko-Gefühl bleibt."],
   ["Relevanz", "Die Seite spricht kaufnahe Situationen an, nicht nur allgemeine Leistungsmerkmale."],
-  ["Tempo", "Die Seite fuehlt sich schnell, ruhig und kontrolliert an, besonders auf mobilen Einstiegen."],
+  ["Tempo", "Die Seite fühlt sich schnell, ruhig und kontrolliert an, besonders auf mobilen Einstiegen."],
 ];
 
 const processSteps = [
-  ["01", "Conversion-Signale lesen", "Shophebel prueft, wie klar Angebot, Trust und Handlung auf der Seite wirken."],
+  ["01", "Conversion-Signale lesen", "Shophebel prüft, wie klar Angebot, Trust und Handlung auf der Seite wirken."],
   ["02", "Bremsen priorisieren", "Aus sichtbaren Problemen werden Hebel mit Business-Wirkung statt Design-Meinungen."],
-  ["03", "Vorher/Nachher ableiten", "Die Analyse zeigt, welche Aenderung den Entscheidungsweg messbar klarer macht."],
-  ["04", "Massnahmen planen", "Der Premium-Report buendelt die naechsten Schritte fuer Website, Shop oder Landingpage."],
+  ["03", "Vorher/Nachher ableiten", "Die Analyse zeigt, welche Änderung den Entscheidungsweg messbar klarer macht."],
+  ["04", "Maßnahmen planen", "Der Premium-Report buendelt die nächsten Schritte für Website, Shop oder Landingpage."],
 ];
 
 function SectionIntro({
@@ -141,7 +141,7 @@ function ConversionSurface() {
         <div className="p-5">
           <div className="space-y-3">
             {[
-              ["CTA Prioritaet", "Primäre Handlung konkurriert mit zwei Nebenpfaden", "hoch"],
+              ["CTA Priorität", "Primäre Handlung konkurriert mit zwei Nebenpfaden", "hoch"],
               ["Trust Timing", "Beweise erscheinen erst nach dem ersten Zweifel", "kritisch"],
               ["Formular-Reibung", "Zu viele Felder vor dem ersten Commitment", "mittel"],
             ].map(([title, copy, level]) => (
@@ -185,25 +185,25 @@ function FaqSchema() {
 }
 
 export const metadata: Metadata = {
-  title: "Conversion-Optimierung fuer mehr Anfragen | Shophebel",
+  title: "Conversion-Optimierung für mehr Anfragen | Shophebel",
   description:
-    "Premium Conversion-Analyse fuer Websites, Shops und Landingpages. Erkenne Trust-Luecken, CTA-Probleme und Umsatzbremsen, bevor du mehr Traffic einkaufst.",
+    "Premium Conversion-Analyse für Websites, Shops und Landingpages. Erkenne Trust-Lücken, CTA-Probleme und Umsatzbremsen, bevor du mehr Traffic einkaufst.",
   alternates: {
     canonical: canonicalPath,
   },
   openGraph: {
-    title: "Conversion-Optimierung fuer mehr Anfragen | Shophebel",
+    title: "Conversion-Optimierung für mehr Anfragen | Shophebel",
     description:
-      "Shophebel zeigt, warum Besucher nicht handeln: Trust, UX, mobile Wirkung, CTAs und Formulare - inklusive Premium-Report und Massnahmenplan.",
+      "Shophebel zeigt, warum Besucher nicht handeln: Trust, UX, mobile Wirkung, CTAs und Formulare - inklusive Premium-Report und Maßnahmenplan.",
     url: pageUrl,
     siteName: "Shophebel Analyse",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Conversion-Optimierung fuer mehr Anfragen | Shophebel",
+    title: "Conversion-Optimierung für mehr Anfragen | Shophebel",
     description:
-      "Mehr Traffic bringt wenig, wenn die Seite nicht ueberzeugt. Finde Conversion-Bremsen mit Shophebel.",
+      "Mehr Traffic bringt wenig, wenn die Seite nicht überzeugt. Finde Conversion-Bremsen mit Shophebel.",
   },
 };
 
@@ -223,15 +223,15 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
           <div>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300 shadow-2xl backdrop-blur-xl">
               <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
-              Conversion Intelligence fuer Websites und Shops
+              Conversion Intelligence für Websites und Shops
             </div>
 
             <h1 className="mt-7 max-w-5xl text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl lg:leading-[0.98]">
-              Mehr Traffic bringt nichts, wenn deine Seite nicht ueberzeugt.
+              Mehr Traffic bringt nichts, wenn deine Seite nicht überzeugt.
             </h1>
 
             <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
-              Shophebel zeigt, wo Besucher Vertrauen verlieren, CTAs uebersehen, Formulare abbrechen oder den Wert deines Angebots nicht schnell genug verstehen.
+              Shophebel zeigt, wo Besucher Vertrauen verlieren, CTAs übersehen, Formulare abbrechen oder den Wert deines Angebots nicht schnell genug verstehen.
             </p>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -245,7 +245,7 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
                 href="#premium-report"
                 className="inline-flex items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] px-5 py-4 text-sm font-bold text-white backdrop-blur-xl hover:bg-white/[0.08]"
               >
-                Massnahmenplan ansehen
+                Maßnahmenplan ansehen
               </a>
             </div>
 
@@ -265,8 +265,8 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
       <section className="border-y border-white/10 bg-white/[0.025] px-4 py-5 sm:px-6 lg:px-8">
         <div className="mx-auto grid max-w-7xl gap-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-500 sm:grid-cols-3">
           <p className="text-slate-300">Mehr Wert aus vorhandenem Traffic</p>
-          <p>Trust- und CTA-Befunde statt Bauchgefuehl</p>
-          <p>Premium-Report fuer Umsetzung</p>
+          <p>Trust- und CTA-Befunde statt Bauchgefühl</p>
+          <p>Premium-Report für Umsetzung</p>
         </div>
       </section>
 
@@ -275,10 +275,10 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
           <div className="lg:sticky lg:top-32">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-300">Conversion-Bremsen</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-              Die groessten Verluste passieren vor dem Klick.
+              Die größten Verluste passieren vor dem Klick.
             </h2>
             <p className="mt-5 text-base leading-8 text-slate-300">
-              Conversion scheitert selten an einem Button allein. Meist fehlt die Kette aus klarem Wert, Vertrauen, Prioritaet und einem Abschluss, der sich einfach anfuehlt.
+              Conversion scheitert selten an einem Button allein. Meist fehlt die Kette aus klarem Wert, Vertrauen, Priorität und einem Abschluss, der sich einfach anfühlt.
             </p>
           </div>
 
@@ -308,7 +308,7 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
         <div className="mx-auto max-w-7xl">
           <SectionIntro
             eyebrow="Trust und UX"
-            title="Besucher konvertieren, wenn sich die Entscheidung leicht anfuehlt."
+            title="Besucher konvertieren, wenn sich die Entscheidung leicht anfühlt."
             copy="Shophebel bewertet nicht nur, ob Elemente vorhanden sind. Entscheidend ist, ob sie im richtigen Moment wirken: vor Zweifel, vor Vergleich und vor dem Absprung."
           />
 
@@ -358,8 +358,8 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
         <div className="mx-auto max-w-7xl">
           <SectionIntro
             eyebrow="CTA und Formular"
-            title="Der Abschluss darf sich nicht wie ein Projekt anfuehlen."
-            copy="Ein guter CTA fuehrt, ein gutes Formular entlastet. Shophebel findet die Stellen, an denen Besucher zwar interessiert sind, aber nicht genug Sicherheit fuer den naechsten Schritt haben."
+            title="Der Abschluss darf sich nicht wie ein Projekt anfühlen."
+            copy="Ein guter CTA führt, ein gutes Formular entlastet. Shophebel findet die Stellen, an denen Besucher zwar interessiert sind, aber nicht genug Sicherheit für den nächsten Schritt haben."
           />
           <div className="mt-12">
             <ConversionSurface />
@@ -382,9 +382,9 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
           </div>
           <div className="rounded-[2rem] border border-cyan-300/20 bg-[linear-gradient(145deg,rgba(8,47,73,0.48),rgba(15,23,42,0.86))] p-6 shadow-[0_35px_120px_-80px_rgba(34,211,238,0.8)]">
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-cyan-200">Nachher</p>
-            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-white">Der Entscheidungsweg fuehlt sich logisch an.</h3>
+            <h3 className="mt-4 text-2xl font-semibold tracking-tight text-white">Der Entscheidungsweg fühlt sich logisch an.</h3>
             <div className="mt-6 space-y-3">
-              {["Wertversprechen in einem Blick", "Beweise vor dem Zweifel", "Eine dominante naechste Aktion", "Formular mit niedriger Einstiegshuerde"].map((item) => (
+              {["Wertversprechen in einem Blick", "Beweise vor dem Zweifel", "Eine dominante nächste Aktion", "Formular mit niedriger Einstiegshuerde"].map((item) => (
                 <div key={item} className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-3 text-sm font-medium text-cyan-50">
                   {item}
                 </div>
@@ -399,7 +399,7 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
           <SectionIntro
             eyebrow="SHOPHEBEL Prozess"
             title="Von sichtbarer Reibung zu priorisierten Conversion-Hebeln."
-            copy="Der Prozess ist schlank genug fuer schnelle Entscheidungen und konkret genug, damit Design, Text und Umsetzung am selben Problem arbeiten."
+            copy="Der Prozess ist schlank genug für schnelle Entscheidungen und konkret genug, damit Design, Text und Umsetzung am selben Problem arbeiten."
           />
           <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {processSteps.map(([number, title, copy]) => (
@@ -418,14 +418,14 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
           <div className="p-6 sm:p-10 lg:p-12">
             <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-200">Premium Report</p>
             <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-              Ein Massnahmenplan fuer mehr Anfragen, nicht mehr Meetings.
+              Ein Maßnahmenplan für mehr Anfragen, nicht mehr Meetings.
             </h2>
             <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300">
-              Der Premium-Report zeigt, welche Conversion-Hebel zuerst wirken sollten: Trust-Aufbau, CTA-Hierarchie, Formularentlastung, mobile Prioritaeten und konkrete Textverbesserungen.
+              Der Premium-Report zeigt, welche Conversion-Hebel zuerst wirken sollten: Trust-Aufbau, CTA-Hierarchie, Formularentlastung, mobile Prioritäten und konkrete Textverbesserungen.
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {["Priorisierte Conversion-Hebel", "CTA- und Formularbefunde", "Trust- und UX-Empfehlungen", "7-Tage-Massnahmenplan"].map((item) => (
+              {["Priorisierte Conversion-Hebel", "CTA- und Formularbefunde", "Trust- und UX-Empfehlungen", "7-Tage-Maßnahmenplan"].map((item) => (
                 <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.045] p-4 text-sm font-semibold text-slate-200">
                   {item}
                 </div>
@@ -458,7 +458,7 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
                 <div className="rounded-xl border border-amber-300/20 bg-amber-300/10 p-4">
                   <p className="text-sm font-semibold text-amber-100">Erste Empfehlung</p>
                   <p className="mt-2 text-sm leading-6 text-slate-300">
-                    Primaeren CTA staerken, Trust-Beweise direkt daneben platzieren und das Formular auf den ersten Commitment-Schritt reduzieren.
+                    Primären CTA staerken, Trust-Beweise direkt daneben platzieren und das Formular auf den ersten Commitment-Schritt reduzieren.
                   </p>
                 </div>
               </div>
@@ -492,7 +492,7 @@ export default async function ConversionOptimierungPage({ searchParams }: Conver
 
       <section className="px-4 pb-24 pt-10 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl rounded-[2rem] border border-white/10 bg-white/[0.04] p-6 text-center shadow-2xl sm:p-10 lg:p-14">
-          <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-300">Startpunkt fuer mehr Anfragen</p>
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-cyan-300">Startpunkt für mehr Anfragen</p>
           <h2 className="mx-auto mt-4 max-w-3xl text-3xl font-semibold tracking-tight text-white sm:text-5xl">
             Bevor du mehr Traffic kaufst, finde heraus, warum vorhandene Besucher nicht handeln.
           </h2>

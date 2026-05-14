@@ -13,7 +13,7 @@ const strongTrustHtml = `
     </nav>
     <main>
       <p>Versand, rueckgabe, sichere Zahlung, Kundenservice und Bewertungen sind wichtige Themen.</p>
-      <p>Trusted Shops und kundenservice stehen fuer Sicherheit.</p>
+      <p>Trusted Shops und kundenservice stehen für Sicherheit.</p>
       <p>kontakt@shop.test</p>
       <p>+49 30 1234567</p>
     </main>

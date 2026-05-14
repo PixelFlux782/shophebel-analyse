@@ -139,7 +139,7 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     if (error instanceof FetchHtmlError) {
       staticError = error;
     } else {
-      throw new AnalysePageError("Die Seite konnte in diesem Lauf nicht verlaesslich geprueft werden.");
+      throw new AnalysePageError("Die Seite konnte in diesem Lauf nicht verlaesslich geprüft werden.");
     }
   }
 
@@ -172,7 +172,7 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
 
   if (staticDocument) {
     technicalNotes.push(
-      "Die erste Seitenfassung war zu duenn, daher wurde eine echte Browseransicht genutzt.",
+      "Die erste Seitenfassung war zu dünn, daher wurde eine echte Browseransicht genutzt.",
     );
   } else if (staticError) {
     technicalNotes.push(
@@ -182,7 +182,7 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
 
   if (preferRenderedAnalysis && staticDocument && !useRenderedFallback) {
     technicalNotes.push(
-      "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht fuer Screenshots.",
+      "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht für Screenshots.",
     );
   }
 
@@ -265,10 +265,10 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
 
     if (staticError) {
       throw new AnalysePageError(
-        `Die Seite konnte in diesem Lauf nicht verlaesslich geprueft werden. ${staticError.message}`,
+        `Die Seite konnte in diesem Lauf nicht verlaesslich geprüft werden. ${staticError.message}`,
       );
     }
 
-    throw new AnalysePageError("Die Seite konnte in diesem Lauf nicht verlaesslich geprueft werden.");
+    throw new AnalysePageError("Die Seite konnte in diesem Lauf nicht verlaesslich geprüft werden.");
   }
 }

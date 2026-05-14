@@ -14,7 +14,7 @@ describe("analysis scoring", () => {
     expect(overallScore).toBe(65);
   });
 
-  it("setzt Free-Metadaten fuer Findings im AnalysisResult", () => {
+  it("setzt Free-Metadaten für Findings im AnalysisResult", () => {
     const result = buildAnalysisResult({
       requestedUrl: "https://shop.test",
       finalUrl: "https://shop.test/",
@@ -46,7 +46,7 @@ describe("analysis scoring", () => {
     expect(result.aiSuggestions).toEqual([]);
   });
 
-  it("setzt visualPreviewAvailable auch fuer mobile-only Screenshots", () => {
+  it("setzt visualPreviewAvailable auch für mobile-only Screenshots", () => {
     const result = buildAnalysisResult({
       requestedUrl: "https://shop.test",
       finalUrl: "https://shop.test/",

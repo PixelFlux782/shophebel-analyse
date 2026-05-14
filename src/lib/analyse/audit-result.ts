@@ -34,21 +34,21 @@ const STATUS_POINTS: Record<AuditCheckStatus, number | null> = {
 function businessMessage(title: string, status: AuditCheckStatus, message: string) {
   const messages: Partial<Record<string, Partial<Record<AuditCheckStatus, string>>>> = {
     "Suchergebnis-Klarheit": {
-      good: "Seitenname und Kurzbeschreibung wirken fuer Besucher, Google und KI-Systeme grundsaetzlich klar.",
+      good: "Seitenname und Kurzbeschreibung wirken für Besucher, Google und KI-Systeme grundsaetzlich klar.",
       warning:
-        "Seitenname oder Kurzbeschreibung koennten klarer zeigen, was du anbietest und warum jemand klicken sollte.",
+        "Seitenname oder Kurzbeschreibung könnten klarer zeigen, was du anbietest und warum jemand klicken sollte.",
       critical:
         "Google und KI-Systeme bekommen keine klare Kurzbeschreibung oder keinen eindeutigen Namen deiner Seite.",
     },
     "Klarheit der Seitenbotschaft": {
       good: "Hauptbotschaft und Abschnittsthemen sind erkennbar.",
-      warning: "Die Seite fuehrt Besucher noch nicht klar genug durch die wichtigsten Botschaften.",
-      critical: "Die Seite hat keine eindeutige Hauptbotschaft. Besucher verstehen den Kernnutzen dadurch spaeter.",
+      warning: "Die Seite führt Besucher noch nicht klar genug durch die wichtigsten Botschaften.",
+      critical: "Die Seite hat keine eindeutige Hauptbotschaft. Besucher verstehen den Kernnutzen dadurch später.",
     },
     Bildverstaendnis: {
-      good: "Die erkannten Bilder sind fuer Google, KI und Screenreader ausreichend beschrieben.",
-      warning: "Einige Bilder erklaeren sich fuer Google, KI und Screenreader nicht gut genug.",
-      critical: "Viele Bilder bleiben fuer Google, KI und Screenreader unklar. Dadurch geht Kontext verloren.",
+      good: "Die erkannten Bilder sind für Google, KI und Screenreader ausreichend beschrieben.",
+      warning: "Einige Bilder erklären sich für Google, KI und Screenreader nicht gut genug.",
+      critical: "Viele Bilder bleiben für Google, KI und Screenreader unklar. Dadurch geht Kontext verloren.",
       unknown: "Es wurden keine Bilder gefunden; Bildbeschreibungen konnten deshalb nicht bewertet werden.",
     },
     "Auffindbarkeit der Hauptseite": {
@@ -57,7 +57,7 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       critical: "Die Seite sendet ein Signal, dass sie nicht in Suchergebnissen erscheinen soll.",
     },
     "Mobile Darstellung": {
-      good: "Die Seite ist grundsaetzlich fuer mobile Darstellung vorbereitet.",
+      good: "Die Seite ist grundsaetzlich für mobile Darstellung vorbereitet.",
       critical:
         "Auf kleinen Bildschirmen kann die Seite falsch oder unbequem wirken, weil die mobile Darstellung nicht sauber markiert ist.",
     },
@@ -65,45 +65,45 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       good: "Die Seite wird sicher verschluesselt geladen.",
       critical: "Die Seite wird nicht sicher verschluesselt geladen. Das kann Vertrauen kosten.",
     },
-    Ladegefuehl: {
+    Ladegefühl: {
       good: "Die Seite reagiert beim ersten Abruf schnell genug.",
       warning: "Die Seite braucht spuerbar Zeit, bis sie geladen ist. Das kann ungeduldige Besucher kosten.",
       critical:
-        "Die Seite laedt sehr langsam. Besucher koennen abspringen, bevor sie Angebot oder Vertrauen sehen.",
-      not_checked: "Fuer diesen Lauf liegt keine verlaessliche Messung zum Ladegefuehl vor.",
+        "Die Seite laedt sehr langsam. Besucher können abspringen, bevor sie Angebot oder Vertrauen sehen.",
+      not_checked: "Für diesen Lauf liegt keine verlaessliche Messung zum Ladegefühl vor.",
     },
     "Stabilitaet beim Laden": {
       not_checked: "Ob sich Elemente beim Laden verschieben, wurde in diesem Lauf nicht als Felddaten gemessen.",
     },
     Vertrauensbelege: {
       good: "Bewertungen, Siegel oder Zahlungsarten geben Besuchern sichtbare Sicherheit.",
-      warning: "Einige Vertrauensbelege sind sichtbar, aber noch nicht stark genug fuer schnelle Sicherheit.",
+      warning: "Einige Vertrauensbelege sind sichtbar, aber noch nicht stark genug für schnelle Sicherheit.",
       critical: "Bewertungen, sichere Zahlung, Siegel oder Serviceversprechen sind kaum sichtbar.",
     },
-    "Naechster Schritt": {
-      good: "Besucher erkennen gut, was sie als Naechstes tun sollen.",
-      warning: "Der naechste Schritt ist sichtbar, koennte aber klarer und oefter gefuehrt werden.",
-      critical: "Besucher erkennen nicht schnell genug, was sie als Naechstes tun sollen.",
+    "Nächster Schritt": {
+      good: "Besucher erkennen gut, was sie als Nächstes tun sollen.",
+      warning: "Der nächste Schritt ist sichtbar, könnte aber klarer und oefter geführt werden.",
+      critical: "Besucher erkennen nicht schnell genug, was sie als Nächstes tun sollen.",
     },
     "Einfacher Anfrageweg": {
       good: "Ein Anfrage- oder Kontaktweg ist auf der Seite erkennbar.",
       warning: "Der Anfrageweg ist noch nicht einfach genug sichtbar.",
     },
-    "Visuelle Seitenpruefung": {
-      good: "Eine echte Seitenansicht wurde erfasst und kann fuer visuelle Hinweise genutzt werden.",
-      not_checked: "Es gibt in diesem Lauf keine verlaessliche Seitenansicht fuer visuelle Hinweise.",
+    "Visuelle Seitenprüfung": {
+      good: "Eine echte Seitenansicht wurde erfasst und kann für visuelle Hinweise genutzt werden.",
+      not_checked: "Es gibt in diesem Lauf keine verlaessliche Seitenansicht für visuelle Hinweise.",
     },
-    Blickfuehrung: {
-      good: "Ueberschriften, Buttons und Bilder geben Besuchern grundsaetzlich Orientierung.",
-      warning: "Die Seite fuehrt den Blick noch nicht klar genug zu Angebot, Vertrauen und naechstem Schritt.",
-      not_checked: "Die visuelle Blickfuehrung konnte in diesem Lauf nicht verlaesslich geprueft werden.",
+    Blickführung: {
+      good: "Überschriften, Buttons und Bilder geben Besuchern grundsaetzlich Orientierung.",
+      warning: "Die Seite führt den Blick noch nicht klar genug zu Angebot, Vertrauen und nächstem Schritt.",
+      not_checked: "Die visuelle Blickführung konnte in diesem Lauf nicht verlaesslich geprüft werden.",
     },
     "Lesbarkeit und Inhaltstiefe": {
       good: "Die Seite liefert genug Inhalt, um wichtige Fragen zu beantworten.",
-      warning: "Die Seite beantwortet noch nicht genug Fragen, damit Besucher sicher entscheiden koennen.",
-      critical: "Die Seite wirkt inhaltlich zu duenn. Wichtige Kauf- und Vertrauensfragen bleiben offen.",
+      warning: "Die Seite beantwortet noch nicht genug Fragen, damit Besucher sicher entscheiden können.",
+      critical: "Die Seite wirkt inhaltlich zu dünn. Wichtige Kauf- und Vertrauensfragen bleiben offen.",
     },
-    "Verstaendliche Daten fuer Google und KI": {
+    "Verständliche Daten für Google und KI": {
       good: "Die Website liefert zusaetzliche maschinenlesbare Hinweise. Das hilft bei der Einordnung.",
       warning:
         "Google und KI-Systeme bekommen noch zu wenig klar ausgezeichnete Informationen zu Angebot, Unternehmen oder Fragen.",
@@ -112,18 +112,18 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       good: "Kundenfragen werden als klare Antworten genutzt. Das hilft Menschen und KI-Systemen.",
       warning: "Wichtige Kundenfragen bleiben noch zu wenig sichtbar beantwortet.",
     },
-    "Regeln fuer KI-Systeme": {
-      good: "Die Regeln fuer KI- oder Content-Systeme sind bewusst erkennbar.",
-      warning: "Einige KI- oder Content-Systeme koennten am Abruf deiner Inhalte gehindert werden.",
+    "Regeln für KI-Systeme": {
+      good: "Die Regeln für KI- oder Content-Systeme sind bewusst erkennbar.",
+      warning: "Einige KI- oder Content-Systeme könnten am Abruf deiner Inhalte gehindert werden.",
       unknown:
-        "Es wurden keine klaren Regeln fuer KI-Systeme erkannt. Das ist nicht automatisch schlecht, sollte aber bewusst entschieden werden.",
+        "Es wurden keine klaren Regeln für KI-Systeme erkannt. Das ist nicht automatisch schlecht, sollte aber bewusst entschieden werden.",
       not_checked:
-        "Die Regeln fuer Such- und KI-Systeme konnten in diesem Lauf nicht verlaesslich geprueft werden.",
+        "Die Regeln für Such- und KI-Systeme konnten in diesem Lauf nicht verlaesslich geprüft werden.",
     },
     "Klare Themenstruktur": {
-      good: "Hauptthema und Unterthemen sind fuer Menschen, Google und KI-Systeme gut erkennbar.",
-      warning: "Die Themenstruktur ist noch nicht klar genug. KI-Systeme koennen dein Angebot schwerer einordnen.",
-      critical: "Die Seite hat keine eindeutige Hauptbotschaft. KI-Systeme koennen dein Hauptthema schwerer einordnen.",
+      good: "Hauptthema und Unterthemen sind für Menschen, Google und KI-Systeme gut erkennbar.",
+      warning: "Die Themenstruktur ist noch nicht klar genug. KI-Systeme können dein Angebot schwerer einordnen.",
+      critical: "Die Seite hat keine eindeutige Hauptbotschaft. KI-Systeme können dein Hauptthema schwerer einordnen.",
     },
   };
 
@@ -197,13 +197,13 @@ function hasAboutLink($: ReturnType<typeof load>, pageUrl: string) {
       const href = $(element).attr("href")?.toLowerCase() ?? "";
       const text = $(element).text().toLowerCase();
 
-      if (/about|ueber-uns|uber-uns|unternehmen|team|firma|wir-ueber-uns/.test(`${href} ${text}`)) {
+      if (/about|über-uns|uber-uns|unternehmen|team|firma|wir-über-uns/.test(`${href} ${text}`)) {
         return true;
       }
 
       try {
         const resolved = new URL(href, pageUrl);
-        return /about|ueber-uns|uber-uns|unternehmen|team|firma|wir-ueber-uns/.test(
+        return /about|über-uns|uber-uns|unternehmen|team|firma|wir-über-uns/.test(
           resolved.pathname.toLowerCase(),
         );
       } catch {
@@ -230,7 +230,7 @@ function getRobotsAiCrawlerStatus(robotsTxt?: string): {
     return {
       status: "not_checked",
       message:
-        "Die Regeln fuer Such- und KI-Systeme konnten in diesem Lauf nicht verlaesslich geprueft werden.",
+        "Die Regeln für Such- und KI-Systeme konnten in diesem Lauf nicht verlaesslich geprüft werden.",
     };
   }
 
@@ -254,21 +254,21 @@ function getRobotsAiCrawlerStatus(robotsTxt?: string): {
   if (blocked.length > 0) {
     return {
       status: "warning",
-      message: `Einige KI- oder Content-Systeme koennten am Abruf deiner Inhalte gehindert werden: ${blocked.join(", ")}.`,
+      message: `Einige KI- oder Content-Systeme könnten am Abruf deiner Inhalte gehindert werden: ${blocked.join(", ")}.`,
     };
   }
 
   if (mentioned.length > 0) {
     return {
       status: "good",
-      message: `Die Seite enthaelt erkennbare Regeln fuer KI- oder Content-Systeme ohne pauschale Blockade: ${mentioned.join(", ")}.`,
+      message: `Die Seite enthält erkennbare Regeln für KI- oder Content-Systeme ohne pauschale Blockade: ${mentioned.join(", ")}.`,
     };
   }
 
   return {
     status: "unknown",
     message:
-      "Es wurden keine klaren Regeln fuer KI-Systeme erkannt. Das ist nicht automatisch schlecht, sollte aber bewusst entschieden werden.",
+      "Es wurden keine klaren Regeln für KI-Systeme erkannt. Das ist nicht automatisch schlecht, sollte aber bewusst entschieden werden.",
   };
 }
 
@@ -352,7 +352,7 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
           ? "warning"
           : "good",
       !title
-        ? "Deine Seite hat keinen klaren Namen fuer Suchergebnisse."
+        ? "Deine Seite hat keinen klaren Namen für Suchergebnisse."
         : !description
           ? "Google und KI-Systeme bekommen keine klare Kurzbeschreibung deiner Seite."
           : `Title (${title.length} Zeichen) und Description (${description.length} Zeichen) wurden geprüft.`,
@@ -396,7 +396,7 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
       hasHttps ? "Die finale URL nutzt HTTPS." : "Die finale URL nutzt kein HTTPS.",
     ),
     createCheck(
-      "Ladegefuehl",
+      "Ladegefühl",
       input.loadTimeMs === undefined
         ? "not_checked"
         : input.loadTimeMs <= 1800
@@ -430,7 +430,7 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
 
   const conversionChecks = [
     createCheck(
-      "Naechster Schritt",
+      "Nächster Schritt",
       ctaMatches.length >= 2 || (input.context.pageSignals?.visibleCtaTextMatches ?? 0) >= 2
         ? "good"
         : ctaMatches.length === 1 || (input.context.pageSignals?.visibleButtons ?? 0) > 0
@@ -456,14 +456,14 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
 
   const designChecks = [
     createCheck(
-      "Visuelle Seitenpruefung",
+      "Visuelle Seitenprüfung",
       input.screenshotsAvailable ? "good" : "not_checked",
       input.screenshotsAvailable
         ? "Ein Screenshot wurde erzeugt und kann visuell genutzt werden."
         : "Kein Screenshot verfügbar; visuelle Bewertung wird nicht simuliert.",
     ),
     createCheck(
-      "Blickfuehrung",
+      "Blickführung",
       input.visualMap
         ? input.visualMap.headings.length > 0 && input.visualMap.buttons.length > 0
           ? "good"
@@ -482,35 +482,35 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
 
   const aiVisibilityChecks = [
     createCheck(
-      "Verstaendliche Daten fuer Google und KI",
+      "Verständliche Daten für Google und KI",
       structuredData ? "good" : "warning",
       structuredData
         ? "Deine Website liefert strukturierte Daten. Das hilft Such- und KI-Systemen bei der Einordnung."
-        : "Keine strukturierten Daten erkannt. KI-Systeme koennen dein Angebot dadurch schwerer eindeutig einordnen.",
+        : "Keine strukturierten Daten erkannt. KI-Systeme können dein Angebot dadurch schwerer eindeutig einordnen.",
     ),
     createCheck(
       "Klare Unternehmensbeschreibung",
       hasClearCompanyDescription ? "good" : "warning",
       hasClearCompanyDescription
         ? "Deine Marke oder dein Unternehmen wird ausreichend klar beschrieben."
-        : "KI-Systeme koennen aktuell schwerer verstehen, wer hinter der Website steht und wofuer sie steht.",
+        : "KI-Systeme können aktuell schwerer verstehen, wer hinter der Website steht und wofür sie steht.",
     ),
     createCheck(
-      "Produkt-/Serviceverstaendlichkeit",
+      "Produkt-/Serviceverständlichkeit",
       productServiceSignals.length >= 3 ? "good" : productServiceSignals.length > 0 ? "warning" : "critical",
       productServiceSignals.length >= 3
         ? `Angebotssignale sind erkennbar: ${productServiceSignals.slice(0, 5).join(", ")}.`
         : productServiceSignals.length > 0
-          ? "Dein Angebot ist teilweise erkennbar, koennte aber fuer Menschen und KI-Systeme klarer beschrieben werden."
-          : "KI-Systeme koennen dein Angebot aktuell schwer einordnen, weil klare Produkt- oder Service-Signale fehlen.",
+          ? "Dein Angebot ist teilweise erkennbar, könnte aber für Menschen und KI-Systeme klarer beschrieben werden."
+          : "KI-Systeme können dein Angebot aktuell schwer einordnen, weil klare Produkt- oder Service-Signale fehlen.",
     ),
     createCheck(
       "Kundenfragen als Antworten",
       faqSchema || faqContent ? "good" : "warning",
       faqSchema
-        ? "FAQ-Inhalte sind mit Schema.org ausgezeichnet. Das ist eine gute Vorbereitung fuer AI-Suchen."
+        ? "FAQ-Inhalte sind mit Schema.org ausgezeichnet. Das ist eine gute Vorbereitung für AI-Suchen."
         : faqContent
-          ? "FAQ-artige Inhalte wurden erkannt, aber ein FAQ-Schema koennte die maschinelle Einordnung verbessern."
+          ? "FAQ-artige Inhalte wurden erkannt, aber ein FAQ-Schema könnte die maschinelle Einordnung verbessern."
           : "Es wurden keine klaren FAQ-Bereiche erkannt. Wichtige Kundenfragen bleiben als AI-Sichtbarkeitschance ungenutzt.",
     ),
     createCheck(
@@ -518,7 +518,7 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
       aboutLink ? "good" : "warning",
       aboutLink
         ? "Eine About-/Unternehmensseite ist verlinkt und kann Marken- und Expertise-Signale staerken."
-        : "Keine klare About-/Unternehmensseite erkannt. Das kann Marken- und Expertise-Signale abschwaechen.",
+        : "Keine klare About-/Unternehmensseite erkannt. Das kann Marken- und Expertise-Signale abschwächen.",
     ),
     createCheck(
       "Lokale Signale",
@@ -526,11 +526,11 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
       localSignals.length >= 2
         ? `Lokale Signale sind erkennbar: ${localSignals.join(", ")}.`
         : localSignals.length === 1
-          ? `Ein lokales Signal wurde erkannt (${localSignals[0]}), Standortbezug koennte aber klarer sein.`
+          ? `Ein lokales Signal wurde erkannt (${localSignals[0]}), Standortbezug könnte aber klarer sein.`
           : "Keine klaren lokalen Signale erkannt. Falls du lokal arbeitest, fehlen KI-Systemen wichtige Standortinformationen.",
     ),
     createCheck(
-      "Regeln fuer KI-Systeme",
+      "Regeln für KI-Systeme",
       robotsAiStatus.status,
       robotsAiStatus.message,
     ),
@@ -540,23 +540,23 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
       hasContact && (hasEmail || hasPhone || localSignals.length > 0)
         ? "Kontakt- oder Standortdaten sind erkennbar. Das hilft Nutzern und Systemen bei Vertrauen und Einordnung."
         : hasContact
-          ? "Kontakt ist erkennbar, aber konkrete Kontakt- oder Standortdaten koennten deutlicher sein."
+          ? "Kontakt ist erkennbar, aber konkrete Kontakt- oder Standortdaten könnten deutlicher sein."
           : "Keine klaren Kontakt-/Standortdaten erkannt. Das erschwert Vertrauen und die Einordnung deines Angebots.",
     ),
     createCheck(
       "Klare Themenstruktur",
       h1Count === 1 && h2Count >= 2 ? "good" : h1Count === 0 ? "critical" : "warning",
       h1Count === 1 && h2Count >= 2
-        ? "Deine Website ist gut vorbereitet fuer AI-Suchen: Hauptthema und Unterthemen sind ueber Ueberschriften erkennbar."
+        ? "Deine Website ist gut vorbereitet für AI-Suchen: Hauptthema und Unterthemen sind über Überschriften erkennbar."
         : h1Count === 0
-          ? "KI-Systeme koennen dein Hauptthema schwerer einordnen, weil keine klare H1 gefunden wurde."
-          : `Die Ueberschriftenstruktur ist ausbaufaehig: ${h1Count} H1, ${h2Count} H2.`,
+          ? "KI-Systeme können dein Hauptthema schwerer einordnen, weil keine klare H1 gefunden wurde."
+          : `Die Überschriftenstruktur ist ausbaufaehig: ${h1Count} H1, ${h2Count} H2.`,
     ),
   ];
 
   return {
     seo: createScoreBlock("Auffindbarkeit", seoChecks),
-    performance: createScoreBlock("Ladegefuehl", performanceChecks),
+    performance: createScoreBlock("Ladegefühl", performanceChecks),
     trust: createScoreBlock("Vertrauen", trustChecks),
     conversion: createScoreBlock("Anfragen", conversionChecks),
     design: createScoreBlock("Design", designChecks),
@@ -647,7 +647,7 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     whyItCostsCustomers:
       "Unsichere Besucher zoegern schneller, vergleichen laenger oder brechen vor Anfrage und Kauf ab.",
     action:
-      "Bewertungen, Zahlungsarten, Sicherheitsbelege und Service-Versprechen frueher auf der Seite sichtbar machen.",
+      "Bewertungen, Zahlungsarten, Sicherheitsbelege und Service-Versprechen früher auf der Seite sichtbar machen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
@@ -664,26 +664,26 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     category: "Vertrauen",
     problem: "Datenschutz wirkt nicht klar genug abgesichert.",
     whyItCostsCustomers:
-      "Gerade bei Formularen und Shops kann fehlende Transparenz Zweifel erzeugen und Abschluesse kosten.",
+      "Gerade bei Formularen und Shops kann fehlende Transparenz Zweifel erzeugen und Abschlüsse kosten.",
     action: "Datenschutz-Link sichtbar platzieren und in Formularnaehe Vertrauen durch kurze Hinweise schaffen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "mittel",
   },
   Kontaktvertrauen: {
     category: "Vertrauen",
-    problem: "Kontaktmoeglichkeiten sind nicht eindeutig genug.",
+    problem: "Kontaktmöglichkeiten sind nicht eindeutig genug.",
     whyItCostsCustomers:
-      "Besucher, die Rueckfragen haben, finden keinen einfachen Weg und verlassen die Seite eher.",
+      "Besucher, die Rückfragen haben, finden keinen einfachen Weg und verlassen die Seite eher.",
     action: "Kontakt, E-Mail, Telefon oder Anfrageweg prominenter und wiederholt sichtbar machen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "hoch",
   },
-  "Naechster Schritt": {
+  "Nächster Schritt": {
     category: "CTA",
-    problem: "Der naechste Schritt ist nicht stark genug erkennbar.",
+    problem: "Der nächste Schritt ist nicht stark genug erkennbar.",
     whyItCostsCustomers:
       "Wenn Besucher nicht sofort wissen, was sie tun sollen, verpufft Aufmerksamkeit ohne Anfrage oder Kauf.",
-    action: "Einen primaeren CTA priorisieren, klar benennen und oberhalb des ersten Scrolls sichtbar machen.",
+    action: "Einen primären CTA priorisieren, klar benennen und oberhalb des ersten Scrolls sichtbar machen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "hoch",
   },
@@ -691,7 +691,7 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     category: "CTA",
     problem: "Der Anfrageweg erzeugt zu wenig sichtbare Handlungssicherheit.",
     whyItCostsCustomers:
-      "Unklare oder fehlende Formulare erschweren den Moment, in dem Interesse in Kontakt umschlagen koennte.",
+      "Unklare oder fehlende Formulare erschweren den Moment, in dem Interesse in Kontakt umschlagen könnte.",
     action: "Ein schlankes Formular oder einen klaren Kontakt-CTA mit Nutzenhinweis einbauen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
@@ -700,17 +700,17 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     category: "Klarheit",
     problem: "Das Angebot wird nicht schnell genug verstanden.",
     whyItCostsCustomers:
-      "Unklare Leistungen oder Produktvorteile fuehren dazu, dass Besucher weiter suchen statt zu handeln.",
+      "Unklare Leistungen oder Produktvorteile führen dazu, dass Besucher weiter suchen statt zu handeln.",
     action: "Hero, Leistungsbeschreibung und Nutzenversprechen konkretisieren und auf einen Hauptnutzen zuspitzen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
   "Klarheit der Seitenbotschaft": {
     category: "Klarheit",
-    problem: "Die Seitenstruktur fuehrt Besucher nicht klar genug.",
+    problem: "Die Seitenstruktur führt Besucher nicht klar genug.",
     whyItCostsCustomers:
-      "Ohne klare Ueberschriften erkennen Nutzer Angebot, Nutzen und Reihenfolge der Inhalte langsamer.",
-    action: "Eine eindeutige Hauptbotschaft setzen und Inhalte mit klaren Abschnittsueberschriften ordnen.",
+      "Ohne klare Überschriften erkennen Nutzer Angebot, Nutzen und Reihenfolge der Inhalte langsamer.",
+    action: "Eine eindeutige Hauptbotschaft setzen und Inhalte mit klaren Abschnittsüberschriften ordnen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "mittel",
   },
@@ -719,24 +719,24 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     problem: "Die mobile Darstellung kann unbequem oder falsch wirken.",
     whyItCostsCustomers:
       "Viele Besucher kommen mobil. Wenn die Ansicht unbequem wirkt, sinkt die Chance auf Anfrage oder Kauf.",
-    action: "Mobile Ansicht, Abstaende, Schriftgroessen und klickbare Elemente fuer kleine Screens verbessern.",
+    action: "Mobile Ansicht, Abstände, Schriftgrößen und klickbare Elemente für kleine Screens verbessern.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
-  Ladegefuehl: {
-    category: "Ladegefuehl",
-    problem: "Die Seite fuehlt sich zu langsam an.",
+  Ladegefühl: {
+    category: "Ladegefühl",
+    problem: "Die Seite fühlt sich zu langsam an.",
     whyItCostsCustomers:
-      "Wartezeit kostet Aufmerksamkeit, Vertrauen und besonders auf mobilen Geraeten direkte Abschluesse.",
+      "Wartezeit kostet Aufmerksamkeit, Vertrauen und besonders auf mobilen Geräten direkte Abschlüsse.",
     action: "Bilder, Skripte und kritische Ladepfade priorisiert verschlanken.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
-  Blickfuehrung: {
+  Blickführung: {
     category: "Design",
-    problem: "Das Layout gibt zu wenig visuelle Fuehrung.",
+    problem: "Das Layout gibt zu wenig visuelle Führung.",
     whyItCostsCustomers:
-      "Wenn Blickfuehrung, Buttons und Inhalte nicht zusammenarbeiten, verlieren Besucher Orientierung.",
+      "Wenn Blickführung, Buttons und Inhalte nicht zusammenarbeiten, verlieren Besucher Orientierung.",
     action: "Hero, CTA-Zonen, Trust-Elemente und Inhaltsbloecke visuell klarer priorisieren.",
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
@@ -750,9 +750,9 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
   },
-  "Verstaendliche Daten fuer Google und KI": {
+  "Verständliche Daten für Google und KI": {
     category: "AI-Sichtbarkeit",
-    problem: "Google und KI-Systeme bekommen dein Angebot nicht eindeutig genug erklaert.",
+    problem: "Google und KI-Systeme bekommen dein Angebot nicht eindeutig genug erklärt.",
     whyItCostsCustomers:
       "Wenn Maschinen Angebot, Marke und Inhalte schlechter verstehen, gehen Sichtbarkeitschancen verloren.",
     action: "Angebot, Unternehmen, Produkte, Leistungen oder Fragen klar maschinenlesbar auszeichnen.",
@@ -761,16 +761,16 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
   },
   "Klare Unternehmensbeschreibung": {
     category: "AI-Sichtbarkeit",
-    problem: "Deine Marke oder dein Unternehmen ist fuer KI-Systeme nicht klar genug beschrieben.",
+    problem: "Deine Marke oder dein Unternehmen ist für KI-Systeme nicht klar genug beschrieben.",
     whyItCostsCustomers:
-      "Wenn Systeme nicht verstehen, wer du bist und wofuer du stehst, gehen Empfehlungs- und Antwortchancen verloren.",
+      "Wenn Systeme nicht verstehen, wer du bist und wofür du stehst, gehen Empfehlungs- und Antwortchancen verloren.",
     action: "Eine klare Unternehmensbeschreibung mit Angebot, Zielgruppe, Standort und Vertrauenssignalen einbauen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "mittel",
   },
-  "Produkt-/Serviceverstaendlichkeit": {
+  "Produkt-/Serviceverständlichkeit": {
     category: "AI-Sichtbarkeit",
-    problem: "Dein Angebot ist fuer KI-Systeme nicht eindeutig genug.",
+    problem: "Dein Angebot ist für KI-Systeme nicht eindeutig genug.",
     whyItCostsCustomers:
       "Unklare Produkt- oder Serviceinformationen erschweren passende Antworten, Empfehlungen und Vergleiche.",
     action: "Produkte, Services, Nutzen, Zielgruppen und typische Anwendungsfaelle klarer beschreiben.",
@@ -782,7 +782,7 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     problem: "Wichtige Kundenfragen werden nicht als Antwortpotenzial genutzt.",
     whyItCostsCustomers:
       "Unbeantwortete Fragen bremsen Vertrauen und schwachen die Chance, in Antwortsystemen aufzutauchen.",
-    action: "Echte Kundenfragen sichtbar beantworten und bei Eignung fuer Google und KI klar auszeichnen.",
+    action: "Echte Kundenfragen sichtbar beantworten und bei Eignung für Google und KI klar auszeichnen.",
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
   },
@@ -800,15 +800,15 @@ const blockerTemplates: Record<string, BlockerTemplate> = {
     problem: "Lokale Einordnung ist nicht klar genug.",
     whyItCostsCustomers:
       "Lokale Anbieter verlieren Chancen, wenn Standort, Einzugsgebiet oder regionale Relevanz nicht eindeutig sind.",
-    action: "Adresse, Standortseiten, Einzugsgebiet, Oeffnungszeiten und lokale Begriffe klarer einbauen.",
+    action: "Adresse, Standortseiten, Einzugsgebiet, Öffnungszeiten und lokale Begriffe klarer einbauen.",
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
   },
-  "Regeln fuer KI-Systeme": {
+  "Regeln für KI-Systeme": {
     category: "AI-Sichtbarkeit",
-    problem: "Regeln fuer KI-Systeme sind nicht bewusst genug festgelegt.",
+    problem: "Regeln für KI-Systeme sind nicht bewusst genug festgelegt.",
     whyItCostsCustomers:
-      "Unklare oder blockierende Regeln koennen beeinflussen, wie Inhalte von bestimmten Systemen verarbeitet werden.",
+      "Unklare oder blockierende Regeln können beeinflussen, wie Inhalte von bestimmten Systemen verarbeitet werden.",
     action: "Bewusst entscheiden, welche Such- und KI-Systeme deine Inhalte abrufen duerfen.",
     estimatedEffort: "niedrig",
     estimatedImpact: "mittel",
@@ -837,49 +837,49 @@ const fallbackTemplates: Record<RevenueBlocker["category"], Omit<BlockerTemplate
   Vertrauen: {
     problem: "Vertrauen wird nicht schnell genug aufgebaut.",
     whyItCostsCustomers: "Besucher brauchen Sicherheit, bevor sie Daten eingeben, anfragen oder kaufen.",
-    action: "Trust-Elemente, Kontakt und Belege frueher sichtbar machen.",
+    action: "Trust-Elemente, Kontakt und Belege früher sichtbar machen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
   Klarheit: {
-    problem: "Die Seite erklaert Angebot und Nutzen nicht schnell genug.",
-    whyItCostsCustomers: "Unklare Botschaften fuehren dazu, dass Besucher nicht weiterdenken oder vergleichen.",
-    action: "Hauptbotschaft, Nutzen und Seitenstruktur schaerfen.",
+    problem: "Die Seite erklärt Angebot und Nutzen nicht schnell genug.",
+    whyItCostsCustomers: "Unklare Botschaften führen dazu, dass Besucher nicht weiterdenken oder vergleichen.",
+    action: "Hauptbotschaft, Nutzen und Seitenstruktur schärfen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
   "Mobile UX": {
     problem: "Die mobile Nutzung hat Reibung.",
-    whyItCostsCustomers: "Mobile Reibung kostet besonders schnell Aufmerksamkeit und Abschluesse.",
-    action: "Mobile Darstellung, Lesbarkeit und Klickwege priorisiert pruefen.",
+    whyItCostsCustomers: "Mobile Reibung kostet besonders schnell Aufmerksamkeit und Abschlüsse.",
+    action: "Mobile Darstellung, Lesbarkeit und Klickwege priorisiert prüfen.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
   CTA: {
-    problem: "Der naechste Schritt ist nicht eindeutig genug.",
+    problem: "Der nächste Schritt ist nicht eindeutig genug.",
     whyItCostsCustomers: "Ohne klare Handlung verlieren interessierte Besucher den Anschluss.",
-    action: "Primaeren CTA sichtbarer und konkreter formulieren.",
+    action: "Primären CTA sichtbarer und konkreter formulieren.",
     estimatedEffort: "niedrig",
     estimatedImpact: "hoch",
   },
   Design: {
-    problem: "Die visuelle Fuehrung ist ausbaufaehig.",
+    problem: "Die visuelle Führung ist ausbaufaehig.",
     whyItCostsCustomers: "Design beeinflusst, ob Angebot, Vertrauen und Handlung schnell verstanden werden.",
     action: "Layout, Hierarchie und wichtige Bereiche optisch klarer ordnen.",
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
   },
-  Ladegefuehl: {
+  Ladegefühl: {
     problem: "Die Seite wirkt beim Laden nicht leicht genug.",
-    whyItCostsCustomers: "Langsames oder instabiles Ladegefuehl senkt Vertrauen und Geduld.",
+    whyItCostsCustomers: "Langsames oder instabiles Ladegefühl senkt Vertrauen und Geduld.",
     action: "Ladebremsen priorisiert identifizieren und reduzieren.",
     estimatedEffort: "mittel",
     estimatedImpact: "hoch",
   },
   "AI-Sichtbarkeit": {
-    problem: "Die Seite ist fuer Antwortsysteme noch nicht gut genug vorbereitet.",
-    whyItCostsCustomers: "Unstrukturierte Inhalte verschenken kuenftige Sichtbarkeitschancen.",
-    action: "Kundenfragen, klar ausgezeichnete Informationen und verstaendliche Themenabschnitte ausbauen.",
+    problem: "Die Seite ist für Antwortsysteme noch nicht gut genug vorbereitet.",
+    whyItCostsCustomers: "Unstrukturierte Inhalte verschenken künftige Sichtbarkeitschancen.",
+    action: "Kundenfragen, klar ausgezeichnete Informationen und verständliche Themenabschnitte ausbauen.",
     estimatedEffort: "mittel",
     estimatedImpact: "mittel",
   },
@@ -896,7 +896,7 @@ function blockerPriorityScore(check: ScoreBlock["checks"][number], template: Blo
 function categoryForBlock(key: keyof AnalysisResultCategories): RevenueBlocker["category"] {
   const map: Record<keyof AnalysisResultCategories, RevenueBlocker["category"]> = {
     seo: "Klarheit",
-    performance: "Ladegefuehl",
+    performance: "Ladegefühl",
     trust: "Vertrauen",
     conversion: "CTA",
     design: "Design",

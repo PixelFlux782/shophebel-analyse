@@ -19,7 +19,7 @@ export async function fetchHtml(inputUrl: string): Promise<FetchHtmlResult> {
     requestedUrl = (await assertPublicHttpUrl(inputUrl)).toString();
   } catch (error) {
     throw new InvalidUrlError(
-      error instanceof Error ? error.message : "Die URL ist ungueltig.",
+      error instanceof Error ? error.message : "Die URL ist ungültig.",
     );
   }
 
@@ -64,7 +64,7 @@ export async function fetchHtml(inputUrl: string): Promise<FetchHtmlResult> {
     const html = await response.text();
 
     if (!html.trim()) {
-      throw new FetchHtmlError("Die geladene Seite enthaelt kein auswertbares HTML.");
+      throw new FetchHtmlError("Die geladene Seite enthält kein auswertbares HTML.");
     }
 
     return {
@@ -79,7 +79,7 @@ export async function fetchHtml(inputUrl: string): Promise<FetchHtmlResult> {
     }
 
     if (error instanceof Error && error.name === "AbortError") {
-      throw new FetchHtmlError("Zeitueberschreitung beim Abrufen der Startseite.");
+      throw new FetchHtmlError("Zeitüberschreitung beim Abrufen der Startseite.");
     }
 
     throw new FetchHtmlError("Die Startseite konnte nicht geladen werden.");

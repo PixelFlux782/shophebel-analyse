@@ -17,11 +17,11 @@ export function normalizeUrl(input: string) {
   const parsed = new URL(normalized);
 
   if (!/^https?:$/i.test(parsed.protocol)) {
-    throw new Error("Bitte gib eine gueltige Webadresse mit http:// oder https:// ein.");
+    throw new Error("Bitte gib eine gültige Webadresse mit http:// oder https:// ein.");
   }
 
   if (!parsed.hostname) {
-    throw new Error("Die URL ist ungueltig.");
+    throw new Error("Die URL ist ungültig.");
   }
 
   return {
@@ -153,23 +153,23 @@ export async function assertPublicHttpUrl(input: string): Promise<URL> {
     parsed = new URL(normalizeUrl(input).fullUrl);
   } catch (error) {
     throw new PublicUrlError(
-      error instanceof Error ? error.message : "Die URL ist ungueltig.",
+      error instanceof Error ? error.message : "Die URL ist ungültig.",
     );
   }
 
   if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
-    throw new PublicUrlError("Bitte gib eine gueltige Webadresse mit http:// oder https:// ein.");
+    throw new PublicUrlError("Bitte gib eine gültige Webadresse mit http:// oder https:// ein.");
   }
 
   if (isBlockedHostname(parsed.hostname) || isBlockedIpAddress(parsed.hostname)) {
-    throw new PublicUrlError("Diese URL kann aus Sicherheitsgruenden nicht geprueft werden.");
+    throw new PublicUrlError("Diese URL kann aus Sicherheitsgruenden nicht geprüft werden.");
   }
 
   try {
     const addresses = await lookup(parsed.hostname, { all: true, verbatim: true });
 
     if (addresses.some((entry) => isBlockedIpAddress(entry.address))) {
-      throw new PublicUrlError("Diese URL kann aus Sicherheitsgruenden nicht geprueft werden.");
+      throw new PublicUrlError("Diese URL kann aus Sicherheitsgruenden nicht geprüft werden.");
     }
   } catch (error) {
     if (error instanceof PublicUrlError) {

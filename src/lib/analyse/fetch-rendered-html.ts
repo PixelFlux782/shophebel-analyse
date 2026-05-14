@@ -41,7 +41,7 @@ export async function fetchRenderedHtml(
     requestedUrl = (await assertPublicHttpUrl(inputUrl)).toString();
   } catch (error) {
     throw new FetchRenderedHtmlError(
-      error instanceof Error ? error.message : "Die URL ist ungueltig.",
+      error instanceof Error ? error.message : "Die URL ist ungültig.",
     );
   }
 
@@ -78,7 +78,7 @@ export async function fetchRenderedHtml(
 
     if (!html.trim()) {
       throw new FetchRenderedHtmlError(
-        "Die sichtbare Seite enthaelt keine auswertbaren Inhalte.",
+        "Die sichtbare Seite enthält keine auswertbaren Inhalte.",
       );
     }
 

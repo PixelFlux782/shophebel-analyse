@@ -130,7 +130,7 @@ describe("screenshot-storage", () => {
     );
   });
 
-  it("gibt bei Supabase Upload-Fehlern undefined zurueck", async () => {
+  it("gibt bei Supabase Upload-Fehlern undefined zurück", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");

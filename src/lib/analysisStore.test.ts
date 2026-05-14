@@ -164,7 +164,7 @@ describe("analysisStore", () => {
     );
   });
 
-  it("persistiert Screenshot-URLs vollstaendig in Supabase", async () => {
+  it("persistiert Screenshot-URLs vollständig in Supabase", async () => {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
 
@@ -392,7 +392,7 @@ describe("analysisStore", () => {
     expect(loaded?.analysis.metadata?.screenshotErrorSource).toBe("browser_launch");
   });
 
-  it("liest Payment-Status fuer Premium-Zugriff aus Supabase", async () => {
+  it("liest Payment-Status für Premium-Zugriff aus Supabase", async () => {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
 

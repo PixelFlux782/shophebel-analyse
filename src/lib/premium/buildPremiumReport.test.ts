@@ -36,7 +36,7 @@ function createAnalysis(overrides: Partial<AnalysisResult> = {}): AnalysisResult
       performance: { score: 70, label: "Performance", summary: "OK", checks: [] },
       trust: { score: 50, label: "Trust", summary: "Trust fehlt", checks: [] },
       conversion: { score: 45, label: "Conversion", summary: "CTA unklar", checks: [] },
-      design: { score: 58, label: "Design", summary: "Design fuehrt wenig", checks: [] },
+      design: { score: 58, label: "Design", summary: "Design führt wenig", checks: [] },
       aiVisibility: { score: 80, label: "AI", summary: "OK", checks: [] },
     },
     quickWins: [{
@@ -52,7 +52,7 @@ function createAnalysis(overrides: Partial<AnalysisResult> = {}): AnalysisResult
     premiumInsightsPreview: [],
     revenueBlockers: [],
     measures: [{
-      title: "Hero und CTA schaerfen",
+      title: "Hero und CTA schärfen",
       description: "Hero und CTA klarer formulieren.",
       effort: "niedrig",
       impact: "hoch",
@@ -74,7 +74,7 @@ function createAnalysis(overrides: Partial<AnalysisResult> = {}): AnalysisResult
 }
 
 describe("buildPremiumReport", () => {
-  it("erstellt Premium-Inhalte fuer bezahlte Reports", () => {
+  it("erstellt Premium-Inhalte für bezahlte Reports", () => {
     const report = buildPremiumReport({
       analysis: createAnalysis(),
       paymentStatus: "paid",
@@ -146,7 +146,7 @@ describe("buildPremiumReport", () => {
     const report = buildPremiumReport({
       analysis: createAnalysis({
         quickWins: [{
-          title: "CTA im Hero schaerfen",
+          title: "CTA im Hero schärfen",
           text: "CTA verbessern",
           description: "CTA verbessern",
           impact: "high",
@@ -155,7 +155,7 @@ describe("buildPremiumReport", () => {
           weight: 1,
         }],
         measures: [{
-          title: "CTA im Hero schaerfen",
+          title: "CTA im Hero schärfen",
           description: "CTA klarer formulieren.",
           effort: "niedrig",
           impact: "hoch",
@@ -177,7 +177,7 @@ describe("buildPremiumReport", () => {
     expect(text).toContain("schärfen");
     expect(text).toContain("Button");
     expect(text).toContain("Visuelle Führung");
-    expect(text).not.toMatch(/\b(?:schaerfen|Fuehrung|naechste|naechsten|fuer)\b/);
+    expect(text).not.toMatch(/\b(?:schärfen|Führung|nächste|nächsten|für)\b/);
     expect(text).not.toContain("Above the fold");
   });
 });

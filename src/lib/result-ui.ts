@@ -109,7 +109,7 @@ export function getRecommendationLabel(recommendation: Recommendation) {
   }
 
   if (recommendation.impact === "high" && recommendation.effort !== "low") {
-    return "Groesster Impact";
+    return "Größter Impact";
   }
 
   return "Langfristige Optimierung";
@@ -133,11 +133,11 @@ export function getAnalysisSummary(result: AnalysisResult) {
 
   if (overallScore >= 80) {
     sentences.push(
-      "Deine Startseite zeigt bereits eine starke Gesamtbasis und wirkt in mehreren Bereichen ueberzeugend.",
+      "Deine Startseite zeigt bereits eine starke Gesamtbasis und wirkt in mehreren Bereichen überzeugend.",
     );
   } else if (overallScore >= 60) {
     sentences.push(
-      "Deine Startseite hat eine solide Basis, aber es gibt noch einige klare Hebel fuer mehr Wirkung.",
+      "Deine Startseite hat eine solide Basis, aber es gibt noch einige klare Hebel für mehr Wirkung.",
     );
   } else {
     sentences.push(
@@ -153,7 +153,7 @@ export function getAnalysisSummary(result: AnalysisResult) {
 
   if (seoScore >= 80) {
     sentences.push(
-      "Die Seite ist fuer Auffindbarkeit bereits gut vorbereitet und gibt Besuchern eine solide Orientierung.",
+      "Die Seite ist für Auffindbarkeit bereits gut vorbereitet und gibt Besuchern eine solide Orientierung.",
     );
   } else if (seoScore < 60) {
     sentences.push(
@@ -169,13 +169,13 @@ export function getAnalysisSummary(result: AnalysisResult) {
 
   if (conversionScore < 60) {
     sentences.push(
-      "Auch beim Weg zur Anfrage oder zum Kauf gibt es Reibung, etwa beim naechsten Schritt, Nutzenargumenten oder Vertrauensbelegen.",
+      "Auch beim Weg zur Anfrage oder zum Kauf gibt es Reibung, etwa beim nächsten Schritt, Nutzenargumenten oder Vertrauensbelegen.",
     );
   }
 
   if (uxScore < 60) {
     sentences.push(
-      "Die Nutzerfuehrung wirkt noch nicht durchgaengig klar und koennte Inhalte besser ordnen.",
+      "Die Nutzerführung wirkt noch nicht durchgaengig klar und könnte Inhalte besser ordnen.",
     );
   }
 
@@ -305,7 +305,7 @@ function pickBoxForFinding(
   const prefersHero = /cta|call to action|hero|starten|bestellen|kaufen|anfragen/.test(text);
   const prefersButtons = /button|cta|call to action|starten|bestellen|kaufen|anfragen/.test(text);
   const prefersForms = /formular|form|kontakt|anfrage/.test(text);
-  const prefersHeadings = /h1|h2|heading|ueberschrift|struktur|title|meta|canonical|open graph|og:/.test(
+  const prefersHeadings = /h1|h2|heading|überschrift|struktur|title|meta|canonical|open graph|og:/.test(
     text,
   );
   const prefersImages = /bild|bilder|image|alt/.test(text);

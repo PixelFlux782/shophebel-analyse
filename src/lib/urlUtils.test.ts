@@ -15,7 +15,7 @@ describe("assertPublicHttpUrl", () => {
     lookupMock.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
   });
 
-  it("erlaubt oeffentliche HTTP- und HTTPS-URLs", async () => {
+  it("erlaubt öffentliche HTTP- und HTTPS-URLs", async () => {
     await expect(assertPublicHttpUrl("example.com")).resolves.toMatchObject({
       protocol: "https:",
       hostname: "example.com",

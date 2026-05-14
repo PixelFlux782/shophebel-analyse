@@ -10,24 +10,24 @@ function createReport(): PremiumReport {
     isPaid: true,
     premiumSummary: {
       headline: "Premium Conversion- und Trust-Audit",
-      mainReason: "Der wahrscheinlich groesste Bremsfaktor ist: CTA unklar.",
-      firstFocus: "Starte mit dem naechsten Schritt.",
-      businessRelevance: "Mehr Klarheit fuer bestehende Besucher.",
-      fastestWin: "Hero CTA schaerfen",
+      mainReason: "Der wahrscheinlich größte Bremsfaktor ist: CTA unklar.",
+      firstFocus: "Starte mit dem nächsten Schritt.",
+      businessRelevance: "Mehr Klarheit für bestehende Besucher.",
+      fastestWin: "Hero CTA schärfen",
     },
     topRevenueBlockers: [
       {
         title: "CTA nicht sichtbar genug",
         category: "Conversion",
         severity: "kritisch",
-        whyItMatters: "Besucher erkennen den naechsten Schritt nicht.",
-        likelyBusinessImpact: "Mehr Abbrueche im oberen Seitenbereich.",
-        recommendedFix: "Primaeren CTA oberhalb der Falz schaerfen.",
+        whyItMatters: "Besucher erkennen den nächsten Schritt nicht.",
+        likelyBusinessImpact: "Mehr Abbrüche im oberen Seitenbereich.",
+        recommendedFix: "Primären CTA oberhalb der Falz schärfen.",
         effort: "niedrig",
         priority: 1,
       },
     ],
-    priorityRoadmap: ["Primaeren CTA oberhalb der Falz schaerfen."],
+    priorityRoadmap: ["Primären CTA oberhalb der Falz schärfen."],
     quickImplementationPlan: [
       {
         days: "Tag 1-2",
@@ -38,7 +38,7 @@ function createReport(): PremiumReport {
     visualAuditNotes: [
       {
         area: "Above the fold",
-        note: "Nutzenversprechen und CTA pruefen.",
+        note: "Nutzenversprechen und CTA prüfen.",
       },
     ],
     conversionHypothesis: "Wenn der CTA klarer wird, steigen Anfragen.",
@@ -70,6 +70,6 @@ describe("PremiumReportSection", () => {
     expect(markup).not.toContain("Visual Audit Notes");
     expect(markup).not.toContain("Above the fold");
     expect(markup).not.toContain("CTA");
-    expect(markup).not.toContain("Massnahmen");
+    expect(markup).not.toContain("Maßnahmen");
   });
 });

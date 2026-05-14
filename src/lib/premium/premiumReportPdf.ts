@@ -516,7 +516,7 @@ async function renderPremiumReportPdfWithFooterStats({
     writeCard(doc, {
       title: "Kein 7-Tage-Plan gespeichert",
       tone: "slate",
-      body: ["Der Report enthaelt aktuell keinen separaten Umsetzungsplan."],
+      body: ["Der Report enthält aktuell keinen separaten Umsetzungsplan."],
     });
   }
 

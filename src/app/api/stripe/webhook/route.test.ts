@@ -63,7 +63,7 @@ describe("POST /api/stripe/webhook", () => {
     vi.restoreAllMocks();
   });
 
-  it("aktualisiert analysis_results bei gueltigem checkout.session.completed Event", async () => {
+  it("aktualisiert analysis_results bei gültigem checkout.session.completed Event", async () => {
     constructEventMock.mockReturnValue(createCheckoutCompletedEvent({
       analysisId: "analysis-123",
       productType: "premium_report",
@@ -105,7 +105,7 @@ describe("POST /api/stripe/webhook", () => {
     expect(payload.paid_at).toBeTruthy();
   });
 
-  it("lehnt ungueltige Signaturen ab", async () => {
+  it("lehnt ungültige Signaturen ab", async () => {
     constructEventMock.mockImplementation(() => {
       throw new Error("No signatures found matching the expected signature.");
     });

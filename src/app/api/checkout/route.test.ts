@@ -37,7 +37,7 @@ describe("POST /api/checkout", () => {
     vi.restoreAllMocks();
   });
 
-  it("gibt in Production ohne Stripe-Konfiguration einen Fehler zurueck", async () => {
+  it("gibt in Production ohne Stripe-Konfiguration einen Fehler zurück", async () => {
     vi.stubEnv("NODE_ENV", "production");
 
     const { POST } = await import("@/app/api/checkout/route");
@@ -65,7 +65,7 @@ describe("POST /api/checkout", () => {
     expect(createMockSession).not.toHaveBeenCalled();
   });
 
-  it("gibt bei fehlender analysisId einen 400-Fehler zurueck", async () => {
+  it("gibt bei fehlender analysisId einen 400-Fehler zurück", async () => {
     const { POST } = await import("@/app/api/checkout/route");
 
     const response = await POST(createRequest({}));
@@ -107,7 +107,7 @@ describe("POST /api/checkout", () => {
     expect(payload.url).toBe("https://checkout.stripe.com/pay/test-session");
   });
 
-  it("gibt einen 500-Fehler zurueck, wenn Stripe keine URL liefert", async () => {
+  it("gibt einen 500-Fehler zurück, wenn Stripe keine URL liefert", async () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
     process.env.STRIPE_PRICE_ID = "price_123";
     createMockSession.mockResolvedValue({

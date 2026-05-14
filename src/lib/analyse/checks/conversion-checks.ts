@@ -134,7 +134,7 @@ export function runConversionChecks(html: string, context?: CheckContext): Check
       category: "conversion",
       status: "success",
       title: "Preis- oder Angebotsbezug vorhanden",
-      description: "Die Seite enthaelt Hinweise auf Preise, Angebote oder kostenlose Leistungen.",
+      description: "Die Seite enthält Hinweise auf Preise, Angebote oder kostenlose Leistungen.",
       priority: "low",
     });
   } else {
@@ -153,7 +153,7 @@ export function runConversionChecks(html: string, context?: CheckContext): Check
       category: "conversion",
       status: "success",
       title: "Formularsignale erkannt",
-      description: "Die Seite enthaelt sichtbare Formularfelder, die auf Interaktion oder Lead-Erfassung hindeuten.",
+      description: "Die Seite enthält sichtbare Formularfelder, die auf Interaktion oder Lead-Erfassung hindeuten.",
       priority: "low",
     });
   }

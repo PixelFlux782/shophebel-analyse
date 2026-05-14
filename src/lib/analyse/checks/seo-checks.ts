@@ -32,9 +32,9 @@ export function runSeoChecks(html: string): CheckResult {
     pushFinding(findings, {
       category: "seo",
       status: "error",
-      title: "Deine Seite hat keinen klaren Namen fuer Suchergebnisse",
+      title: "Deine Seite hat keinen klaren Namen für Suchergebnisse",
       description:
-        "Google, KI-Systeme und Besucher sehen keinen eindeutigen Seitennamen. Dadurch bleibt unklar, wofuer die Seite steht.",
+        "Google, KI-Systeme und Besucher sehen keinen eindeutigen Seitennamen. Dadurch bleibt unklar, wofür die Seite steht.",
       priority: "high",
     });
   } else if (title.length < 20 || title.length > 65) {
@@ -43,7 +43,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "warning",
       title: "Der Seitenname wirkt in Suchergebnissen nicht ideal",
-      description: `Der Seitenname hat ${title.length} Zeichen. Er sollte kurz genug fuer Suchergebnisse sein und trotzdem Angebot und Nutzen klar machen.`,
+      description: `Der Seitenname hat ${title.length} Zeichen. Er sollte kurz genug für Suchergebnisse sein und trotzdem Angebot und Nutzen klar machen.`,
       priority: "medium",
     });
   } else {
@@ -51,7 +51,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Der Seitenname ist klar genug",
-      description: "Der Seitenname ist vorhanden und wirkt fuer Suchergebnisse gut nutzbar.",
+      description: "Der Seitenname ist vorhanden und wirkt für Suchergebnisse gut nutzbar.",
       priority: "low",
     });
   }
@@ -80,7 +80,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Die Kurzbeschreibung ist gut vorbereitet",
-      description: "Die Seite hat eine klare Kurzbeschreibung fuer Suchergebnisse und KI-Systeme.",
+      description: "Die Seite hat eine klare Kurzbeschreibung für Suchergebnisse und KI-Systeme.",
       priority: "low",
     });
   }
@@ -90,7 +90,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Die Hauptbotschaft ist klar gesetzt",
-      description: "Die Startseite hat eine eindeutige Hauptueberschrift.",
+      description: "Die Startseite hat eine eindeutige Hauptüberschrift.",
       priority: "low",
     });
   } else if (h1Count === 0) {
@@ -108,7 +108,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "warning",
       title: "Die Seite sendet mehrere Hauptbotschaften",
-      description: `Es wurden ${h1Count} Hauptueberschriften gefunden. Das kann Angebot und Prioritaet unklar wirken lassen.`,
+      description: `Es wurden ${h1Count} Hauptüberschriften gefunden. Das kann Angebot und Priorität unklar wirken lassen.`,
       priority: "medium",
     });
   }
@@ -118,7 +118,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Die Inhalte sind in Abschnitte gegliedert",
-      description: `Die Seite nutzt ${h2Count} erkennbare Abschnittsueberschriften.`,
+      description: `Die Seite nutzt ${h2Count} erkennbare Abschnittsüberschriften.`,
       priority: "low",
     });
   } else {
@@ -137,7 +137,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Die Seitensprache ist klar markiert",
-      description: `Die Sprache der Seite ist fuer Browser und Systeme markiert (${lang}).`,
+      description: `Die Sprache der Seite ist für Browser und Systeme markiert (${lang}).`,
       priority: "low",
     });
   } else {
@@ -214,7 +214,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "warning",
       title: "Keine Bilder gefunden",
-      description: "Die Startseite enthaelt keine Bilder und verschenkt visuelle Signale.",
+      description: "Die Startseite enthält keine Bilder und verschenkt visuelle Signale.",
       priority: "medium",
     });
   } else {
@@ -232,8 +232,8 @@ export function runSeoChecks(html: string): CheckResult {
     pushFinding(findings, {
       category: "seo",
       status: imagesWithoutAlt >= 3 ? "error" : "warning",
-      title: "Bilder erklaeren sich nicht gut genug",
-      description: `${imagesWithoutAlt} Bild${imagesWithoutAlt === 1 ? "" : "er"} werden fuer Google, KI und Screenreader nicht ausreichend beschrieben.`,
+      title: "Bilder erklären sich nicht gut genug",
+      description: `${imagesWithoutAlt} Bild${imagesWithoutAlt === 1 ? "" : "er"} werden für Google, KI und Screenreader nicht ausreichend beschrieben.`,
       priority: imagesWithoutAlt >= 3 ? "high" : "medium",
     });
   } else if (images.length > 0) {
@@ -241,7 +241,7 @@ export function runSeoChecks(html: string): CheckResult {
       category: "seo",
       status: "success",
       title: "Bilder sind ausreichend beschrieben",
-      description: "Die erkannten Bilder liefern beschreibende Hinweise fuer Google, KI und Screenreader.",
+      description: "Die erkannten Bilder liefern beschreibende Hinweise für Google, KI und Screenreader.",
       priority: "low",
     });
   }

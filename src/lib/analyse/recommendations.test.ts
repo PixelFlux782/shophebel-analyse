@@ -18,7 +18,7 @@ function createFinding(
 }
 
 describe("buildRecommendations", () => {
-  it("erzeugt gewichtete Empfehlungen fuer bekannte Findings", () => {
+  it("erzeugt gewichtete Empfehlungen für bekannte Findings", () => {
     const recommendations = buildRecommendations([
       createFinding("Google und KI bekommen keine klare Kurzbeschreibung", "seo", "high"),
       createFinding("Impressum fehlt", "trust", "high"),
@@ -37,7 +37,7 @@ describe("buildRecommendations", () => {
       });
   });
 
-  it("verwendet fuer unbekannte Findings eine sinnvolle Fallback-Empfehlung", () => {
+  it("verwendet für unbekannte Findings eine sinnvolle Fallback-Empfehlung", () => {
     const recommendations = buildRecommendations([
       createFinding("Unbekanntes Problem", "ux", "medium"),
     ]);

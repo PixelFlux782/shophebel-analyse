@@ -53,7 +53,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "error",
       title: "Die Seite wird nicht sicher geladen",
-      description: "Die Verbindung wirkt fuer Besucher weniger vertrauenswuerdig und kann vor Anfragen oder Kaeufen verunsichern.",
+      description: "Die Verbindung wirkt für Besucher weniger vertrauenswürdig und kann vor Anfragen oder Käufen verunsichern.",
       priority: "high",
     });
   }
@@ -101,7 +101,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "success",
       title: "Kontakt ist erkennbar",
-      description: "Besucher finden einen Weg, Rueckfragen zu stellen oder Kontakt aufzunehmen.",
+      description: "Besucher finden einen Weg, Rückfragen zu stellen oder Kontakt aufzunehmen.",
       priority: "low",
     });
   } else {
@@ -110,7 +110,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "warning",
       title: "Kontakt ist nicht schnell genug sichtbar",
-      description: "Interessierte Besucher finden nicht sofort, wie sie dich erreichen koennen.",
+      description: "Interessierte Besucher finden nicht sofort, wie sie dich erreichen können.",
       priority: "high",
     });
   }
@@ -120,7 +120,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "success",
       title: "Direkte Kontaktangabe vorhanden",
-      description: "E-Mail oder Telefon sind direkt erkennbar. Das senkt die Hemmschwelle fuer Rueckfragen.",
+      description: "E-Mail oder Telefon sind direkt erkennbar. Das senkt die Hemmschwelle für Rückfragen.",
       priority: "low",
     });
   } else {
@@ -129,7 +129,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "warning",
       title: "Direkte Kontaktangaben fehlen",
-      description: "Besucher sehen keine E-Mail-Adresse oder Telefonnummer. Das kann bei Rueckfragen bremsen.",
+      description: "Besucher sehen keine E-Mail-Adresse oder Telefonnummer. Das kann bei Rückfragen bremsen.",
       priority: "medium",
     });
   }

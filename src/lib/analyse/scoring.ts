@@ -10,12 +10,12 @@ import { FREE_VISIBLE_FINDINGS_LIMIT } from "@/lib/result-ui";
 
 const CATEGORY_LABELS: Record<AnalysisCategory, string> = {
   seo: "Auffindbarkeit",
-  performance: "Ladegefuehl",
+  performance: "Ladegefühl",
   trust: "Vertrauen",
   conversion: "Anfragen",
   design: "Design",
   aiVisibility: "KI-Sichtbarkeit",
-  ux: "Nutzerfuehrung",
+  ux: "Nutzerführung",
 };
 
 export function clampScore(score: number) {
@@ -79,7 +79,7 @@ export function buildAnalysisResult(input: BuildAnalysisResultInput): AnalysisRe
       },
       performance: {
         score: input.categoryScores.performance?.score ?? 0,
-        label: "Ladegefuehl",
+        label: "Ladegefühl",
         summary: "Performance wurde in diesem Legacy-Aufruf nicht geprüft.",
         checks: [],
       },

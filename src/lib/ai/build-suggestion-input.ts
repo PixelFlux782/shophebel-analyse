@@ -30,7 +30,7 @@ function buildVisualHint(result: AnalysisResult, finding: Finding) {
   }
 
   if (finding.category === "trust") {
-    return `${visualMap.links.length} sichtbare Links und ${visualMap.forms.length} Formbereiche liefern Ansatzpunkte fuer Vertrauenssignale.`;
+    return `${visualMap.links.length} sichtbare Links und ${visualMap.forms.length} Formbereiche liefern Ansatzpunkte für Vertrauenssignale.`;
   }
 
   if (finding.category === "seo" || finding.category === "ux") {

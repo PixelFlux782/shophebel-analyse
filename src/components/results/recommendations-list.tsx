@@ -28,7 +28,7 @@ export function RecommendationsList({
       </h2>
       {!isPremium && hiddenRecommendationCount > 0 ? (
         <p className="mt-3 text-sm leading-7 text-slate-600">
-          In der kostenlosen Analyse zeigen wir dir die wichtigsten ersten Schritte. Die Vollanalyse oeffnet alle Empfehlungen inklusive genauer Priorisierung.
+          In der kostenlosen Analyse zeigen wir dir die wichtigsten ersten Schritte. Die Vollanalyse öffnet alle Empfehlungen inklusive genauer Priorisierung.
         </p>
       ) : null}
 

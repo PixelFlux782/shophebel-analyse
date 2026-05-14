@@ -25,10 +25,10 @@ function createPremiumReport(overrides: Partial<PremiumReport> = {}): PremiumRep
       mainReason: "Der CTA ist unklar.",
       firstFocus: "CTA und Trust zuerst.",
       businessRelevance: "Mehr Klarheit kann mehr Anfragen bringen.",
-      fastestWin: "Hero CTA schaerfen",
+      fastestWin: "Hero CTA schärfen",
     },
     topRevenueBlockers: [],
-    priorityRoadmap: ["1. Hero CTA schaerfen"],
+    priorityRoadmap: ["1. Hero CTA schärfen"],
     quickImplementationPlan: [],
     visualAuditNotes: [],
     conversionHypothesis: "Wenn der CTA klarer wird, steigen Anfragen.",
@@ -95,7 +95,7 @@ describe("premiumReportStore", () => {
     vi.restoreAllMocks();
   });
 
-  it("gibt einen vorhandenen Premium-Report zurueck", async () => {
+  it("gibt einen vorhandenen Premium-Report zurück", async () => {
     const report = createPremiumReport();
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
       new Response(JSON.stringify([{ report }]), { status: 200 }),
@@ -115,9 +115,9 @@ describe("premiumReportStore", () => {
         analysis_id: "analysis-123",
         report,
         consultant_notes: {
-          executiveComment: "Manuell geprueft.",
+          executiveComment: "Manuell geprüft.",
           customActionItems: ["CTA testen"],
-          internalNotes: "Nicht fuer Kunden",
+          internalNotes: "Nicht für Kunden",
         },
         status: "refined",
       }]), { status: 200 }),
@@ -126,7 +126,7 @@ describe("premiumReportStore", () => {
     const loaded = await getPremiumReportRecordByAnalysisId("analysis-123");
 
     expect(loaded?.report).toEqual(report);
-    expect(loaded?.consultantNotes.executiveComment).toBe("Manuell geprueft.");
+    expect(loaded?.consultantNotes.executiveComment).toBe("Manuell geprüft.");
     expect(loaded?.consultantNotes.customActionItems).toEqual(["CTA testen"]);
     expect(loaded?.status).toBe("refined");
   });
@@ -139,8 +139,8 @@ describe("premiumReportStore", () => {
         analysis_id: "analysis-123",
         report,
         consultant_notes: {
-          executiveComment: "Manuell geprueft.",
-          customActionItems: ["CTA testen", "Trust ergaenzen"],
+          executiveComment: "Manuell geprüft.",
+          customActionItems: ["CTA testen", "Trust ergänzen"],
         },
         status: "refined",
       }]), { status: 200 }),
@@ -150,8 +150,8 @@ describe("premiumReportStore", () => {
     const saved = await saveConsultantNotesForAnalysis({
       analysisId: "analysis-123",
       consultantNotes: {
-        executiveComment: "Manuell geprueft.",
-        customActionItems: ["CTA testen", "Trust ergaenzen"],
+        executiveComment: "Manuell geprüft.",
+        customActionItems: ["CTA testen", "Trust ergänzen"],
         internalNotes: "Nur intern",
       },
     });
@@ -183,7 +183,7 @@ describe("premiumReportStore", () => {
     expect(fetchMock.mock.calls[1]?.[0]).toBe("https://example.supabase.co/rest/v1/premium_reports");
   });
 
-  it("erzeugt fuer unbezahlte Analysen keinen Report", async () => {
+  it("erzeugt für unbezahlte Analysen keinen Report", async () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 

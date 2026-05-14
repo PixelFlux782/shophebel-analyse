@@ -6,11 +6,11 @@ const strongSeoHtml = `
 <!doctype html>
 <html lang="de">
   <head>
-    <title>Shophebel Testshop fuer starke SEO Signale</title>
-    <meta name="description" content="Diese Startseite bietet eine starke SEO-Basis mit sauberer Struktur, guter Description und klaren Open-Graph-Signalen fuer bessere Sichtbarkeit." />
+    <title>Shophebel Testshop für starke SEO Signale</title>
+    <meta name="description" content="Diese Startseite bietet eine starke SEO-Basis mit sauberer Struktur, guter Description und klaren Open-Graph-Signalen für bessere Sichtbarkeit." />
     <link rel="canonical" href="https://shop.test/" />
     <meta property="og:title" content="Shophebel Testshop" />
-    <meta property="og:description" content="Mehr Sichtbarkeit fuer deinen Shop." />
+    <meta property="og:description" content="Mehr Sichtbarkeit für deinen Shop." />
   </head>
   <body>
     <h1>Shophebel Testshop</h1>
@@ -51,14 +51,14 @@ describe("runSeoChecks", () => {
     const result = runSeoChecks(weakSeoHtml);
 
     expect(result.score).toBeLessThan(60);
-    expect(result.findings.some((finding) => finding.title === "Deine Seite hat keinen klaren Namen fuer Suchergebnisse")).toBe(true);
+    expect(result.findings.some((finding) => finding.title === "Deine Seite hat keinen klaren Namen für Suchergebnisse")).toBe(true);
     expect(result.findings.some((finding) => finding.title === "Google und KI bekommen keine klare Kurzbeschreibung")).toBe(
       true,
     );
     expect(result.findings.some((finding) => finding.title === "Die Seite sendet mehrere Hauptbotschaften")).toBe(
       true,
     );
-    expect(result.findings.some((finding) => finding.title === "Bilder erklaeren sich nicht gut genug")).toBe(
+    expect(result.findings.some((finding) => finding.title === "Bilder erklären sich nicht gut genug")).toBe(
       true,
     );
   });

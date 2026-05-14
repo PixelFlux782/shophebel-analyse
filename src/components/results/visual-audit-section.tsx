@@ -45,8 +45,8 @@ const friendlyTitleMap: Record<string, string> = {
   "Mobile Darstellung": "Mobile Darstellung",
   HTTPS: "Sicheres Laden",
   "Sicheres Laden": "Sicheres Laden",
-  Ladezeit: "Ladegefuehl",
-  Ladegefuehl: "Ladegefuehl",
+  Ladezeit: "Ladegefühl",
+  Ladegefühl: "Ladegefühl",
   "Core Web Vitals": "Gefühlte Performance",
   "Stabilitaet beim Laden": "Stabilitaet beim Laden",
   Impressum: "Rechtliches Vertrauen",
@@ -55,28 +55,28 @@ const friendlyTitleMap: Record<string, string> = {
   "Bewertungen/Siegel/Zahlungsarten": "Kaufvertrauen",
   Vertrauensbelege: "Kaufvertrauen",
   "CTA-Erkennung": "Nächster Schritt",
-  "Naechster Schritt": "Nächster Schritt",
+  "Nächster Schritt": "Nächster Schritt",
   "Formular/Lead-Erfassung": "Anfrageweg",
   "Einfacher Anfrageweg": "Anfrageweg",
   Angebotsklarheit: "Angebot sofort verstehen",
   "Screenshot/Visual-Check": "Visuelle Prüfung",
-  "Visuelle Seitenpruefung": "Visuelle Prüfung",
+  "Visuelle Seitenprüfung": "Visuelle Prüfung",
   "Layout-Signale": "Layout-Führung",
-  Blickfuehrung: "Blickfuehrung",
+  Blickführung: "Blickführung",
   "Lesbarkeit/Content-Dichte": "Lesbarkeit und Dichte",
   "Lesbarkeit und Inhaltstiefe": "Lesbarkeit und Inhaltstiefe",
   "Strukturierte Daten": "AI-Verständlichkeit",
-  "Verstaendliche Daten fuer Google und KI": "AI-Verständlichkeit",
+  "Verständliche Daten für Google und KI": "AI-Verständlichkeit",
   "Klare Unternehmensbeschreibung": "Marke klar erkennbar",
-  "Produkt-/Serviceverstaendlichkeit": "Angebot für KI-Systeme",
+  "Produkt-/Serviceverständlichkeit": "Angebot für KI-Systeme",
   "FAQ-Bereiche": "Antwort-Potenzial",
   "Kundenfragen als Antworten": "Antwort-Potenzial",
   "About-Seite": "Unternehmenssignale",
   "Lokale Signale": "Lokale Einordnung",
   "robots.txt / AI-Crawler-Hinweise": "AI-Crawler-Hinweise",
-  "Regeln fuer KI-Systeme": "Regeln für KI-Systeme",
+  "Regeln für KI-Systeme": "Regeln für KI-Systeme",
   "Kontakt-/Standortdaten": "Kontakt und Standort",
-  "Semantische Ueberschriftenstruktur": "Inhalte für KI-Systeme",
+  "Semantische Überschriftenstruktur": "Inhalte für KI-Systeme",
   "Klare Themenstruktur": "Inhalte für KI-Systeme",
 };
 
@@ -132,7 +132,7 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     ["Mobile UX", result.categories.performance],
     ["CTA", result.categories.conversion],
     ["Design", result.categories.design],
-    ["Ladegefuehl", result.categories.performance],
+    ["Ladegefühl", result.categories.performance],
     ["AI-Sichtbarkeit", result.categories.aiVisibility],
   ];
 
@@ -157,9 +157,9 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
 function noteCategory(category: string, title: string) {
   const text = `${category} ${title}`.toLowerCase();
   if (text.includes("mobile")) return "Mobile UX";
-  if (text.includes("lade")) return "Ladegefuehl";
+  if (text.includes("lade")) return "Ladegefühl";
   if (text.includes("vertrauen")) return "Vertrauen";
-  if (text.includes("cta") || text.includes("naechster")) return "CTA Klarheit";
+  if (text.includes("cta") || text.includes("nächster")) return "CTA Klarheit";
   if (text.includes("design") || text.includes("blick") || text.includes("layout")) return "Visuelle Hierarchie";
   if (text.includes("klarheit")) return "Above the Fold";
   return category;
@@ -176,10 +176,10 @@ function noteText(problem: VisualProblem) {
 function notesFromProblems(problems: VisualProblem[], scope: "desktop" | "mobile" | "fullPage") {
   const filteredProblems =
     scope === "mobile"
-      ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefuehl")
+      ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefühl")
       : scope === "fullPage"
         ? problems.filter((problem) => problem.category !== "Mobile UX")
-        : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefuehl");
+        : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefühl");
 
   return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, 5).map((problem) => ({
     title: problem.title,
@@ -215,7 +215,7 @@ function MobileScreenshotCard({
             Mobile
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            Kleine Ansicht, grosse Reibung.
+            Kleine Ansicht, große Reibung.
           </p>
         </div>
         <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-bold text-white">
