@@ -34,6 +34,7 @@ export function ScreenshotLightbox({
   const currentImage = images[currentIndex];
   const hasNavigation = images.length > 1;
   const notes = currentImage?.notes ?? [];
+  const hasNotes = notes.length > 0;
   const [showNotes, setShowNotes] = useState(true);
 
   useEffect(() => {
@@ -100,9 +101,10 @@ export function ScreenshotLightbox({
             <button
               type="button"
               onClick={() => setShowNotes((current) => !current)}
-              className="rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+              disabled={!hasNotes}
+              className="rounded-full border border-white/15 bg-white/8 px-4 py-2 text-xs font-bold text-white shadow-lg transition hover:border-cyan-300/50 hover:bg-white/14 focus:outline-none focus:ring-2 focus:ring-cyan-300/70 disabled:cursor-not-allowed disabled:opacity-55"
             >
-              {showNotes ? "Hinweise ausblenden" : "Hinweise anzeigen"}
+              {hasNotes ? (showNotes ? "Hinweise ausblenden" : "Hinweise anzeigen") : "Keine Hinweise verfuegbar"}
             </button>
             <button
               type="button"
@@ -117,7 +119,7 @@ export function ScreenshotLightbox({
 
         <div
           className={`grid min-h-0 flex-1 gap-0 bg-slate-950/65 transition-[grid-template-columns] duration-300 ease-out ${
-            showNotes ? "lg:grid-cols-[minmax(0,1fr)_23rem]" : "lg:grid-cols-[minmax(0,1fr)_0rem]"
+            showNotes || !hasNotes ? "lg:grid-cols-[minmax(0,1fr)_23rem]" : "lg:grid-cols-[minmax(0,1fr)_0rem]"
           }`}
         >
           <div className="relative flex min-h-0 items-center justify-center p-3 sm:p-5">
@@ -152,7 +154,7 @@ export function ScreenshotLightbox({
           <aside
             aria-hidden={!showNotes}
             className={`min-h-0 overflow-hidden border-t border-white/10 bg-white/6 backdrop-blur-xl transition-all duration-300 ease-out lg:border-l lg:border-t-0 ${
-              showNotes
+              showNotes || !hasNotes
                 ? "max-h-[38vh] opacity-100 lg:max-h-none"
                 : "max-h-0 border-t-0 opacity-0 lg:border-l-0"
             }`}

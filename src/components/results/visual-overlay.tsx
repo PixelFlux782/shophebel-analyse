@@ -92,6 +92,7 @@ export function VisualOverlay({
   notes,
 }: VisualOverlayProps) {
   const [showHotspots, setShowHotspots] = useState(true);
+  const [showHintCards, setShowHintCards] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -107,6 +108,7 @@ export function VisualOverlay({
     setImageLoaded(false);
     setImageFailed(false);
     setNaturalSize(null);
+    setShowHintCards(true);
   }, [imageSrc]);
 
   return (
@@ -132,6 +134,15 @@ export function VisualOverlay({
               {showHotspots ? "Markierungen ausblenden" : "Markierungen anzeigen"}
             </button>
           ) : null}
+          {lightboxNotes.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => setShowHintCards((current) => !current)}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
+            >
+              {showHintCards ? "Hinweise ausblenden" : "Hinweise anzeigen"}
+            </button>
+          ) : null}
           {!imageFailed ? (
             <button
               type="button"
@@ -144,87 +155,117 @@ export function VisualOverlay({
         </div>
       </div>
 
-      <div className="relative mt-4 overflow-x-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-        <div
-          className="relative min-w-[42rem] overflow-hidden bg-slate-100"
-          style={{ aspectRatio }}
-        >
-          {!imageFailed ? (
-            <img
-              src={imageSrc}
-              alt={imageAlt}
-              loading="lazy"
-              onLoad={(event) => {
-                const image = event.currentTarget;
-                setNaturalSize({
-                  width: image.naturalWidth,
-                  height: image.naturalHeight,
-                });
-                setImageLoaded(true);
-              }}
-              onError={() => {
-                setImageFailed(true);
-                setImageLoaded(false);
-              }}
-              className="absolute inset-0 h-full w-full object-fill object-top"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
-              <div className="w-2/3 max-w-lg rounded-2xl border border-slate-200 bg-white/80 p-6 text-center">
-                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                  Screenshot nicht geladen
-                </p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Die Analyse ist vorhanden, aber die visuelle Vorschau konnte nicht angezeigt werden.
-                </p>
+      <div className={`mt-4 grid gap-4 ${showHintCards && lightboxNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_22rem]" : ""}`}>
+        <div className="relative overflow-x-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
+          <div
+            className="relative min-w-[42rem] overflow-hidden bg-slate-100"
+            style={{ aspectRatio }}
+          >
+            {!imageFailed ? (
+              <img
+                src={imageSrc}
+                alt={imageAlt}
+                loading="lazy"
+                onLoad={(event) => {
+                  const image = event.currentTarget;
+                  setNaturalSize({
+                    width: image.naturalWidth,
+                    height: image.naturalHeight,
+                  });
+                  setImageLoaded(true);
+                }}
+                onError={() => {
+                  setImageFailed(true);
+                  setImageLoaded(false);
+                }}
+                className="absolute inset-0 h-full w-full object-fill object-top"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+                <div className="w-2/3 max-w-lg rounded-2xl border border-slate-200 bg-white/80 p-6 text-center">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Screenshot nicht geladen
+                  </p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Die Analyse ist vorhanden, aber die visuelle Vorschau konnte nicht angezeigt werden.
+                  </p>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
-            <div className="pointer-events-none absolute inset-0">
-              {hotspots.map((hotspot) => {
-                const tone = getHotspotToneClasses(hotspot.tone);
-                const suggestion = getSuggestionForHotspot(suggestions, hotspot);
+            {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
+              <div className="pointer-events-none absolute inset-0">
+                {hotspots.map((hotspot) => {
+                  const tone = getHotspotToneClasses(hotspot.tone);
+                  const suggestion = getSuggestionForHotspot(suggestions, hotspot);
 
-                return (
-                  <div
-                    key={hotspot.id}
-                    className="group pointer-events-auto absolute"
-                    style={{
-                      left: `${(hotspot.x / baseWidth) * 100}%`,
-                      top: `${(hotspot.y / baseHeight) * 100}%`,
-                      width: `${(hotspot.width / baseWidth) * 100}%`,
-                      height: `${(hotspot.height / baseHeight) * 100}%`,
-                    }}
-                  >
+                  return (
                     <div
-                      className={`relative h-full w-full rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}
+                      key={hotspot.id}
+                      className="group pointer-events-auto absolute"
+                      style={{
+                        left: `${(hotspot.x / baseWidth) * 100}%`,
+                        top: `${(hotspot.y / baseHeight) * 100}%`,
+                        width: `${(hotspot.width / baseWidth) * 100}%`,
+                        height: `${(hotspot.height / baseHeight) * 100}%`,
+                      }}
                     >
-                      <div className="absolute left-2 top-2 flex items-center gap-2">
-                        <span className={`h-3 w-3 rounded-full ${tone.dot}`} />
-                        <span
-                          className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${tone.badge}`}
-                        >
-                          {hotspot.tone === "problem"
-                            ? "Problem"
-                            : hotspot.tone === "good"
-                              ? "Staerke"
-                              : "Hebel"}
-                        </span>
+                      <div
+                        className={`relative h-full w-full rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}
+                      >
+                        <div className="absolute left-2 top-2 flex items-center gap-2">
+                          <span className={`h-3 w-3 rounded-full ${tone.dot}`} />
+                          <span
+                            className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${tone.badge}`}
+                          >
+                            {hotspot.tone === "problem"
+                              ? "Problem"
+                              : hotspot.tone === "good"
+                                ? "Staerke"
+                                : "Hebel"}
+                          </span>
+                        </div>
+                        <HotspotSuggestionPopover
+                          hotspot={hotspot}
+                          suggestion={suggestion}
+                          toneClasses={{ dot: tone.dot, badge: tone.badge }}
+                        />
                       </div>
-                      <HotspotSuggestionPopover
-                        hotspot={hotspot}
-                        suggestion={suggestion}
-                        toneClasses={{ dot: tone.dot, badge: tone.badge }}
-                      />
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : null}
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
         </div>
+
+        {showHintCards && lightboxNotes.length > 0 ? (
+          <div className="max-h-[32rem] overflow-y-auto rounded-[1.2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_-58px_rgba(15,23,42,0.35)]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+              Hinweise
+            </p>
+            <div className="mt-3 grid gap-3">
+              {lightboxNotes.map((note, index) => (
+                <article key={`${note.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
+                        {note.category ?? "Visual Audit"}
+                      </p>
+                      <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
+                    </div>
+                    {note.badge ? (
+                      <span className="shrink-0 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                        {note.badge}
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{note.text}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </div>
       <ScreenshotLightbox
         images={[{ src: imageSrc, alt: imageAlt, title, notes: lightboxNotes }]}
