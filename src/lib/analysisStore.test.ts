@@ -80,6 +80,28 @@ describe("analysisStore", () => {
     expect(loaded?.isDemo).toBe(true);
   });
 
+  it("erhaelt Lead-Verknuepfungen im lokalen Fallback", async () => {
+    const contactRequestId = "11111111-1111-4111-8111-111111111111";
+    const auditContextId = "22222222-2222-4222-8222-222222222222";
+    const analysis = createAnalysisResult({
+      metadata: {
+        contactRequestId,
+        auditContextId,
+        leadContext: { company: "Test GmbH" },
+      },
+    });
+
+    const saved = await saveAnalysisResult({
+      analysis,
+      contactRequestId,
+      auditContextId,
+    });
+
+    expect(saved.contactRequestId).toBe(contactRequestId);
+    expect(saved.auditContextId).toBe(auditContextId);
+    expect(saved.analysis.metadata?.leadContext).toEqual({ company: "Test GmbH" });
+  });
+
   it("normalisiert leere Screenshot-Arrays im Fallback defensiv", async () => {
     const analysis = createAnalysisResult({
       screenshots: [] as unknown as AnalysisResult["screenshots"],
@@ -210,6 +232,89 @@ describe("analysisStore", () => {
       runtime: "vercel",
     });
     expect(payload.result.metadata?.screenshotError).toBe("Chromium executable not found");
+  });
+
+  it("persistiert optionale Lead- und Audit-IDs in Supabase-Spalten und Metadata", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const contactRequestId = "11111111-1111-4111-8111-111111111111";
+    const auditContextId = "22222222-2222-4222-8222-222222222222";
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), { status: 201 }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await saveAnalysisResult({
+      analysis: createAnalysisResult({
+        metadata: {
+          contactRequestId,
+          auditContextId,
+          leadContext: { email: "kontakt@example.test" },
+          auditContext: { website_url: "https://shop.test" },
+        },
+      }),
+      contactRequestId,
+      auditContextId,
+    });
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const payload = JSON.parse(init.body as string) as {
+      contact_request_id: string;
+      audit_context_id: string;
+      metadata: AnalysisResult["metadata"];
+      result: AnalysisResult;
+    };
+
+    expect(payload.contact_request_id).toBe(contactRequestId);
+    expect(payload.audit_context_id).toBe(auditContextId);
+    expect(payload.metadata?.contactRequestId).toBe(contactRequestId);
+    expect(payload.metadata?.auditContextId).toBe(auditContextId);
+    expect(payload.metadata?.leadContext).toEqual({ email: "kontakt@example.test" });
+    expect(payload.result.metadata?.auditContext).toEqual({ website_url: "https://shop.test" });
+  });
+
+  it("retryt Supabase-Speicherung ohne Relation-Spalten, wenn die Migration fehlt", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const contactRequestId = "11111111-1111-4111-8111-111111111111";
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response("Could not find the 'contact_request_id' column", { status: 400 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify([]), { status: 201 }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    const saved = await saveAnalysisResult({
+      analysis: createAnalysisResult({
+        metadata: { contactRequestId },
+      }),
+      contactRequestId,
+    });
+
+    const [, firstInit] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [, retryInit] = fetchMock.mock.calls[1] as [string, RequestInit];
+    const firstPayload = JSON.parse(firstInit.body as string) as { contact_request_id?: string };
+    const retryPayload = JSON.parse(retryInit.body as string) as {
+      contact_request_id?: string;
+      metadata: AnalysisResult["metadata"];
+    };
+
+    expect(firstPayload.contact_request_id).toBe(contactRequestId);
+    expect(retryPayload.contact_request_id).toBeUndefined();
+    expect(retryPayload.metadata?.contactRequestId).toBe(contactRequestId);
+    expect(saved.contactRequestId).toBe(contactRequestId);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "[analysis-store] analysis_results lead linkage insert failed; retrying without relation columns. Apply the documented migration for contact_request_id and audit_context_id.",
+      expect.objectContaining({
+        contactRequestId,
+      }),
+    );
   });
 
   it("normalisiert alte Supabase-Ergebnisse mit leerem Screenshot-Array beim Lesen", async () => {

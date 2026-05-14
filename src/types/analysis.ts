@@ -13,6 +13,13 @@ export type AnalysisMode = "static" | "rendered";
 
 export interface AnalysisRequest {
   url: string;
+  mode?: string;
+  isDemo?: boolean;
+  isPremium?: boolean;
+  contactRequestId?: string;
+  auditContextId?: string;
+  leadContext?: Record<string, unknown>;
+  auditContext?: Record<string, unknown>;
 }
 
 export interface CategoryScore {
@@ -103,6 +110,11 @@ export interface AnalysisScreenshots {
 }
 
 export interface AnalysisMetadata {
+  source?: string;
+  contactRequestId?: string;
+  auditContextId?: string;
+  leadContext?: Record<string, unknown>;
+  auditContext?: Record<string, unknown>;
   screenshotError?: string;
   screenshotErrorSource?: "browser_launch" | "capture" | "storage" | "rendered_fallback";
   screenshotVariantFailures?: Array<{

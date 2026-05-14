@@ -183,6 +183,38 @@ describe("POST /api/analyse", () => {
     );
   });
 
+  it("ignoriert ungueltige Lead-IDs ohne die Analyse abzubrechen", async () => {
+    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const response = await POST(createRequest({
+      url: "shop.test",
+      contactRequestId: "keine-uuid",
+      auditContextId: "22222222-2222-4222-8222-222222222222",
+      leadContext: { company: "Test GmbH" },
+    }));
+    const payload = (await response.json()) as {
+      id?: string;
+      metadata?: {
+        contactRequestId?: string;
+        auditContextId?: string;
+        leadContext?: Record<string, unknown>;
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(payload.id).toBeTruthy();
+    expect(payload.metadata?.contactRequestId).toBeUndefined();
+    expect(payload.metadata?.auditContextId).toBe("22222222-2222-4222-8222-222222222222");
+    expect(payload.metadata?.leadContext).toEqual({ company: "Test GmbH" });
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "[analysis] Ignoring invalid lead linkage UUID",
+      {
+        fieldName: "contactRequestId",
+        value: "keine-uuid",
+      },
+    );
+  });
+
   it("gibt bei ungueltiger URL einen 400-Fehler zurueck", async () => {
     const response = await POST(createRequest({ url: "" }));
     const payload = (await response.json()) as { error: string };

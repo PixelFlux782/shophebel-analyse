@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -13,6 +14,14 @@ import { getAnalysisResult } from "@/lib/analysisStore";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
 import { getOrCreatePremiumReport } from "@/lib/premium/premiumReportStore";
 import { getAnalysisSummary, getOverallStatusLabel, getScoreTone } from "@/lib/result-ui";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
 
 interface AnalyseResultPageProps {
   params: Promise<{

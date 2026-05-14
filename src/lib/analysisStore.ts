@@ -7,6 +7,8 @@ export interface StoredAnalysisResult {
   analysis: AnalysisResult;
   createdAt: string;
   isDemo?: boolean;
+  contactRequestId?: string | null;
+  auditContextId?: string | null;
   paymentStatus?: string | null;
   paidAt?: string | null;
 }
@@ -14,6 +16,8 @@ export interface StoredAnalysisResult {
 type SaveAnalysisResultInput = {
   analysis: AnalysisResult;
   isDemo?: boolean;
+  contactRequestId?: string;
+  auditContextId?: string;
 };
 
 type SupabaseAnalysisRow = {
@@ -23,6 +27,8 @@ type SupabaseAnalysisRow = {
   result: AnalysisResult;
   screenshots?: AnalysisScreenshots | null;
   metadata?: AnalysisResult["metadata"] | null;
+  contact_request_id?: string | null;
+  audit_context_id?: string | null;
   payment_status?: string | null;
   paid_at?: string | null;
 };
@@ -196,6 +202,8 @@ async function toStoredAnalysisResult(row: SupabaseAnalysisRow, config: Supabase
     },
     createdAt: row.created_at,
     isDemo: row.is_demo,
+    contactRequestId: row.contact_request_id ?? analysis.metadata?.contactRequestId ?? null,
+    auditContextId: row.audit_context_id ?? analysis.metadata?.auditContextId ?? null,
     paymentStatus: row.payment_status ?? null,
     paidAt: row.paid_at ?? null,
   };
@@ -283,6 +291,53 @@ function formatSupabaseRequestDebug({
   return parts.join(" | ");
 }
 
+function shouldRetryWithoutLeadLinkage(responseText: string) {
+  const normalized = responseText.toLowerCase();
+
+  return (
+    normalized.includes("contact_request_id") ||
+    normalized.includes("audit_context_id") ||
+    normalized.includes("contact_requests") ||
+    normalized.includes("audit_contexts") ||
+    normalized.includes("foreign key")
+  );
+}
+
+function buildAnalysisInsertPayload({
+  id,
+  now,
+  analysis,
+  input,
+  includeLeadLinkage,
+}: {
+  id: string;
+  now: string;
+  analysis: AnalysisResult;
+  input: SaveAnalysisResultInput;
+  includeLeadLinkage: boolean;
+}) {
+  return {
+    id,
+    created_at: now,
+    updated_at: now,
+    requested_url: analysis.requestedUrl,
+    final_url: analysis.finalUrl || analysis.url,
+    overall_score: analysis.overallScore,
+    analysis_mode: analysis.analysisMode,
+    is_demo: Boolean(input.isDemo),
+    result: analysis,
+    screenshots: analysis.screenshots ?? null,
+    visual_preview_available: analysis.visualPreviewAvailable,
+    metadata: analysis.metadata ?? {},
+    ...(includeLeadLinkage
+      ? {
+          contact_request_id: input.contactRequestId ?? null,
+          audit_context_id: input.auditContextId ?? null,
+        }
+      : {}),
+  };
+}
+
 async function saveAnalysisResultSupabase(
   input: SaveAnalysisResultInput,
 ): Promise<StoredAnalysisResult> {
@@ -296,20 +351,7 @@ async function saveAnalysisResultSupabase(
   const id = randomUUID();
   const now = new Date().toISOString();
   const analysis = normalizeAnalysisResult(input.analysis);
-  const payload = {
-    id,
-    created_at: now,
-    updated_at: now,
-    requested_url: analysis.requestedUrl,
-    final_url: analysis.finalUrl || analysis.url,
-    overall_score: analysis.overallScore,
-    analysis_mode: analysis.analysisMode,
-    is_demo: Boolean(input.isDemo),
-    result: analysis,
-    screenshots: analysis.screenshots ?? null,
-    visual_preview_available: analysis.visualPreviewAvailable,
-    metadata: analysis.metadata ?? {},
-  };
+  const hasLeadLinkage = Boolean(input.contactRequestId || input.auditContextId);
 
   const requestUrl = `${config.url}/rest/v1/analysis_results`;
   let response: Response;
@@ -323,7 +365,13 @@ async function saveAnalysisResultSupabase(
         Authorization: `Bearer ${config.serviceRoleKey}`,
         Prefer: "return=representation",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(buildAnalysisInsertPayload({
+        id,
+        now,
+        analysis,
+        input,
+        includeLeadLinkage: hasLeadLinkage,
+      })),
       cache: "no-store",
     });
   } catch (error) {
@@ -336,6 +384,50 @@ async function saveAnalysisResultSupabase(
 
   if (!response.ok) {
     const details = await response.text();
+
+    if (hasLeadLinkage && shouldRetryWithoutLeadLinkage(details)) {
+      console.warn("[analysis-store] analysis_results lead linkage insert failed; retrying without relation columns. Apply the documented migration for contact_request_id and audit_context_id.", {
+        status: response.status,
+        details,
+        contactRequestId: input.contactRequestId ?? null,
+        auditContextId: input.auditContextId ?? null,
+      });
+
+      response = await fetch(requestUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: config.serviceRoleKey,
+          Authorization: `Bearer ${config.serviceRoleKey}`,
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(buildAnalysisInsertPayload({
+          id,
+          now,
+          analysis,
+          input,
+          includeLeadLinkage: false,
+        })),
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        const parsed = (await response.json()) as SupabaseAnalysisRow[];
+        const row = parsed[0];
+
+        return row
+          ? toStoredAnalysisResult(row, config)
+          : {
+              id,
+              analysis,
+              createdAt: now,
+              isDemo: input.isDemo,
+              contactRequestId: input.contactRequestId ?? null,
+              auditContextId: input.auditContextId ?? null,
+            };
+      }
+    }
+
     throw new Error(formatSupabaseRequestDebug({
       operation: "supabase_analysis_insert_failed",
       requestUrl,
@@ -353,6 +445,8 @@ async function saveAnalysisResultSupabase(
       analysis,
       createdAt: now,
       isDemo: input.isDemo,
+      contactRequestId: input.contactRequestId ?? null,
+      auditContextId: input.auditContextId ?? null,
     };
   }
 
@@ -366,6 +460,8 @@ function saveAnalysisResultMemory(input: SaveAnalysisResultInput): StoredAnalysi
     createdAt: new Date().toISOString(),
     analysis: normalizeAnalysisResult(input.analysis),
     isDemo: input.isDemo,
+    contactRequestId: input.contactRequestId ?? input.analysis.metadata?.contactRequestId ?? null,
+    auditContextId: input.auditContextId ?? input.analysis.metadata?.auditContextId ?? null,
     paymentStatus: null,
     paidAt: null,
   };

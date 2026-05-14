@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import "@/styles/globals.css";
 import { Navbar } from "@/components/navbar";
+import { APP_URL } from "@/lib/env";
 
 export const metadata: Metadata = {
+  metadataBase: new URL(APP_URL),
   title: "Shophebel Analyse",
   description:
     "Shophebel findet digitale Schwaechen bei Websites und Onlineshops - und zeigt konkrete Hebel fuer mehr Sichtbarkeit, Vertrauen und Umsatz.",

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
@@ -15,6 +16,14 @@ import {
   getPremiumReportRecordByAnalysisId,
   saveConsultantNotesForAnalysis,
 } from "@/lib/premium/premiumReportStore";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
+};
 
 interface AdminPremiumReportPageProps {
   params: Promise<{

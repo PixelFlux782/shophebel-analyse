@@ -10,6 +10,10 @@ import {
 
 export const runtime = "nodejs";
 
+const noindexHeaders = {
+  "X-Robots-Tag": "noindex, nofollow, noarchive",
+};
+
 interface PremiumReportPdfRouteContext {
   params: Promise<{
     analysisId: string;
@@ -21,17 +25,17 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
     const { analysisId } = await context.params;
 
     if (!analysisId) {
-      return NextResponse.json({ error: "Keine Analyse-ID übergeben." }, { status: 400 });
+      return NextResponse.json({ error: "Keine Analyse-ID übergeben." }, { status: 400, headers: noindexHeaders });
     }
 
     const analysis = await getAnalysisResult(analysisId);
 
     if (!analysis) {
-      return NextResponse.json({ error: "Analyse nicht gefunden." }, { status: 404 });
+      return NextResponse.json({ error: "Analyse nicht gefunden." }, { status: 404, headers: noindexHeaders });
     }
 
     if (!canViewPremiumReport(analysis.paymentStatus)) {
-      return NextResponse.json({ error: "Premium-Report ist nicht freigeschaltet." }, { status: 403 });
+      return NextResponse.json({ error: "Premium-Report ist nicht freigeschaltet." }, { status: 403, headers: noindexHeaders });
     }
 
     const premiumReportRecord = await getPremiumReportRecordByAnalysisId(analysisId);
@@ -44,7 +48,7 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
         hadStoredReport: Boolean(premiumReportRecord),
       });
 
-      return NextResponse.json({ error: "Premium-Report konnte nicht erstellt werden." }, { status: 500 });
+      return NextResponse.json({ error: "Premium-Report konnte nicht erstellt werden." }, { status: 500, headers: noindexHeaders });
     }
 
     if (!premiumReportRecord) {
@@ -67,11 +71,12 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="${filename}"`,
         "Cache-Control": "private, no-store",
+        ...noindexHeaders,
       },
     });
   } catch (error) {
     console.error("[premium-report-pdf] PDF render failed.", error);
 
-    return NextResponse.json({ error: "PDF konnte nicht erzeugt werden." }, { status: 500 });
+    return NextResponse.json({ error: "PDF konnte nicht erzeugt werden." }, { status: 500, headers: noindexHeaders });
   }
 }
