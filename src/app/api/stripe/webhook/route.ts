@@ -10,6 +10,8 @@ type CheckoutSessionMetadata = {
   plan?: string;
 };
 
+type PaidPlan = "full" | "premium";
+
 function getSupabaseConfig() {
   const url = process.env.SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -67,14 +69,16 @@ async function markAnalysisPaid(input: {
     throw new Error("Supabase is not configured for Stripe webhook persistence.");
   }
 
+  const plan = normalizePaidPlan(input.metadata);
   const payload = {
     updated_at: new Date().toISOString(),
     payment_status: "paid",
     paid_at: new Date().toISOString(),
     stripe_session_id: input.session.id,
     stripe_customer_email: getCustomerEmail(input.session),
-    product_type: input.metadata.productType ?? null,
-    plan: input.metadata.plan ?? null,
+    product_type: plan === "full" ? "full_analysis" : "premium_report",
+    plan,
+    ...(plan === "premium" ? { is_premium: true } : {}),
   };
 
   const response = await fetch(
@@ -96,6 +100,14 @@ async function markAnalysisPaid(input: {
     const details = await response.text();
     throw new Error(`supabase_payment_update_failed: ${response.status} ${details}`);
   }
+}
+
+function normalizePaidPlan(metadata: CheckoutSessionMetadata): PaidPlan {
+  if (metadata.plan === "full" || metadata.productType === "full_analysis") {
+    return "full";
+  }
+
+  return "premium";
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {

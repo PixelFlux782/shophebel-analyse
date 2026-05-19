@@ -34,7 +34,7 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
       return NextResponse.json({ error: "Analyse nicht gefunden." }, { status: 404, headers: noindexHeaders });
     }
 
-    if (!canViewPremiumReport(analysis.paymentStatus)) {
+    if (!canViewPremiumReport(analysis)) {
       return NextResponse.json({ error: "Premium-Report ist nicht freigeschaltet." }, { status: 403, headers: noindexHeaders });
     }
 

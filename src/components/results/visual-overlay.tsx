@@ -105,10 +105,14 @@ export function VisualOverlay({
   const lightboxNotes = mergeNotes(notes, buildHotspotNotes(hotspots, suggestions));
 
   useEffect(() => {
-    setImageLoaded(false);
-    setImageFailed(false);
-    setNaturalSize(null);
-    setShowHintCards(true);
+    const timeout = window.setTimeout(() => {
+      setImageLoaded(false);
+      setImageFailed(false);
+      setNaturalSize(null);
+      setShowHintCards(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [imageSrc]);
 
   return (

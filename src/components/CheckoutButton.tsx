@@ -2,18 +2,20 @@
 
 import { useState } from "react";
 
-import { buildCheckoutRequestPayload } from "@/lib/checkout-client";
+import { buildCheckoutRequestPayload, CheckoutPlan } from "@/lib/checkout-client";
 
 interface CheckoutButtonProps {
   analysisId: string;
   label?: string;
   className?: string;
+  plan?: CheckoutPlan;
 }
 
 export function CheckoutButton({
   analysisId,
-  label = "Vollanalyse freischalten (9,99 EUR)",
+  label = "Vollanalyse fuer 5 EUR freischalten",
   className = "",
+  plan = "full",
 }: CheckoutButtonProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -28,7 +30,11 @@ export function CheckoutButton({
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify(buildCheckoutRequestPayload({ analysisId })),
+        body: JSON.stringify(buildCheckoutRequestPayload({
+          analysisId,
+          productType: plan === "full" ? "full_analysis" : "premium_report",
+          plan,
+        })),
       });
 
       const payload = (await response.json()) as { url?: string; error?: string };

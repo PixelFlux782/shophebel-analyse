@@ -34,8 +34,12 @@ function ScreenshotImage({
   const hasHints = Boolean(notes?.length);
 
   useEffect(() => {
-    setFailed(false);
-    setShowHints(true);
+    const timeout = window.setTimeout(() => {
+      setFailed(false);
+      setShowHints(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [src]);
 
   return (

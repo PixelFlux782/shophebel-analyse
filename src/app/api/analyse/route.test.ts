@@ -85,7 +85,7 @@ describe("POST /api/analyse", () => {
     vi.restoreAllMocks();
   });
 
-  it("liefert eine echte Analyse mit Scores, Findings und Empfehlungen", async () => {
+  it("liefert nach der kostenlosen Analyse nur einen Teaser zurueck", async () => {
     const response = await POST(createRequest({ url: "shop.test" }));
     const payload = (await response.json()) as {
       id: string;
@@ -99,18 +99,13 @@ describe("POST /api/analyse", () => {
         viewport?: string;
       };
       visualPreviewAvailable?: boolean;
-      aiSuggestions?: Array<{ title: string; actionSteps: string[] }>;
-      isPremium: boolean;
-      totalFindings: number;
-      visibleFindings: number;
-      categoryScores: {
-        seo: { score: number };
-        trust: { score: number };
-        conversion: { score: number };
-        ux: { score: number };
-      };
+      summary: string;
+      plan: string;
+      paymentStatus: string;
       findings: Array<{ title: string }>;
-      recommendations: Array<{ title: string; weight: number }>;
+      recommendations?: Array<{ title: string; weight: number }>;
+      categoryScores?: unknown;
+      aiSuggestions?: unknown;
     };
 
     expect(response.status).toBe(200);
@@ -119,20 +114,17 @@ describe("POST /api/analyse", () => {
     expect(payload.analysisMode).toBe("static");
     expect(payload.finalUrl).toBe("https://shop.test/");
     expect(payload.overallScore).toBeGreaterThan(0);
-    expect(payload.isPremium).toBe(false);
+    expect(payload.plan).toBe("free");
+    expect(payload.paymentStatus).toBe("free");
+    expect(payload.summary).toBeTruthy();
     expect(payload.visualPreviewAvailable).toBe(false);
     expect(payload.screenshots).toBeUndefined();
-    expect(payload.aiSuggestions?.length).toBeGreaterThan(0);
-    expect(payload.aiSuggestions?.every((entry) => entry.actionSteps.length > 0)).toBe(true);
-    expect(payload.technicalNotes?.length).toBeGreaterThan(0);
-    expect(payload.totalFindings).toBe(payload.findings.length);
-    expect(payload.visibleFindings).toBeLessThanOrEqual(payload.totalFindings);
-    expect(payload.categoryScores.seo.score).toBeGreaterThan(0);
-    expect(payload.categoryScores.trust.score).toBeGreaterThan(0);
-    expect(payload.categoryScores.conversion.score).toBeGreaterThan(0);
-    expect(payload.categoryScores.ux.score).toBeGreaterThan(0);
+    expect(payload.aiSuggestions).toBeUndefined();
+    expect(payload.technicalNotes).toBeUndefined();
     expect(payload.findings.length).toBeGreaterThan(0);
-    expect(payload.recommendations.every((entry) => typeof entry.weight === "number")).toBe(true);
+    expect(payload.findings.length).toBeLessThanOrEqual(2);
+    expect(payload.categoryScores).toBeUndefined();
+    expect(payload.recommendations).toBeUndefined();
   });
 
   it("liefert die Analyse auch dann zurück, wenn die Supabase-Speicherung fehlschlaegt", async () => {
@@ -194,18 +186,12 @@ describe("POST /api/analyse", () => {
     }));
     const payload = (await response.json()) as {
       id?: string;
-      metadata?: {
-        contactRequestId?: string;
-        auditContextId?: string;
-        leadContext?: Record<string, unknown>;
-      };
+      metadata?: unknown;
     };
 
     expect(response.status).toBe(200);
     expect(payload.id).toBeTruthy();
-    expect(payload.metadata?.contactRequestId).toBeUndefined();
-    expect(payload.metadata?.auditContextId).toBe("22222222-2222-4222-8222-222222222222");
-    expect(payload.metadata?.leadContext).toEqual({ company: "Test GmbH" });
+    expect(payload.metadata).toBeUndefined();
     expect(consoleWarnSpy).toHaveBeenCalledWith(
       "[analysis] Ignoring invalid lead linkage UUID",
       {

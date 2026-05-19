@@ -1,7 +1,10 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const createMockSession = vi.fn();
+const { createMockSession, getAnalysisResultMock } = vi.hoisted(() => ({
+  createMockSession: vi.fn(),
+  getAnalysisResultMock: vi.fn(),
+}));
 
 vi.mock("stripe", () => {
   return {
@@ -14,6 +17,10 @@ vi.mock("stripe", () => {
     },
   };
 });
+
+vi.mock("@/lib/analysisStore", () => ({
+  getAnalysisResult: getAnalysisResultMock,
+}));
 
 function createRequest(body: unknown) {
   return new NextRequest("http://localhost:3001/api/checkout", {
@@ -29,7 +36,14 @@ describe("POST /api/checkout", () => {
   beforeEach(() => {
     delete process.env.STRIPE_SECRET_KEY;
     delete process.env.STRIPE_PRICE_ID;
+    delete process.env.STRIPE_FULL_ANALYSIS_PRICE_ID;
+    delete process.env.STRIPE_PREMIUM_ANALYSIS_PRICE_ID;
     createMockSession.mockReset();
+    getAnalysisResultMock.mockReset();
+    getAnalysisResultMock.mockResolvedValue({
+      id: "analysis-123",
+      analysis: { url: "https://shop.test" },
+    });
   });
 
   afterEach(() => {
@@ -60,7 +74,7 @@ describe("POST /api/checkout", () => {
 
     expect(response.status).toBe(200);
     expect(payload.demo).toBe(true);
-    expect(payload.url).toContain("/analyse/result/analysis-123?checkout=demo");
+    expect(payload.url).toContain("/analyse/result/analysis-123?checkout=demo&upgrade=premium");
     expect(payload.url).not.toContain("/checkout/success");
     expect(createMockSession).not.toHaveBeenCalled();
   });
@@ -77,7 +91,7 @@ describe("POST /api/checkout", () => {
 
   it("erstellt mit Stripe-Konfiguration eine Checkout-Session", async () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
-    process.env.STRIPE_PRICE_ID = "price_123";
+    process.env.STRIPE_PREMIUM_ANALYSIS_PRICE_ID = "price_premium_123";
     createMockSession.mockResolvedValue({
       url: "https://checkout.stripe.com/pay/test-session",
     });
@@ -87,7 +101,7 @@ describe("POST /api/checkout", () => {
     const response = await POST(createRequest({
       analysisId: "analysis-456",
       productType: "premium_report",
-      plan: "premium_report",
+      plan: "premium",
     }));
     const payload = (await response.json()) as { url: string };
 
@@ -95,13 +109,19 @@ describe("POST /api/checkout", () => {
     expect(createMockSession).toHaveBeenCalledOnce();
     expect(createMockSession).toHaveBeenCalledWith(expect.objectContaining({
       success_url: expect.stringContaining(
-        "/checkout/success?analysisId=analysis-456",
+        "/analyse/result/analysis-456?upgrade=premium&success=true",
       ),
       cancel_url: expect.stringContaining("/analyse/result/analysis-456"),
+      line_items: [
+        {
+          price: "price_premium_123",
+          quantity: 1,
+        },
+      ],
       metadata: {
         analysisId: "analysis-456",
         productType: "premium_report",
-        plan: "premium_report",
+        plan: "premium",
       },
     }));
     expect(payload.url).toBe("https://checkout.stripe.com/pay/test-session");
@@ -109,14 +129,14 @@ describe("POST /api/checkout", () => {
 
   it("gibt einen 500-Fehler zurück, wenn Stripe keine URL liefert", async () => {
     process.env.STRIPE_SECRET_KEY = "sk_test_123";
-    process.env.STRIPE_PRICE_ID = "price_123";
+    process.env.STRIPE_FULL_ANALYSIS_PRICE_ID = "price_full_123";
     createMockSession.mockResolvedValue({
       url: null,
     });
 
     const { POST } = await import("@/app/api/checkout/route");
 
-    const response = await POST(createRequest({ analysisId: "analysis-789" }));
+    const response = await POST(createRequest({ analysisId: "analysis-789", plan: "full" }));
     const payload = (await response.json()) as { error: string };
 
     expect(response.status).toBe(500);

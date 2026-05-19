@@ -11,6 +11,10 @@ export interface StoredAnalysisResult {
   auditContextId?: string | null;
   paymentStatus?: string | null;
   paidAt?: string | null;
+  plan?: string | null;
+  productType?: string | null;
+  isPremium?: boolean | null;
+  stripeSessionId?: string | null;
 }
 
 type SaveAnalysisResultInput = {
@@ -31,6 +35,10 @@ type SupabaseAnalysisRow = {
   audit_context_id?: string | null;
   payment_status?: string | null;
   paid_at?: string | null;
+  plan?: string | null;
+  product_type?: string | null;
+  is_premium?: boolean | null;
+  stripe_session_id?: string | null;
 };
 
 type SupabaseConfig = { url: string; serviceRoleKey: string };
@@ -206,6 +214,10 @@ async function toStoredAnalysisResult(row: SupabaseAnalysisRow, config: Supabase
     auditContextId: row.audit_context_id ?? analysis.metadata?.auditContextId ?? null,
     paymentStatus: row.payment_status ?? null,
     paidAt: row.paid_at ?? null,
+    plan: row.plan ?? null,
+    productType: row.product_type ?? null,
+    isPremium: row.is_premium ?? analysis.isPremium ?? null,
+    stripeSessionId: row.stripe_session_id ?? null,
   };
 }
 
@@ -303,18 +315,30 @@ function shouldRetryWithoutLeadLinkage(responseText: string) {
   );
 }
 
+function shouldRetryWithoutAccessColumns(responseText: string) {
+  const normalized = responseText.toLowerCase();
+
+  return (
+    normalized.includes("payment_status") ||
+    normalized.includes("product_type") ||
+    normalized.includes("plan")
+  );
+}
+
 function buildAnalysisInsertPayload({
   id,
   now,
   analysis,
   input,
   includeLeadLinkage,
+  includeAccessColumns,
 }: {
   id: string;
   now: string;
   analysis: AnalysisResult;
   input: SaveAnalysisResultInput;
   includeLeadLinkage: boolean;
+  includeAccessColumns: boolean;
 }) {
   return {
     id,
@@ -329,6 +353,13 @@ function buildAnalysisInsertPayload({
     screenshots: analysis.screenshots ?? null,
     visual_preview_available: analysis.visualPreviewAvailable,
     metadata: analysis.metadata ?? {},
+    ...(includeAccessColumns
+      ? {
+          payment_status: "free",
+          plan: "free",
+          product_type: "analysis_teaser",
+        }
+      : {}),
     ...(includeLeadLinkage
       ? {
           contact_request_id: input.contactRequestId ?? null,
@@ -371,6 +402,7 @@ async function saveAnalysisResultSupabase(
         analysis,
         input,
         includeLeadLinkage: hasLeadLinkage,
+        includeAccessColumns: true,
       })),
       cache: "no-store",
     });
@@ -407,6 +439,7 @@ async function saveAnalysisResultSupabase(
           analysis,
           input,
           includeLeadLinkage: false,
+          includeAccessColumns: true,
         })),
         cache: "no-store",
       });
@@ -424,6 +457,54 @@ async function saveAnalysisResultSupabase(
               isDemo: input.isDemo,
               contactRequestId: input.contactRequestId ?? null,
               auditContextId: input.auditContextId ?? null,
+              paymentStatus: "free",
+              plan: "free",
+              productType: "analysis_teaser",
+            };
+      }
+    }
+
+    if (shouldRetryWithoutAccessColumns(details)) {
+      console.warn("[analysis-store] analysis_results access columns missing; retrying insert without plan/payment fields. Apply the documented three-tier migration.", {
+        status: response.status,
+        details,
+      });
+
+      response = await fetch(requestUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          apikey: config.serviceRoleKey,
+          Authorization: `Bearer ${config.serviceRoleKey}`,
+          Prefer: "return=representation",
+        },
+        body: JSON.stringify(buildAnalysisInsertPayload({
+          id,
+          now,
+          analysis,
+          input,
+          includeLeadLinkage: hasLeadLinkage,
+          includeAccessColumns: false,
+        })),
+        cache: "no-store",
+      });
+
+      if (response.ok) {
+        const parsed = (await response.json()) as SupabaseAnalysisRow[];
+        const row = parsed[0];
+
+        return row
+          ? toStoredAnalysisResult(row, config)
+          : {
+              id,
+              analysis,
+              createdAt: now,
+              isDemo: input.isDemo,
+              contactRequestId: input.contactRequestId ?? null,
+              auditContextId: input.auditContextId ?? null,
+              paymentStatus: "free",
+              plan: "free",
+              productType: "analysis_teaser",
             };
       }
     }
@@ -464,6 +545,10 @@ function saveAnalysisResultMemory(input: SaveAnalysisResultInput): StoredAnalysi
     auditContextId: input.auditContextId ?? input.analysis.metadata?.auditContextId ?? null,
     paymentStatus: null,
     paidAt: null,
+    plan: "free",
+    productType: "analysis_teaser",
+    isPremium: input.analysis.isPremium,
+    stripeSessionId: null,
   };
 
   getMemoryStore().set(id, record);
@@ -479,7 +564,9 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
     return getMemoryStore().get(id) ?? null;
   }
 
-  const requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=id,created_at,is_demo,result,screenshots,metadata,payment_status,paid_at&limit=1`;
+  const extendedSelect = "id,created_at,is_demo,result,screenshots,metadata,contact_request_id,audit_context_id,payment_status,paid_at,plan,product_type,is_premium,stripe_session_id";
+  const basicSelect = "id,created_at,is_demo,result,screenshots,metadata,contact_request_id,audit_context_id,payment_status,paid_at";
+  let requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=${extendedSelect}&limit=1`;
   let response: Response;
 
   try {
@@ -504,6 +591,34 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
 
   if (!response.ok) {
     const details = await response.text();
+    const shouldRetryBasicSelect =
+      details.toLowerCase().includes("plan") ||
+      details.toLowerCase().includes("product_type") ||
+      details.toLowerCase().includes("is_premium") ||
+      details.toLowerCase().includes("stripe_session_id");
+
+    if (shouldRetryBasicSelect) {
+      requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=${basicSelect}&limit=1`;
+      response = await fetch(
+        requestUrl,
+        {
+          method: "GET",
+          headers: {
+            apikey: config.serviceRoleKey,
+            Authorization: `Bearer ${config.serviceRoleKey}`,
+          },
+          cache: "no-store",
+        },
+      );
+
+      if (response.ok) {
+        const parsed = (await response.json()) as SupabaseAnalysisRow[];
+        const row = parsed[0];
+
+        return row ? toStoredAnalysisResult(row, config) : null;
+      }
+    }
+
     throw new Error(formatSupabaseRequestDebug({
       operation: "supabase_analysis_select_failed",
       requestUrl,

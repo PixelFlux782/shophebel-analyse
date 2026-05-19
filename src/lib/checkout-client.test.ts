@@ -7,11 +7,11 @@ describe("buildCheckoutRequestPayload", () => {
     expect(buildCheckoutRequestPayload({
       analysisId: "analysis-123",
       productType: "premium_report",
-      plan: "premium_report",
+      plan: "premium",
     })).toEqual({
       analysisId: "analysis-123",
       productType: "premium_report",
-      plan: "premium_report",
+      plan: "premium",
     });
   });
 });

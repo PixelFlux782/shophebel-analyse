@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { saveAnalysisResult } from "@/lib/analysisStore";
 import { DEMO_ANALYSES } from "@/lib/demoData";
+import { getAnalysisSummary } from "@/lib/result-ui";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +24,25 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       id: record.id,
-      ...demoAnalysis,
+      url: demoAnalysis.url,
+      requestedUrl: demoAnalysis.requestedUrl,
+      finalUrl: demoAnalysis.finalUrl,
+      scannedAt: demoAnalysis.scannedAt,
+      analysisMode: demoAnalysis.analysisMode,
+      overallScore: demoAnalysis.overallScore,
+      summary: getAnalysisSummary(demoAnalysis),
+      findings: demoAnalysis.findings.slice(0, 2).map((finding) => ({
+        category: finding.category,
+        status: finding.status,
+        title: finding.title,
+        description: finding.description,
+      })),
+      screenshots: demoAnalysis.screenshots?.viewport
+        ? { viewport: demoAnalysis.screenshots.viewport }
+        : undefined,
+      visualPreviewAvailable: demoAnalysis.visualPreviewAvailable,
+      plan: "free",
+      paymentStatus: "free",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Demo-Analyse konnte nicht erstellt werden.";

@@ -2,16 +2,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CheckoutButton } from "@/components/CheckoutButton";
 import { AnalysisSummary } from "@/components/results/analysis-summary";
+import { FindingsList } from "@/components/results/findings-list";
 import { MeasuresPlan } from "@/components/results/measures-plan";
 import { PremiumPreviewLock } from "@/components/results/premium-preview-lock";
 import { PremiumReportSection } from "@/components/results/premium-report-section";
 import { PremiumReportRequestButton } from "@/components/results/premium-report-request-button";
+import { RecommendationsList } from "@/components/results/recommendations-list";
 import { RevenueBlockersReport } from "@/components/results/revenue-blockers-report";
 import { ScoreGrid } from "@/components/results/score-grid";
 import { VisualAuditSection } from "@/components/results/visual-audit-section";
 import { getAnalysisResult } from "@/lib/analysisStore";
-import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
+import {
+  canViewFullAnalysis,
+  canViewPremiumReport,
+  resolveAnalysisPlan,
+} from "@/lib/premium/premiumAccess";
 import { getOrCreatePremiumReport } from "@/lib/premium/premiumReportStore";
 import { getAnalysisSummary, getOverallStatusLabel, getScoreTone } from "@/lib/result-ui";
 
@@ -29,6 +36,8 @@ interface AnalyseResultPageProps {
   }>;
   searchParams: Promise<{
     premium?: string;
+    success?: string;
+    upgrade?: string;
   }>;
 }
 
@@ -37,7 +46,7 @@ export default async function AnalyseResultPage({
   searchParams,
 }: AnalyseResultPageProps) {
   const { id } = await params;
-  await searchParams;
+  const resolvedSearchParams = await searchParams;
   const result = await getAnalysisResult(id);
 
   if (!result) {
@@ -45,7 +54,13 @@ export default async function AnalyseResultPage({
   }
 
   const analysis = result.analysis;
-  const canViewPremium = canViewPremiumReport(result.paymentStatus);
+  const plan = resolveAnalysisPlan(result);
+  const canViewFull = canViewFullAnalysis(result);
+  const canViewPremium = canViewPremiumReport(result);
+  const isPaymentProcessing =
+    resolvedSearchParams.success === "true" &&
+    ((resolvedSearchParams.upgrade === "full" && plan !== "full" && plan !== "premium") ||
+      (resolvedSearchParams.upgrade === "premium" && !canViewPremium));
   const premiumReport = canViewPremium
     ? await getOrCreatePremiumReport({ analysis: result })
     : null;
@@ -103,7 +118,11 @@ export default async function AnalyseResultPage({
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-400">
                   Nächster Schritt
                 </p>
-                {canViewPremium ? (
+                {isPaymentProcessing ? (
+                  <div className="mt-4 rounded-2xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-100">
+                    Zahlung wird verarbeitet. Lade die Seite in ein paar Sekunden neu, falls die Freischaltung noch fehlt.
+                  </div>
+                ) : canViewPremium ? (
                   <div className="mt-4 space-y-3">
                     <p className="rounded-2xl border border-emerald-300/30 bg-emerald-400/10 px-4 py-3 text-sm font-semibold text-emerald-100">
                       Premium-Report freigeschaltet
@@ -115,12 +134,18 @@ export default async function AnalyseResultPage({
                       Premium-Report als PDF herunterladen
                     </Link>
                   </div>
-                ) : (
+                ) : canViewFull ? (
                   <PremiumReportRequestButton
                     analysisId={result.id}
                     url={analysis.url}
-                    label="Premium-Report freischalten"
+                    label="Premium Analyse fuer 49 EUR starten"
                     className="mt-4 w-full"
+                  />
+                ) : (
+                  <CheckoutButton
+                    analysisId={result.id}
+                    label="Vollanalyse fuer 5 EUR freischalten"
+                    className="mt-4 w-full justify-center bg-cyan-300 text-slate-950 hover:bg-cyan-200"
                   />
                 )}
               </div>
@@ -128,13 +153,117 @@ export default async function AnalyseResultPage({
           </div>
         </section>
 
-        <section className="mt-8">
-          <VisualAuditSection result={analysis} />
-        </section>
+        {!canViewFull ? (
+          <>
+            <section className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.45fr)]">
+              <div className="rounded-[1.9rem] border border-white/70 bg-white/90 p-7 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
+                <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                  Ersteinschaetzung
+                </p>
+                <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                  Das Wichtigste aus dem kostenlosen Teaser
+                </h2>
+                <p className="mt-4 text-base leading-8 text-slate-600">{diagnosis}</p>
+                <div className="mt-6 grid gap-3">
+                  {analysis.findings.slice(0, 2).map((finding) => (
+                    <article
+                      key={`${finding.category}-${finding.title}`}
+                      className="rounded-[1.25rem] border border-slate-200 bg-slate-50 px-4 py-4"
+                    >
+                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-cyan-700">
+                        Hinweis
+                      </p>
+                      <h3 className="mt-2 text-base font-semibold text-slate-950">{finding.title}</h3>
+                      <p className="mt-2 text-sm leading-6 text-slate-600">{finding.description}</p>
+                    </article>
+                  ))}
+                </div>
+              </div>
 
-        <section className="mt-10">
-          <ScoreGrid result={analysis} />
-        </section>
+              {analysis.screenshots?.viewport ? (
+                <div className="rounded-[1.9rem] border border-white/70 bg-white/90 p-5 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Screenshot-Teaser
+                  </p>
+                  <div className="mt-4 max-h-[22rem] overflow-hidden rounded-[1.35rem] border border-slate-200 bg-slate-100">
+                    <img
+                      src={analysis.screenshots.viewport}
+                      alt="Screenshot-Teaser der analysierten Website"
+                      className="w-full object-cover object-top"
+                    />
+                  </div>
+                </div>
+              ) : null}
+            </section>
+
+            <section className="mt-8 rounded-[1.9rem] border border-white/70 bg-white/90 p-7 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
+              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
+                Gesperrte Bereiche
+              </p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
+                Vollanalyse fuer 5 EUR freischalten
+              </h2>
+              <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {[
+                  "Vollstaendige Findings",
+                  "Kategorie-Breakdowns",
+                  "Visual Audit",
+                  "Massnahmen",
+                  "AI Visibility",
+                  "PDF Export",
+                ].map((item) => (
+                  <div key={item} className="rounded-[1.2rem] border border-slate-200 bg-slate-50 px-4 py-4">
+                    <div className="h-2 w-24 rounded-full bg-slate-200 blur-[1px]" />
+                    <p className="mt-4 font-semibold text-slate-950">{item}</p>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Dieser Bereich ist in der kostenlosen Vorschau gesperrt.
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <CheckoutButton
+                  analysisId={result.id}
+                  label="Vollanalyse fuer 5 EUR freischalten"
+                  className="justify-center bg-slate-950 text-white hover:bg-slate-800"
+                />
+                <PremiumReportRequestButton
+                  analysisId={result.id}
+                  url={analysis.url}
+                  label="Premium Analyse ansehen"
+                />
+              </div>
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="mt-8">
+              <VisualAuditSection result={analysis} />
+            </section>
+
+            <section className="mt-10">
+              <ScoreGrid result={analysis} />
+            </section>
+
+            <section className="mt-10">
+              <FindingsList
+                findings={analysis.findings}
+                isPremium
+                analysisId={result.id}
+                totalFindings={analysis.totalFindings}
+                visibleFindings={analysis.totalFindings}
+              />
+            </section>
+
+            <section className="mt-10">
+              <RecommendationsList recommendations={analysis.recommendations} isPremium />
+            </section>
+
+            <section className="mt-10">
+              <AnalysisSummary result={analysis} />
+            </section>
+          </>
+        )}
 
         {canViewPremium ? (
           <>
@@ -158,11 +287,7 @@ export default async function AnalyseResultPage({
           </>
         ) : null}
 
-        <section className="mt-10">
-          <AnalysisSummary result={analysis} />
-        </section>
-
-        {!canViewPremium ? (
+        {canViewFull && !canViewPremium ? (
           <section className="mt-10">
             <PremiumPreviewLock analysisId={result.id} url={analysis.url} />
           </section>

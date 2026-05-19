@@ -38,9 +38,15 @@ export function ScreenshotLightbox({
   const [showNotes, setShowNotes] = useState(true);
 
   useEffect(() => {
-    if (isOpen) {
-      setShowNotes(true);
+    if (!isOpen) {
+      return;
     }
+
+    const timeout = window.setTimeout(() => {
+      setShowNotes(true);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [currentIndex, isOpen]);
 
   useEffect(() => {

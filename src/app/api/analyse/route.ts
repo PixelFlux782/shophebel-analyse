@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createStoredAnalysisResult, saveAnalysisResult } from "@/lib/analysisStore";
 import { AnalysePageError, analysePage } from "@/lib/analyse/analyse-page";
 import { InvalidUrlError } from "@/lib/analyse/fetch-html";
+import { getAnalysisSummary } from "@/lib/result-ui";
 import { AnalysisRequest } from "@/types/analysis";
 
 export const runtime = "nodejs";
@@ -95,6 +96,34 @@ async function persistAnalysisBestEffort(
   }
 }
 
+function buildFreeAnalysisResponse(
+  analysis: Awaited<ReturnType<typeof analysePage>>,
+  recordId?: string,
+) {
+  return {
+    ...(recordId ? { id: recordId } : {}),
+    url: analysis.url,
+    requestedUrl: analysis.requestedUrl,
+    finalUrl: analysis.finalUrl,
+    scannedAt: analysis.scannedAt,
+    analysisMode: analysis.analysisMode,
+    overallScore: analysis.overallScore,
+    summary: getAnalysisSummary(analysis),
+    findings: analysis.findings.slice(0, 2).map((finding) => ({
+      category: finding.category,
+      status: finding.status,
+      title: finding.title,
+      description: finding.description,
+    })),
+    screenshots: analysis.screenshots?.viewport
+      ? { viewport: analysis.screenshots.viewport }
+      : undefined,
+    visualPreviewAvailable: analysis.visualPreviewAvailable,
+    plan: "free",
+    paymentStatus: "free",
+  };
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as AnalysisRequest;
@@ -111,10 +140,7 @@ export async function POST(request: NextRequest) {
     });
     const responseAnalysis = record?.analysis ?? analysis;
 
-    return NextResponse.json({
-      ...(record ? { id: record.id } : {}),
-      ...responseAnalysis,
-    });
+    return NextResponse.json(buildFreeAnalysisResponse(responseAnalysis, record?.id));
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Analyse konnte nicht erstellt werden.";

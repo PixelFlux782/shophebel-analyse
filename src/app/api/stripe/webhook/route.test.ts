@@ -67,7 +67,7 @@ describe("POST /api/stripe/webhook", () => {
     constructEventMock.mockReturnValue(createCheckoutCompletedEvent({
       analysisId: "analysis-123",
       productType: "premium_report",
-      plan: "premium_report",
+      plan: "premium",
     }));
     const fetchMock = vi
       .fn()
@@ -93,6 +93,7 @@ describe("POST /api/stripe/webhook", () => {
       stripe_customer_email: string;
       product_type: string;
       plan: string;
+      is_premium?: boolean;
       paid_at: string;
     };
 
@@ -101,8 +102,38 @@ describe("POST /api/stripe/webhook", () => {
     expect(payload.stripe_session_id).toBe("cs_test_123");
     expect(payload.stripe_customer_email).toBe("kunde@example.test");
     expect(payload.product_type).toBe("premium_report");
-    expect(payload.plan).toBe("premium_report");
+    expect(payload.plan).toBe("premium");
+    expect(payload.is_premium).toBe(true);
     expect(payload.paid_at).toBeTruthy();
+  });
+
+  it("setzt Full-Zahlungen ohne Premium-Flag", async () => {
+    constructEventMock.mockReturnValue(createCheckoutCompletedEvent({
+      analysisId: "analysis-123",
+      productType: "full_analysis",
+      plan: "full",
+    }));
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(null, { status: 204 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await import("@/app/api/stripe/webhook/route");
+    const response = await POST(createRequest("stripe-body"));
+
+    expect(response.status).toBe(200);
+
+    const [, patchInit] = fetchMock.mock.calls[1] as [string, RequestInit];
+    const payload = JSON.parse(patchInit.body as string) as {
+      product_type: string;
+      plan: string;
+      is_premium?: boolean;
+    };
+
+    expect(payload.product_type).toBe("full_analysis");
+    expect(payload.plan).toBe("full");
+    expect(payload.is_premium).toBeUndefined();
   });
 
   it("lehnt ungültige Signaturen ab", async () => {

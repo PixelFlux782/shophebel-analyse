@@ -1,15 +1,16 @@
-export type CheckoutProductType = "premium_report";
+export type CheckoutProductType = "full_analysis" | "premium_report";
+export type CheckoutPlan = "full" | "premium";
 
 export type CheckoutRequestPayload = {
   analysisId: string;
   productType?: CheckoutProductType;
-  plan?: string;
+  plan?: CheckoutPlan;
 };
 
 export function buildCheckoutRequestPayload(input: {
   analysisId: string;
   productType?: CheckoutProductType;
-  plan?: string;
+  plan?: CheckoutPlan;
 }): CheckoutRequestPayload {
   return {
     analysisId: input.analysisId,

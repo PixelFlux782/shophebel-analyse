@@ -212,7 +212,7 @@ export async function saveConsultantNotesForAnalysis(input: {
 export async function getOrCreatePremiumReport(
   input: GetOrCreatePremiumReportInput,
 ): Promise<PremiumReport | null> {
-  if (!canViewPremiumReport(input.analysis.paymentStatus)) {
+  if (!canViewPremiumReport(input.analysis)) {
     return null;
   }
 

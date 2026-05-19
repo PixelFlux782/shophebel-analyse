@@ -204,7 +204,11 @@ function MobileScreenshotCard({
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   useEffect(() => {
-    setFailed(false);
+    const timeout = window.setTimeout(() => {
+      setFailed(false);
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [src]);
 
   return (
