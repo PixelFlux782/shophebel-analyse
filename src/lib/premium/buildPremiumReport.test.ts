@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { buildPremiumReport } from "@/lib/premium/buildPremiumReport";
-import { AnalysisResult, Finding } from "@/types/analysis";
+import { AnalysisOpportunity, AnalysisResult, Finding } from "@/types/analysis";
 
 function finding(input: Partial<Finding> & Pick<Finding, "title" | "category">): Finding {
   return {
@@ -73,6 +73,28 @@ function createAnalysis(overrides: Partial<AnalysisResult> = {}): AnalysisResult
   };
 }
 
+function opportunity(overrides: Partial<AnalysisOpportunity> = {}): AnalysisOpportunity {
+  return {
+    id: "opportunity-1",
+    title: "Hero CTA als klaren Anfrage-Hebel schärfen",
+    description: "Der Einstieg erzeugt noch zu wenig Handlungsdruck.",
+    category: "conversion",
+    severity: "high",
+    businessImpact: "Mehr Besucher verstehen den nächsten Schritt und brechen seltener ab.",
+    aiOpportunity: "KI kann CTA-Varianten und Hero-Copy vorbereiten.",
+    suggestedModule: "Conversion Quick Wins",
+    suggestedService: "Quick Fix Sprint",
+    implementationEffort: "low",
+    expectedEffect: "Mehr qualifizierte Anfragen aus bestehendem Traffic.",
+    recurringPotential: false,
+    ctaLabel: "Quick Fix starten",
+    ctaHref: "/#kontakt",
+    sourceType: "revenueBlocker",
+    priorityScore: 91,
+    ...overrides,
+  };
+}
+
 describe("buildPremiumReport", () => {
   it("erstellt Premium-Inhalte für bezahlte Reports", () => {
     const report = buildPremiumReport({
@@ -118,6 +140,40 @@ describe("buildPremiumReport", () => {
     });
 
     expect(report.isPaid).toBe(false);
+  });
+
+  it("erstellt eine priorisierte Opportunity Roadmap aus analysis.opportunities", () => {
+    const report = buildPremiumReport({
+      analysis: createAnalysis({
+        opportunities: [
+          opportunity({ id: "low", title: "Trust Proof ausbauen", priorityScore: 62, suggestedModule: "Trust Booster Modul", suggestedService: "Trust & Proof Sprint", ctaLabel: "Umsetzung besprechen" }),
+          opportunity({ id: "high", title: "KI FAQ für kaufnahe Fragen aufbauen", priorityScore: 96, suggestedModule: "Smart FAQ Assistant", suggestedService: "AI Visibility Sprint", ctaLabel: "KI-Modul anfragen" }),
+          opportunity({ id: "mid", title: "Hero CTA schärfen", priorityScore: 88 }),
+        ],
+      }),
+      paymentStatus: "paid",
+    });
+
+    expect(report.opportunityRoadmap?.title).toBe("Priorisierte Opportunity Roadmap");
+    expect(report.opportunityRoadmap?.items).toHaveLength(3);
+    expect(report.opportunityRoadmap?.items[0]).toMatchObject({
+      title: "KI FAQ für kaufnahe Fragen aufbauen",
+      nextStep: "Als KI-Modul prüfen.",
+      priorityScore: 96,
+    });
+    expect(report.opportunityRoadmap?.items[1]?.nextStep).toBe("Als Quick Fix priorisieren.");
+    expect(report.opportunityRoadmap?.items.map((item) => item.priorityScore)).toEqual([96, 88, 62]);
+  });
+
+  it("funktioniert unverändert ohne Opportunities", () => {
+    const report = buildPremiumReport({
+      analysis: createAnalysis({ opportunities: undefined }),
+      paymentStatus: "paid",
+    });
+
+    expect(report.opportunityRoadmap).toBeUndefined();
+    expect(report.topRevenueBlockers.length).toBeGreaterThan(0);
+    expect(report.priorityRoadmap.length).toBeGreaterThan(0);
   });
 
   it("formuliert die Conversion-Hypothese als sauberen deutschen Absatz", () => {
@@ -177,7 +233,7 @@ describe("buildPremiumReport", () => {
     expect(text).toContain("schärfen");
     expect(text).toContain("Button");
     expect(text).toContain("Visuelle Führung");
-    expect(text).not.toMatch(/\b(?:schärfen|Führung|nächste|nächsten|für)\b/);
+    expect(text).not.toMatch(/sch\u00c3\u00a4rfen|F\u00c3\u00bchrung|n\u00c3\u00a4chste|n\u00c3\u00a4chsten|f\u00c3\u00bcr/);
     expect(text).not.toContain("Above the fold");
   });
 });

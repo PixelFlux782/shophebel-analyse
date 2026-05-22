@@ -1,6 +1,7 @@
 import {
   ActionMeasure,
   AnalysisCategory,
+  AnalysisOpportunity,
   AnalysisResult,
   Finding,
   PriorityLevel,
@@ -35,6 +36,20 @@ export type PremiumReport = {
     fastestWin: string;
   };
   topRevenueBlockers: PremiumBlocker[];
+  opportunityRoadmap?: {
+    title: string;
+    summary: string;
+    items: Array<{
+      title: string;
+      businessImpact: string;
+      suggestedModule: string;
+      suggestedService: string;
+      implementationEffort: string;
+      expectedEffect: string;
+      nextStep: string;
+      priorityScore: number;
+    }>;
+  };
   priorityRoadmap: string[];
   quickImplementationPlan: Array<{
     days: string;
@@ -304,6 +319,63 @@ function buildPriorityRoadmap(blockers: PremiumBlocker[], result: AnalysisResult
   return (blockerActions.length > 0 ? blockerActions : measureActions).slice(0, 5);
 }
 
+function effortLabel(effort: AnalysisOpportunity["implementationEffort"]) {
+  const labels: Record<AnalysisOpportunity["implementationEffort"], string> = {
+    low: "niedrig",
+    medium: "mittel",
+    high: "hoch",
+  };
+
+  return labels[effort] ?? "mittel";
+}
+
+function nextStepForOpportunity(opportunity: AnalysisOpportunity) {
+  const combined = `${opportunity.ctaLabel} ${opportunity.suggestedService} ${opportunity.suggestedModule}`;
+
+  if (/quick fix|quick/i.test(combined)) {
+    return "Als Quick Fix priorisieren.";
+  }
+
+  if (/conversion|lead|checkout/i.test(combined)) {
+    return "Im Conversion Sprint umsetzen.";
+  }
+
+  if (/(ki|ai|visibility|faq|content automation)/i.test(combined)) {
+    return "Als KI-Modul prüfen.";
+  }
+
+  return "In die Premium Roadmap aufnehmen.";
+}
+
+function buildOpportunityRoadmap(opportunities?: AnalysisOpportunity[]): PremiumReport["opportunityRoadmap"] {
+  const items = Array.isArray(opportunities)
+    ? [...opportunities]
+        .filter((opportunity) => opportunity && typeof opportunity.priorityScore === "number")
+        .sort((left, right) => right.priorityScore - left.priorityScore)
+        .slice(0, 5)
+        .map((opportunity) => ({
+          title: sentenceFragment(opportunity.title, "Priorisierter Opportunity-Hebel"),
+          businessImpact: ensureGermanSentence(opportunity.businessImpact),
+          suggestedModule: normalizeGermanText(opportunity.suggestedModule),
+          suggestedService: normalizeGermanText(opportunity.suggestedService),
+          implementationEffort: effortLabel(opportunity.implementationEffort),
+          expectedEffect: ensureGermanSentence(opportunity.expectedEffect),
+          nextStep: nextStepForOpportunity(opportunity),
+          priorityScore: Math.round(Math.max(0, Math.min(100, opportunity.priorityScore))),
+        }))
+    : [];
+
+  if (items.length === 0) {
+    return undefined;
+  }
+
+  return {
+    title: "Priorisierte Opportunity Roadmap",
+    summary: "Diese Roadmap übersetzt die stärksten Analyse-Opportunities in konkrete Shophebel-Module, Service-Pakete und nächste Umsetzungsschritte.",
+    items,
+  };
+}
+
 function normalizePremiumBlocker(blocker: PremiumBlocker): PremiumBlocker {
   return {
     ...blocker,
@@ -326,6 +398,22 @@ function normalizePremiumReport(report: PremiumReport): PremiumReport {
       fastestWin: sentenceFragment(report.premiumSummary.fastestWin),
     },
     topRevenueBlockers: report.topRevenueBlockers.map(normalizePremiumBlocker),
+    opportunityRoadmap: report.opportunityRoadmap
+      ? {
+          title: normalizeGermanText(report.opportunityRoadmap.title),
+          summary: ensureGermanSentence(report.opportunityRoadmap.summary),
+          items: report.opportunityRoadmap.items.map((item) => ({
+            title: sentenceFragment(item.title),
+            businessImpact: ensureGermanSentence(item.businessImpact),
+            suggestedModule: normalizeGermanText(item.suggestedModule),
+            suggestedService: normalizeGermanText(item.suggestedService),
+            implementationEffort: normalizeGermanText(item.implementationEffort),
+            expectedEffect: ensureGermanSentence(item.expectedEffect),
+            nextStep: ensureGermanSentence(item.nextStep),
+            priorityScore: item.priorityScore,
+          })),
+        }
+      : undefined,
     priorityRoadmap: report.priorityRoadmap.map((item) => normalizeGermanText(item)),
     quickImplementationPlan: report.quickImplementationPlan.map((step) => ({
       days: normalizeGermanText(step.days),
@@ -352,6 +440,7 @@ export function buildPremiumReport(input: {
     isPaid,
     premiumSummary,
     topRevenueBlockers,
+    opportunityRoadmap: buildOpportunityRoadmap(input.analysis.opportunities),
     priorityRoadmap: buildPriorityRoadmap(topRevenueBlockers, input.analysis),
     quickImplementationPlan: buildQuickImplementationPlan(input.analysis, topRevenueBlockers),
     visualAuditNotes: buildVisualAuditNotes(input.analysis),

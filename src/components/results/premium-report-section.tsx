@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { buildOpportunityContactUrl } from "@/lib/opportunity-contact-url";
 import { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import { polishPremiumText } from "@/lib/premium/premiumCopy";
 
@@ -9,6 +10,23 @@ type PremiumReportSectionReport = Partial<PremiumReport> & {
 
 function text(value: unknown, fallback = "Noch nicht im Premium-Report enthalten.") {
   return polishPremiumText(value, fallback);
+}
+
+function optionalText(value: unknown) {
+  return typeof value === "string" ? value : undefined;
+}
+
+function getRoadmapContactHref(
+  item: NonNullable<PremiumReport["opportunityRoadmap"]>["items"][number],
+) {
+  return buildOpportunityContactUrl({
+    opportunityTitle: optionalText(item.title),
+    businessImpact: optionalText(item.businessImpact),
+    suggestedModule: optionalText(item.suggestedModule),
+    suggestedService: optionalText(item.suggestedService),
+    ctaLabel: "Umsetzung besprechen",
+    source: "premium",
+  });
 }
 
 export function PremiumReportSection({
@@ -23,6 +41,7 @@ export function PremiumReportSection({
   const quickImplementationPlan = report.quickImplementationPlan ?? [];
   const visualAuditNotes = report.visualAuditNotes ?? [];
   const priorityRoadmap = report.priorityRoadmap ?? [];
+  const opportunityRoadmap = report.opportunityRoadmap;
   const pdfHref = analysisId
     ? `/api/premium-report/${encodeURIComponent(analysisId)}/pdf`
     : null;
@@ -82,6 +101,65 @@ export function PremiumReportSection({
             </p>
           </article>
         </div>
+
+        {opportunityRoadmap?.items?.length ? (
+          <article className="mt-8 rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.5)]">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
+              Roadmap
+            </p>
+            <h3 className="mt-2 text-2xl font-bold text-slate-950">
+              {text(opportunityRoadmap.title, "Priorisierte Opportunity Roadmap")}
+            </h3>
+            <p className="mt-3 text-sm leading-7 text-slate-700">
+              {text(opportunityRoadmap.summary, "Die wichtigsten Opportunities werden nach Wirkung und Umsetzbarkeit priorisiert.")}
+            </p>
+            <div className="mt-5 grid gap-4">
+              {opportunityRoadmap.items.map((item, index) => (
+                <div key={`${item.priorityScore}-${item.title}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                        Opportunity {index + 1} · Score {item.priorityScore}
+                      </p>
+                      <h4 className="mt-2 text-xl font-bold text-slate-950">{text(item.title)}</h4>
+                    </div>
+                    <span className="rounded-full bg-cyan-100 px-3 py-1 text-xs font-bold text-cyan-900">
+                      Aufwand: {text(item.implementationEffort, "mittel")}
+                    </span>
+                  </div>
+                  <dl className="mt-4 grid gap-3 text-sm leading-7 text-slate-700 md:grid-cols-2">
+                    <div>
+                      <dt className="font-bold text-slate-950">Business Impact</dt>
+                      <dd>{text(item.businessImpact)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-slate-950">Shophebel-Modul</dt>
+                      <dd>{text(item.suggestedModule)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-slate-950">Service-Paket</dt>
+                      <dd>{text(item.suggestedService)}</dd>
+                    </div>
+                    <div>
+                      <dt className="font-bold text-slate-950">Erwarteter Effekt</dt>
+                      <dd>{text(item.expectedEffect)}</dd>
+                    </div>
+                    <div className="md:col-span-2">
+                      <dt className="font-bold text-slate-950">Nächster Schritt</dt>
+                      <dd>{text(item.nextStep)}</dd>
+                    </div>
+                  </dl>
+                  <a
+                    href={getRoadmapContactHref(item)}
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:border-cyan-300 hover:bg-cyan-50 sm:w-auto"
+                  >
+                    Umsetzung besprechen
+                  </a>
+                </div>
+              ))}
+            </div>
+          </article>
+        ) : null}
 
         <div className="mt-8">
           <h3 className="text-2xl font-bold text-slate-950">Top-Umsatzbremsen</h3>

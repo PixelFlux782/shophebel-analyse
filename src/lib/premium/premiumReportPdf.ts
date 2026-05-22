@@ -65,6 +65,7 @@ export function getPremiumReportPdfStaticLabels() {
     "Dein Premium-Report",
     "Management-Zusammenfassung",
     "Top-Umsatzbremsen",
+    "Priorisierte Opportunity Roadmap",
     "Conversion-Hypothese",
     "7-Tage-Plan",
     "Priorisierte Maßnahmen",
@@ -440,6 +441,10 @@ async function renderPremiumReportPdfWithFooterStats({
     ? report.visualAuditNotes
     : [];
   const priorityRoadmap = stringList(report.priorityRoadmap);
+  const opportunityRoadmap = report.opportunityRoadmap;
+  const opportunityRoadmapItems = Array.isArray(opportunityRoadmap?.items)
+    ? opportunityRoadmap.items
+    : [];
   const customerConsultantSections = getCustomerFacingConsultantSections(consultantNotes);
 
   writeCover(doc, analysis);
@@ -485,6 +490,37 @@ async function renderPremiumReportPdfWithFooterStats({
       title: "Keine separaten Umsatzblocker gespeichert",
       tone: "slate",
       body: ["Der Export bleibt nutzbar; für diese Analyse liegen keine Top-Umsatzbremsen im gespeicherten Premium-Report vor."],
+    });
+  }
+
+  if (opportunityRoadmapItems.length > 0) {
+    drawSectionHeader(doc, "Priorisierte Opportunity Roadmap", "Opportunities");
+    writeCard(doc, {
+      title: textValue(opportunityRoadmap?.title, "Priorisierte Opportunity Roadmap"),
+      tone: "cyan",
+      label: "Roadmap",
+      minHeight: 82,
+      body: [
+        textValue(
+          opportunityRoadmap?.summary,
+          "Die wichtigsten Opportunities werden nach Wirkung und Umsetzbarkeit priorisiert.",
+        ),
+      ],
+    });
+    opportunityRoadmapItems.forEach((item, index) => {
+      writeCard(doc, {
+        title: `${index + 1}. ${textValue(item.title, "Opportunity")}`,
+        tone: index === 0 ? "emerald" : index <= 2 ? "amber" : "slate",
+        label: `Score ${textValue(item.priorityScore, String(index + 1))}`,
+        body: [
+          `Business Impact: ${textValue(item.businessImpact, "Nicht im gespeicherten Report enthalten.")}`,
+          `Shophebel-Modul: ${textValue(item.suggestedModule, "Nicht im gespeicherten Report enthalten.")}`,
+          `Service-Paket: ${textValue(item.suggestedService, "Nicht im gespeicherten Report enthalten.")}`,
+          `Aufwand: ${textValue(item.implementationEffort, "mittel")}`,
+          `Erwarteter Effekt: ${textValue(item.expectedEffect, "Nicht im gespeicherten Report enthalten.")}`,
+          `NÃ¤chster Schritt: ${textValue(item.nextStep, "In die Premium Roadmap aufnehmen.")}`,
+        ],
+      });
     });
   }
 

@@ -10,6 +10,14 @@ export type FindingStatus = "success" | "warning" | "error";
 export type AuditCheckStatus = "good" | "warning" | "critical" | "unknown" | "not_checked";
 export type PriorityLevel = "low" | "medium" | "high";
 export type AnalysisMode = "static" | "rendered";
+export type OpportunitySeverity = PriorityLevel | "critical";
+export type OpportunityEffort = PriorityLevel;
+export type OpportunitySourceType =
+  | "revenueBlocker"
+  | "measure"
+  | "finding"
+  | "aiSuggestion"
+  | "fallback";
 
 export interface AnalysisRequest {
   url: string;
@@ -159,6 +167,26 @@ export interface AiSuggestion {
   hotspotId?: string;
 }
 
+export interface AnalysisOpportunity {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  severity: OpportunitySeverity;
+  businessImpact: string;
+  lostRevenueHypothesis?: string;
+  aiOpportunity: string;
+  suggestedModule: string;
+  suggestedService: string;
+  implementationEffort: OpportunityEffort;
+  expectedEffect: string;
+  recurringPotential: boolean;
+  ctaLabel: string;
+  ctaHref: string;
+  sourceType: OpportunitySourceType;
+  priorityScore: number;
+}
+
 export interface AnalysisResult {
   url: string;
   createdAt: string;
@@ -185,6 +213,7 @@ export interface AnalysisResult {
   findings: Finding[];
   recommendations: Recommendation[];
   aiSuggestions?: AiSuggestion[];
+  opportunities?: AnalysisOpportunity[];
 }
 
 export interface CheckResult {

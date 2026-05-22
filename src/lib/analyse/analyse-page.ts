@@ -13,6 +13,7 @@ import { runUxChecks } from "@/lib/analyse/checks/ux-checks";
 import { generateSuggestions } from "@/lib/ai/generate-suggestions";
 import { buildRecommendations } from "@/lib/analyse/recommendations";
 import { buildAnalysisResult, createCategoryScore } from "@/lib/analyse/scoring";
+import { buildAnalysisOpportunities } from "@/lib/analyse/opportunity-engine";
 import { shouldUseRenderedFallback } from "@/lib/analyse/content-quality";
 import { fetchRobotsTxt } from "@/lib/analyse/fetch-robots";
 import {
@@ -120,6 +121,14 @@ async function buildResultFromDocument(
   });
 
   result.aiSuggestions = await generateSuggestions(result);
+  result.opportunities = buildAnalysisOpportunities({
+    revenueBlockers: result.revenueBlockers,
+    measures: result.measures,
+    findings: result.findings,
+    aiSuggestions: result.aiSuggestions,
+    overallScore: result.overallScore,
+    url: result.url,
+  });
 
   return result;
 }

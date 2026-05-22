@@ -128,6 +128,7 @@ describe("premiumReportPdf consultant notes", () => {
 
     expect(labels).toContain("Management-Zusammenfassung");
     expect(labels).toContain("Conversion-Hypothese");
+    expect(labels).toContain("Priorisierte Opportunity Roadmap");
     expect(labels).toContain("Visuelle Prüfung");
     expect(labels).toContain("sichtbarer Startbereich");
     expect(labels).toContain("Umsatzbremsen");
@@ -135,7 +136,7 @@ describe("premiumReportPdf consultant notes", () => {
     expect(labels).not.toContain("Executive Summary");
     expect(labels).not.toContain("Visual Audit Notes");
     expect(labels).not.toContain("Above the fold");
-    expect(labels).not.toMatch(/\b(?:Prüfung|Maßnahmen)\b/);
+    expect(labels).not.toMatch(/Pr\u00c3\u00bcfung|Ma\u00c3\u0178nahmen/);
   });
 
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {
@@ -164,7 +165,9 @@ describe("premiumReportPdf consultant notes", () => {
     expect(text).toContain("Rückgabe früher erklären");
     expect(text).toContain("länger zögern");
     expect(text).toContain("Abschlüsse und Formularnähe");
-    expect(text).not.toMatch(/erklärt|erklären|früher|Rueckgabe|Abschlüsse|Formularnaehe|zoegern|laenger/);
+    expect(text).not.toMatch(
+      /Rueckgabe|Formularnaehe|zoegern|laenger|R\u00c3\u00bcckgabe|fr\u00c3\u00bcher|erkl\u00c3\u00a4ren|Abschl\u00c3\u00bcsse|Formularn\u00c3\u00a4he|l\u00c3\u00a4nger|z\u00c3\u00b6gern/,
+    );
   });
 
   it("rendert PDF-Footer auf bestehenden Seiten ohne Extra-Seiten", async () => {
@@ -180,5 +183,37 @@ describe("premiumReportPdf consultant notes", () => {
     expect(footerPageStats.after).toBe(footerPageStats.before);
     expect(pageCount).toBe(footerPageStats.after);
     expect(source).not.toMatch(/KRITISC\s+H|WICHTI\s+G|KURZFA\s+ZIT|Zus\s+ammenfassung/);
+  });
+
+  it("rendert die Opportunity Roadmap als eigenen PDF-Abschnitt", async () => {
+    const report: PremiumReport = {
+      ...createReport(),
+      opportunityRoadmap: {
+        title: "Priorisierte Opportunity Roadmap",
+        summary: "Die wichtigsten Opportunities werden nach Wirkung und Aufwand sortiert.",
+        items: [
+          {
+            title: "Hero-Botschaft als Anfrage-Hebel schÃ¤rfen",
+            businessImpact: "Besucher verstehen schneller, warum sie anfragen sollten.",
+            suggestedModule: "Conversion Quick Wins",
+            suggestedService: "Quick Fix Sprint",
+            implementationEffort: "niedrig",
+            expectedEffect: "Mehr qualifizierte Anfragen aus bestehendem Traffic.",
+            nextStep: "Als Quick Fix priorisieren.",
+            priorityScore: 94,
+          },
+        ],
+      },
+    };
+    const { pdf } = await renderPremiumReportPdfDiagnostics({
+      analysis: createAnalysis(),
+      report,
+      consultantNotes: {},
+    });
+    const source = pdf.toString("latin1");
+
+    expect(countPdfPages(pdf)).toBeGreaterThan(0);
+    expect(source).toContain("4f70706f72");
+    expect(source).toContain("53686f70686562656c2d4d6f64756c");
   });
 });

@@ -70,6 +70,49 @@ describe("PremiumReportSection", () => {
     expect(markup).not.toContain("Visual Audit Notes");
     expect(markup).not.toContain("Above the fold");
     expect(markup).not.toContain("CTA");
-    expect(markup).not.toContain("Maßnahmen");
+    expect(markup).not.toContain("Ma\u00c3\u0178nahmen");
+  });
+
+  it("rendert die optionale Opportunity Roadmap", () => {
+    const report: PremiumReport = {
+      ...createReport(),
+      opportunityRoadmap: {
+        title: "Priorisierte Opportunity Roadmap",
+        summary: "Die stärksten Chancen werden nach Wirkung und Aufwand geordnet.",
+        items: [
+          {
+            title: "Hero-Botschaft als Anfrage-Hebel schärfen",
+            businessImpact: "Besucher verstehen schneller, warum sie anfragen sollten.",
+            suggestedModule: "Conversion Quick Wins",
+            suggestedService: "Quick Fix Sprint",
+            implementationEffort: "niedrig",
+            expectedEffect: "Mehr qualifizierte Anfragen aus bestehendem Traffic.",
+            nextStep: "Als Quick Fix priorisieren.",
+            priorityScore: 94,
+          },
+        ],
+      },
+    };
+    const markup = renderToStaticMarkup(
+      React.createElement(PremiumReportSection, {
+        report,
+      }),
+    );
+
+    expect(markup).toContain("Priorisierte Opportunity Roadmap");
+    expect(markup).toContain("Business Impact");
+    expect(markup).toContain("Shophebel-Modul");
+    expect(markup).toContain("Service-Paket");
+    expect(markup).toContain("Erwarteter Effekt");
+    expect(markup).toContain("Nächster Schritt");
+    expect(markup).toContain("Schnelle Hebel");
+    expect(markup).toContain("Quick Fix Sprint");
+    expect(markup).toContain("Als Quick Fix priorisieren");
+    expect(markup).toContain("Umsetzung besprechen");
+    expect(markup).toContain("https://shophebel.vercel.app/?opportunity=Hero-Botschaft+als+Anfrage-Hebel+sch%C3%A4rfen");
+    expect(markup).toContain("opportunitySource=premium");
+    expect(markup).toContain("module=Conversion+Quick+Wins");
+    expect(markup).toContain("service=Quick+Fix+Sprint");
+    expect(markup).toContain("#kontakt");
   });
 });

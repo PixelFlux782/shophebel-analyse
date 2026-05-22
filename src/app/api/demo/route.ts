@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { saveAnalysisResult } from "@/lib/analysisStore";
+import { buildAnalysisOpportunities } from "@/lib/analyse/opportunity-engine";
 import { DEMO_ANALYSES } from "@/lib/demoData";
 import { getAnalysisSummary } from "@/lib/result-ui";
 
@@ -20,6 +21,16 @@ export async function POST(request: NextRequest) {
       createdAt: new Date().toISOString(),
       ...DEMO_ANALYSES[type],
     };
+    demoAnalysis.opportunities =
+      demoAnalysis.opportunities ??
+      buildAnalysisOpportunities({
+        revenueBlockers: demoAnalysis.revenueBlockers,
+        measures: demoAnalysis.measures,
+        findings: demoAnalysis.findings,
+        aiSuggestions: demoAnalysis.aiSuggestions,
+        overallScore: demoAnalysis.overallScore,
+        url: demoAnalysis.url,
+      });
     const record = await saveAnalysisResult({ analysis: demoAnalysis, isDemo: true });
 
     return NextResponse.json({

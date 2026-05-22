@@ -6,6 +6,7 @@ import { CheckoutButton } from "@/components/CheckoutButton";
 import { AnalysisSummary } from "@/components/results/analysis-summary";
 import { FindingsList } from "@/components/results/findings-list";
 import { MeasuresPlan } from "@/components/results/measures-plan";
+import { OpportunityList } from "@/components/results/opportunity-list";
 import { PremiumPreviewLock } from "@/components/results/premium-preview-lock";
 import { PremiumReportSection } from "@/components/results/premium-report-section";
 import { PremiumReportRequestButton } from "@/components/results/premium-report-request-button";
@@ -208,6 +209,7 @@ export default async function AnalyseResultPage({
                   "Vollstaendige Findings",
                   "Kategorie-Breakdowns",
                   "Visual Audit",
+                  "Konkrete KI- und Umsatzhebel",
                   "Massnahmen",
                   "AI Visibility",
                   "PDF Export",
@@ -221,6 +223,20 @@ export default async function AnalyseResultPage({
                   </div>
                 ))}
               </div>
+              {analysis.opportunities?.length ? (
+                <div className="mt-5 rounded-[1.2rem] border border-cyan-200 bg-cyan-50 px-4 py-4">
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                    Opportunity Engine
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold text-slate-950">
+                    Wir haben weitere konkrete KI- und Umsatzhebel erkannt.
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">
+                    Die Vollanalyse zeigt die komplette Liste mit Business Impact, KI-Chance,
+                    Shophebel-Modul und dem naechsten sinnvollen Schritt.
+                  </p>
+                </div>
+              ) : null}
               <div className="mt-6 flex flex-wrap gap-3">
                 <CheckoutButton
                   analysisId={result.id}
@@ -243,6 +259,10 @@ export default async function AnalyseResultPage({
 
             <section className="mt-10">
               <ScoreGrid result={analysis} />
+            </section>
+
+            <section className="mt-10">
+              <OpportunityList opportunities={analysis.opportunities} />
             </section>
 
             <section className="mt-10">
