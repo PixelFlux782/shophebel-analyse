@@ -93,6 +93,32 @@ function getHotspotToneClasses(tone: VisualHotspot["tone"]) {
   };
 }
 
+function getBoundedHotspotBox(hotspot: VisualHotspot, baseWidth: number, baseHeight: number) {
+  const rawLeft = (hotspot.x / baseWidth) * 100;
+  const rawTop = (hotspot.y / baseHeight) * 100;
+  const rawWidth = (hotspot.width / baseWidth) * 100;
+  const rawHeight = (hotspot.height / baseHeight) * 100;
+  const left = Math.max(0.75, Math.min(96, rawLeft));
+  const top = Math.max(0.75, Math.min(96, rawTop));
+  const width = Math.max(4, Math.min(99 - left, rawWidth));
+  const height = Math.max(4, Math.min(99 - top, rawHeight));
+  const nearRight = left + width > 72;
+  const nearBottom = top + height > 74;
+
+  return {
+    left,
+    top,
+    width,
+    height,
+    labelStyle: {
+      left: nearRight ? "auto" : "0",
+      right: nearRight ? "0" : "auto",
+      top: nearBottom ? "auto" : "100%",
+      bottom: nearBottom ? "100%" : "auto",
+    },
+  };
+}
+
 export function VisualOverlay({
   imageSrc,
   imageAlt,
@@ -112,12 +138,12 @@ export function VisualOverlay({
   const [imageFailed, setImageFailed] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
   const noteRefs = useRef<Record<string, HTMLElement | null>>({});
   const mappedWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
   const mappedHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
   const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
   const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
-  const aspectRatio = `${baseWidth} / ${baseHeight}`;
   const lightboxNotes = useMemo(
     () => mergeNotes(notes, buildHotspotNotes(hotspots, suggestions, variant)),
     [hotspots, notes, suggestions, variant],
@@ -139,17 +165,22 @@ export function VisualOverlay({
   }, [activeFilter, filteredNotes, hotspots]);
 
   useEffect(() => {
-    const timeout = window.setTimeout(() => {
-      setImageLoaded(false);
-      setImageFailed(false);
-      setNaturalSize(null);
-      setShowHintCards(true);
-      setShowHotspots(true);
-      setActiveHotspotId(null);
-      setActiveFilter("alle");
-    }, 0);
+    setImageLoaded(false);
+    setImageFailed(false);
+    setNaturalSize(null);
+    setShowHintCards(true);
+    setShowHotspots(true);
+    setActiveHotspotId(null);
+    setActiveFilter("alle");
 
-    return () => window.clearTimeout(timeout);
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth > 0) {
+      setNaturalSize({
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+      });
+      setImageLoaded(true);
+    }
   }, [imageSrc]);
 
   const focusNote = (hotspotId: string) => {
@@ -206,28 +237,76 @@ export function VisualOverlay({
 
       <div className={`mt-4 grid gap-4 ${showHintCards && lightboxNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
         <div className="relative overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-          <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio }}>
+          <div className="max-h-[clamp(34rem,72vh,58rem)] overflow-auto bg-slate-100">
             {!imageFailed ? (
-              <img
-                src={imageSrc}
-                alt={imageAlt}
-                loading="lazy"
-                onLoad={(event) => {
-                  const image = event.currentTarget;
-                  setNaturalSize({
-                    width: image.naturalWidth,
-                    height: image.naturalHeight,
-                  });
-                  setImageLoaded(true);
-                }}
-                onError={() => {
-                  setImageFailed(true);
-                  setImageLoaded(false);
-                }}
-                className="absolute inset-0 h-full w-full object-fill object-top"
-              />
+              <div className="relative min-h-[18rem] w-full">
+                <img
+                  ref={imageRef}
+                  src={imageSrc}
+                  alt={imageAlt}
+                  loading="lazy"
+                  onLoad={(event) => {
+                    const image = event.currentTarget;
+                    setNaturalSize({
+                      width: image.naturalWidth,
+                      height: image.naturalHeight,
+                    });
+                    setImageLoaded(true);
+                  }}
+                  onError={() => {
+                    setImageFailed(true);
+                    setImageLoaded(false);
+                  }}
+                  className="block h-auto w-full bg-white object-contain object-top"
+                />
+
+                {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
+                  <div className="pointer-events-none absolute inset-0 z-20">
+                    {visibleHotspots.map((hotspot, index) => {
+                      const tone = getHotspotToneClasses(hotspot.tone);
+                      const box = getBoundedHotspotBox(hotspot, baseWidth, baseHeight);
+                      const isActive = activeHotspotId === hotspot.id;
+
+                      return (
+                        <button
+                          key={hotspot.id}
+                          type="button"
+                          onClick={() => focusNote(hotspot.id)}
+                          className={`group pointer-events-auto absolute rounded-xl text-left outline-none transition ${
+                            isActive ? "z-40 ring-4 ring-cyan-300/40" : "z-20"
+                          }`}
+                          style={{
+                            left: `${box.left}%`,
+                            top: `${box.top}%`,
+                            width: `${box.width}%`,
+                            height: `${box.height}%`,
+                          }}
+                          aria-label={`Marker ${index + 1}: ${hotspot.title}`}
+                        >
+                          <div className={`relative h-full min-h-11 w-full min-w-11 rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}>
+                            <div className="absolute left-2 top-2 z-30 flex max-w-[calc(100%-1rem)] items-center gap-2">
+                              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white text-xs font-bold text-white shadow-lg ${tone.dot}`}>
+                                {index + 1}
+                              </span>
+                              <span className={`hidden max-w-[9rem] truncate rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] shadow sm:inline-flex ${tone.badge}`}>
+                                {hotspot.tone === "problem" ? "Problem" : hotspot.tone === "good" ? "Chance" : "Wichtig"}
+                              </span>
+                            </div>
+                            <span
+                              className="absolute z-30 mt-2 hidden max-w-[min(13rem,calc(100vw-3rem))] rounded-xl border border-slate-200 bg-white/98 px-3 py-2 text-xs font-bold leading-5 text-slate-950 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.45)] group-hover:block group-focus-visible:block"
+                              style={box.labelStyle}
+                            >
+                              {hotspot.title}
+                            </span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-100">
+              <div className="flex min-h-[24rem] items-center justify-center bg-slate-100">
                 <div className="w-2/3 max-w-lg rounded-2xl border border-slate-200 bg-white/80 p-6 text-center">
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Screenshot nicht geladen
@@ -238,58 +317,6 @@ export function VisualOverlay({
                 </div>
               </div>
             )}
-
-            {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
-              <div className="pointer-events-none absolute inset-0">
-                {visibleHotspots.map((hotspot, index) => {
-                  const tone = getHotspotToneClasses(hotspot.tone);
-                  const left = Math.max(1.2, Math.min(96, (hotspot.x / baseWidth) * 100));
-                  const top = Math.max(1.2, Math.min(96, (hotspot.y / baseHeight) * 100));
-                  const width = Math.max(4, Math.min(98 - left, (hotspot.width / baseWidth) * 100));
-                  const height = Math.max(4, Math.min(98 - top, (hotspot.height / baseHeight) * 100));
-                  const labelRight = left > 72 ? "0" : "auto";
-                  const labelLeft = left > 72 ? "auto" : "0";
-                  const labelBottom = top > 76 ? "100%" : "auto";
-                  const labelTop = top > 76 ? "auto" : "100%";
-                  const isActive = activeHotspotId === hotspot.id;
-
-                  return (
-                    <button
-                      key={hotspot.id}
-                      type="button"
-                      onClick={() => focusNote(hotspot.id)}
-                      className={`group pointer-events-auto absolute rounded-xl text-left outline-none transition ${
-                        isActive ? "z-40 ring-4 ring-cyan-300/40" : "z-20"
-                      }`}
-                      style={{
-                        left: `${left}%`,
-                        top: `${top}%`,
-                        width: `${width}%`,
-                        height: `${height}%`,
-                      }}
-                      aria-label={`Marker ${index + 1}: ${hotspot.title}`}
-                    >
-                      <div className={`relative h-full w-full rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}>
-                        <div className="absolute left-2 top-2 z-30 flex items-center gap-2">
-                          <span className={`grid h-7 w-7 place-items-center rounded-full border border-white text-xs font-bold text-white shadow-lg ${tone.dot}`}>
-                            {index + 1}
-                          </span>
-                          <span className={`hidden rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] shadow sm:inline-flex ${tone.badge}`}>
-                            {hotspot.tone === "problem" ? "Problem" : hotspot.tone === "good" ? "Chance" : "Wichtig"}
-                          </span>
-                        </div>
-                        <span
-                          className="absolute z-30 mt-2 hidden max-w-[13rem] rounded-xl border border-slate-200 bg-white/98 px-3 py-2 text-xs font-bold leading-5 text-slate-950 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.45)] group-hover:block group-focus-visible:block"
-                          style={{ left: labelLeft, right: labelRight, top: labelTop, bottom: labelBottom }}
-                        >
-                          {hotspot.title}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            ) : null}
           </div>
         </div>
 

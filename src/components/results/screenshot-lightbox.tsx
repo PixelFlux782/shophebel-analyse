@@ -36,6 +36,32 @@ interface ScreenshotLightboxProps {
   onSelect: (index: number) => void;
 }
 
+function getBoundedHotspotBox(hotspot: VisualHotspot, mappedWidth: number, mappedHeight: number) {
+  const rawLeft = (hotspot.x / mappedWidth) * 100;
+  const rawTop = (hotspot.y / mappedHeight) * 100;
+  const rawWidth = (hotspot.width / mappedWidth) * 100;
+  const rawHeight = (hotspot.height / mappedHeight) * 100;
+  const left = Math.max(0.75, Math.min(96, rawLeft));
+  const top = Math.max(0.75, Math.min(96, rawTop));
+  const width = Math.max(4, Math.min(99 - left, rawWidth));
+  const height = Math.max(4, Math.min(99 - top, rawHeight));
+  const nearRight = left + width > 72;
+  const nearBottom = top + height > 74;
+
+  return {
+    left,
+    top,
+    width,
+    height,
+    labelStyle: {
+      left: nearRight ? "auto" : "0",
+      right: nearRight ? "0" : "auto",
+      top: nearBottom ? "auto" : "100%",
+      bottom: nearBottom ? "100%" : "auto",
+    },
+  };
+}
+
 export function ScreenshotLightbox({
   images,
   currentIndex,
@@ -149,14 +175,14 @@ export function ScreenshotLightbox({
       role="dialog"
       aria-modal="true"
       aria-label={`${currentImage.title} in Vollansicht`}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/88 px-3 py-4 backdrop-blur-xl sm:px-6 sm:py-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/88 px-3 py-3 backdrop-blur-xl sm:px-5 sm:py-5"
       onMouseDown={onClose}
     >
       <div
-        className="relative flex h-full max-h-[92vh] w-full max-w-7xl flex-col overflow-hidden rounded-[1.5rem] border border-white/12 bg-slate-950/85 shadow-[0_36px_120px_-45px_rgba(0,0,0,0.85)]"
+        className="relative flex h-full max-h-[96vh] w-full max-w-[96rem] flex-col overflow-hidden rounded-[1.5rem] border border-white/12 bg-slate-950/85 shadow-[0_36px_120px_-45px_rgba(0,0,0,0.85)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
-        <div className="flex min-h-16 items-center justify-between gap-3 border-b border-white/10 bg-white/6 px-4 py-3 backdrop-blur-xl sm:px-5">
+        <div className="sticky top-0 z-50 flex min-h-16 items-center justify-between gap-3 border-b border-white/10 bg-slate-950/92 px-4 py-3 backdrop-blur-xl sm:px-5">
           <div className="min-w-0">
             <p className="truncate text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
               Vollansicht
@@ -164,6 +190,13 @@ export function ScreenshotLightbox({
             <p className="mt-1 truncate text-sm text-slate-300">{currentImage.title}</p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-cyan-300/35 bg-cyan-300 px-4 py-2 text-xs font-bold text-slate-950 shadow-lg transition hover:border-cyan-200 hover:bg-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
+            >
+              Zurück
+            </button>
             {hasMarkers ? (
               <button
                 type="button"
@@ -197,24 +230,17 @@ export function ScreenshotLightbox({
             showNotes || !hasNotes ? "lg:grid-cols-[minmax(0,1fr)_25rem]" : "lg:grid-cols-[minmax(0,1fr)_0rem]"
           }`}
         >
-          <div className="relative flex min-h-0 items-center justify-center overflow-auto p-3 sm:p-5">
-            <div className="relative max-h-full max-w-full">
+          <div className="relative min-h-0 overflow-auto p-3 sm:p-5">
+            <div className="relative mx-auto w-full max-w-6xl">
               <img
                 src={currentImage.src}
                 alt={currentImage.alt}
-                className="max-h-[calc(100vh-9rem)] max-w-full rounded-xl border border-white/10 bg-white object-contain shadow-[0_26px_90px_-50px_rgba(0,0,0,0.9)]"
+                className="block h-auto w-full rounded-xl border border-white/10 bg-white object-contain object-top shadow-[0_26px_90px_-50px_rgba(0,0,0,0.9)]"
               />
               {hasMarkers && showMarkers ? (
                 <div className="pointer-events-none absolute inset-0 z-20">
                   {visibleHotspots.map((hotspot, index) => {
-                    const left = Math.max(1.5, Math.min(94, (hotspot.x / mappedWidth) * 100));
-                    const top = Math.max(1.5, Math.min(94, (hotspot.y / mappedHeight) * 100));
-                    const width = Math.max(4, Math.min(98 - left, (hotspot.width / mappedWidth) * 100));
-                    const height = Math.max(4, Math.min(98 - top, (hotspot.height / mappedHeight) * 100));
-                    const labelLeft = left > 72 ? "auto" : left < 12 ? "0" : "0";
-                    const labelRight = left > 72 ? "0" : "auto";
-                    const labelTop = top > 78 ? "auto" : "100%";
-                    const labelBottom = top > 78 ? "100%" : "auto";
+                    const box = getBoundedHotspotBox(hotspot, mappedWidth, mappedHeight);
                     const isActive = activeHotspotId === hotspot.id;
 
                     return (
@@ -232,10 +258,10 @@ export function ScreenshotLightbox({
                                 : "z-20 border-amber-300 bg-amber-300/16"
                         }`}
                         style={{
-                          left: `${left}%`,
-                          top: `${top}%`,
-                          width: `${width}%`,
-                          height: `${height}%`,
+                          left: `${box.left}%`,
+                          top: `${box.top}%`,
+                          width: `${box.width}%`,
+                          height: `${box.height}%`,
                         }}
                         aria-label={`Marker ${index + 1}: ${hotspot.title}`}
                       >
@@ -243,8 +269,8 @@ export function ScreenshotLightbox({
                           {index + 1}
                         </span>
                         <span
-                          className="absolute z-30 mt-2 max-w-[13rem] rounded-xl border border-white/20 bg-slate-950/92 px-3 py-2 text-xs font-bold leading-5 text-white shadow-xl"
-                          style={{ left: labelLeft, right: labelRight, top: labelTop, bottom: labelBottom }}
+                          className="absolute z-30 mt-2 max-w-[min(14rem,calc(100vw-3rem))] rounded-xl border border-white/20 bg-slate-950/92 px-3 py-2 text-xs font-bold leading-5 text-white shadow-xl"
+                          style={box.labelStyle}
                         >
                           {hotspot.title}
                         </span>
