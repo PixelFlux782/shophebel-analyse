@@ -88,7 +88,7 @@ async function markAnalysisPaid(input: {
     stripe_customer_email: getCustomerEmail(input.session),
     product_type: productType,
     plan,
-    ...(plan === "premium" ? { is_premium: true } : {}),
+    is_premium: plan === "premium",
   };
 
   const response = await fetch(
@@ -147,6 +147,14 @@ function normalizePaidPlan(metadata: CheckoutSessionMetadata): PaidPlan | null {
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const metadata = (session.metadata ?? {}) as CheckoutSessionMetadata;
   const analysisId = metadata.analysisId?.trim();
+
+  if (session.payment_status !== "paid") {
+    console.warn("[stripe-webhook] checkout.session.completed without paid payment_status", {
+      sessionId: session.id,
+      paymentStatus: session.payment_status,
+    });
+    return;
+  }
 
   if (!analysisId) {
     console.warn("[stripe-webhook] checkout.session.completed without analysisId metadata");

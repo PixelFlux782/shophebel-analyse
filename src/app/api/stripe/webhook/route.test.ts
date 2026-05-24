@@ -42,6 +42,7 @@ function createCheckoutCompletedEvent(metadata: Record<string, string> = {
     data: {
       object: {
         id: "cs_test_123",
+        payment_status: "paid",
         metadata,
         customer_details: {
           email: "kunde@example.test",
@@ -139,7 +140,7 @@ describe("POST /api/stripe/webhook", () => {
     expect(payload.access_level).toBe("full");
     expect(payload.product_type).toBe("full_analysis");
     expect(payload.plan).toBe("full");
-    expect(payload.is_premium).toBeUndefined();
+    expect(payload.is_premium).toBe(false);
   });
 
   it("ignoriert unbekannten productType und schreibt nichts", async () => {

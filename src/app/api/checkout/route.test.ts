@@ -113,7 +113,7 @@ describe("POST /api/checkout", () => {
     expect(createMockSession).toHaveBeenCalledOnce();
     expect(createMockSession).toHaveBeenCalledWith(expect.objectContaining({
       success_url: expect.stringContaining(
-        "/analyse/result/analysis-456?upgrade=premium&success=true",
+        "/checkout/success?analysisId=analysis-456&upgrade=premium&success=true",
       ),
       cancel_url: expect.stringContaining("/analyse/result/analysis-456"),
       line_items: [

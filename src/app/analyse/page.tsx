@@ -10,7 +10,9 @@ interface AnalysePageProps {
 export default async function AnalysePage({ searchParams }: AnalysePageProps) {
   const params = await searchParams;
   const urlParam = params.url;
+  const planParam = params.plan;
   const initialUrl = typeof urlParam === "string" ? urlParam : "";
+  const initialPlan = planParam === "full" || planParam === "premium" ? planParam : undefined;
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-slate-950">
@@ -62,7 +64,7 @@ export default async function AnalysePage({ searchParams }: AnalysePageProps) {
           </section>
 
           <section className="lg:pl-4">
-            <UrlForm initialUrl={initialUrl} />
+            <UrlForm initialUrl={initialUrl} initialPlan={initialPlan} />
           </section>
         </div>
       </main>

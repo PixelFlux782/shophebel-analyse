@@ -3,10 +3,12 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { buildCheckoutRequestPayload, CheckoutPlan } from "@/lib/checkout-client";
 import { AnalysisResult } from "@/types/analysis";
 
 interface UrlFormProps {
   initialUrl?: string;
+  initialPlan?: CheckoutPlan;
 }
 
 const DEMO_OPTIONS = [
@@ -37,7 +39,7 @@ const TRUST_BADGES = [
   "Premium-Report optional",
 ];
 
-export function UrlForm({ initialUrl = "" }: UrlFormProps) {
+export function UrlForm({ initialUrl = "", initialPlan }: UrlFormProps) {
   const router = useRouter();
   const [url, setUrl] = useState(initialUrl);
   const [error, setError] = useState("");
@@ -68,6 +70,28 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
 
       if (!response.ok || !payload.id) {
         throw new Error(payload.error || "Analyse konnte nicht gestartet werden.");
+      }
+
+      if (initialPlan) {
+        const checkoutResponse = await fetch("/api/checkout", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(buildCheckoutRequestPayload({
+            analysisId: payload.id,
+            productType: initialPlan === "full" ? "full_analysis" : "premium_report",
+            plan: initialPlan,
+          })),
+        });
+        const checkoutPayload = (await checkoutResponse.json()) as { url?: string; error?: string };
+
+        if (!checkoutResponse.ok || !checkoutPayload.url) {
+          throw new Error(checkoutPayload.error || "Checkout konnte nicht gestartet werden.");
+        }
+
+        window.location.href = checkoutPayload.url;
+        return;
       }
 
       router.push(`/analyse/result/${payload.id}`);
@@ -150,7 +174,17 @@ export function UrlForm({ initialUrl = "" }: UrlFormProps) {
             className="group relative mt-5 inline-flex w-full items-center justify-center overflow-hidden rounded-2xl bg-cyan-400 px-5 py-4 text-base font-bold text-slate-950 shadow-[0_18px_60px_-28px_rgba(34,211,238,0.9)] transition-all hover:-translate-y-0.5 hover:bg-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-200 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-70"
           >
             <div className="absolute inset-0 translate-x-[-100%] bg-[linear-gradient(110deg,rgba(255,255,255,0)_0%,rgba(255,255,255,0.38)_50%,rgba(255,255,255,0)_100%)] transition-transform duration-700 ease-in-out group-hover:translate-x-[100%]" />
-            <span className="relative">{isSubmitting ? "Analyse laeuft..." : "Kostenlose Analyse starten"}</span>
+            <span className="relative">
+              {isSubmitting
+                ? initialPlan
+                  ? "Analyse und Checkout werden vorbereitet..."
+                  : "Analyse laeuft..."
+                : initialPlan === "full"
+                  ? "Analyse starten und Vollanalyse freischalten"
+                  : initialPlan === "premium"
+                    ? "Analyse starten und Premium-Report kaufen"
+                    : "Kostenlose Analyse starten"}
+            </span>
           </button>
 
           <div className="mt-5 flex flex-wrap gap-2">

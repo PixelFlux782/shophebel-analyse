@@ -15,6 +15,7 @@ interface CheckoutSuccessPageProps {
   searchParams?: Promise<{
     analysisId?: string | string[];
     analysis?: string | string[];
+    upgrade?: string | string[];
   }>;
 }
 
@@ -29,9 +30,12 @@ export default async function CheckoutSuccessPage({
   const analysisId =
     getFirstSearchParam(resolvedSearchParams.analysisId) ??
     getFirstSearchParam(resolvedSearchParams.analysis);
+  const upgrade = getFirstSearchParam(resolvedSearchParams.upgrade);
+  const normalizedUpgrade = upgrade === "full" || upgrade === "premium" ? upgrade : "premium";
   const resultHref = analysisId
-    ? `/analyse/result/${encodeURIComponent(analysisId)}`
+    ? `/analyse/result/${encodeURIComponent(analysisId)}?upgrade=${normalizedUpgrade}&success=true`
     : null;
+  const isFull = normalizedUpgrade === "full";
 
   return (
     <main className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 px-4 py-16 text-slate-950 sm:px-6 lg:px-8">
@@ -56,21 +60,22 @@ export default async function CheckoutSuccessPage({
           Zahlung erfolgreich
         </p>
         <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
-          Deine Premium-Analyse ist bereit
+          {isFull ? "Deine Vollanalyse ist bereit" : "Deine Premium-Analyse ist bereit"}
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
-          Premium wird freigeschaltet. Du kannst direkt zur Analyse zurückkehren
-          und die erweiterten Inhalte ansehen.
+          {isFull
+            ? "Die Vollanalyse wird freigeschaltet. Du kannst direkt zur Analyse zurueckkehren und alle Detailbereiche ansehen."
+            : "Der Premium-Report wird freigeschaltet. Du kannst direkt zur Analyse zurueckkehren und den Report ansehen."}
         </p>
 
         {resultHref ? (
-          <SuccessRedirect resultHref={resultHref} />
+          <SuccessRedirect resultHref={resultHref} plan={normalizedUpgrade} />
         ) : (
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-left text-sm leading-7 text-amber-900">
             <p className="font-semibold">Analyse-ID fehlt</p>
             <p className="mt-1">
-              Die Zahlung war erfolgreich, aber der Link enthält keine
-              Analyse-ID. Öffne deine Analyse erneut oder kontaktiere uns,
+              Die Zahlung war erfolgreich, aber der Link enthaelt keine
+              Analyse-ID. Oeffne deine Analyse erneut oder kontaktiere uns,
               falls die Freischaltung nicht sichtbar ist.
             </p>
             <Link

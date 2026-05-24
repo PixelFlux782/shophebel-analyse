@@ -141,7 +141,8 @@ export async function POST(request: NextRequest) {
 
     const product = checkoutProducts[plan];
     const accessLevel = productTypeToAccessLevel(product.productType);
-    const successUrl = new URL(`/analyse/result/${encodeURIComponent(body.analysisId)}`, APP_URL);
+    const successUrl = new URL("/checkout/success", APP_URL);
+    successUrl.searchParams.set("analysisId", body.analysisId);
     successUrl.searchParams.set("upgrade", plan);
     successUrl.searchParams.set("success", "true");
     const cancelUrl = new URL(`/analyse/result/${encodeURIComponent(body.analysisId)}`, APP_URL);

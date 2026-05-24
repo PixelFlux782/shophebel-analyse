@@ -63,7 +63,7 @@ export function PremiumUpgradeCard({
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-cyan-200">
             Preis
           </p>
-          <p className="mt-3 text-5xl font-semibold">9,99 EUR</p>
+          <p className="mt-3 text-5xl font-semibold">5 EUR</p>
           <p className="mt-3 text-sm leading-7 text-slate-200">
             Ein sinnvoller nächster Schritt, wenn du aus dieser Analyse konkrete Prioritäten und mehr Sicherheit für die Optimierung ableiten willst.
           </p>
