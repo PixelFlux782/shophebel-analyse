@@ -42,6 +42,16 @@ function ScreenshotImage({
     return () => window.clearTimeout(timeout);
   }, [src]);
 
+  const handleImageError = () => {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[screenshot-gallery] Screenshot image failed to load", {
+        src,
+      });
+    }
+
+    setFailed(true);
+  };
+
   return (
     <article className="rounded-[1.45rem] border border-slate-200 bg-slate-50/80 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -69,7 +79,7 @@ function ScreenshotImage({
                 src={src}
                 alt={alt}
                 loading="lazy"
-                onError={() => setFailed(true)}
+                onError={handleImageError}
                 className="h-auto w-full object-top"
               />
               <button

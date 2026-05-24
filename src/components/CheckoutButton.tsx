@@ -13,7 +13,7 @@ interface CheckoutButtonProps {
 
 export function CheckoutButton({
   analysisId,
-  label = "Vollanalyse fuer 5 EUR freischalten",
+  label = "Vollanalyse für 5 EUR freischalten",
   className = "",
   plan = "full",
 }: CheckoutButtonProps) {

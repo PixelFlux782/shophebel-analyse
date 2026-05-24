@@ -1,9 +1,10 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const { createMockSession, getAnalysisResultMock } = vi.hoisted(() => ({
+const { createMockSession, getAnalysisResultMock, markAnalysisPendingMock } = vi.hoisted(() => ({
   createMockSession: vi.fn(),
   getAnalysisResultMock: vi.fn(),
+  markAnalysisPendingMock: vi.fn(),
 }));
 
 vi.mock("stripe", () => {
@@ -20,6 +21,7 @@ vi.mock("stripe", () => {
 
 vi.mock("@/lib/analysisStore", () => ({
   getAnalysisResult: getAnalysisResultMock,
+  markAnalysisPending: markAnalysisPendingMock,
 }));
 
 function createRequest(body: unknown) {
@@ -40,6 +42,8 @@ describe("POST /api/checkout", () => {
     delete process.env.STRIPE_PREMIUM_ANALYSIS_PRICE_ID;
     createMockSession.mockReset();
     getAnalysisResultMock.mockReset();
+    markAnalysisPendingMock.mockReset();
+    markAnalysisPendingMock.mockResolvedValue(undefined);
     getAnalysisResultMock.mockResolvedValue({
       id: "analysis-123",
       analysis: { url: "https://shop.test" },
@@ -121,9 +125,73 @@ describe("POST /api/checkout", () => {
       metadata: {
         analysisId: "analysis-456",
         productType: "premium_report",
+        accessLevel: "premium",
         plan: "premium",
       },
     }));
+    expect(payload.url).toBe("https://checkout.stripe.com/pay/test-session");
+    expect(markAnalysisPendingMock).toHaveBeenCalledWith("analysis-456", "premium_report", "premium");
+  });
+
+  it("setzt accessLevel full für full_analysis", async () => {
+    process.env.STRIPE_SECRET_KEY = "sk_test_123";
+    process.env.STRIPE_FULL_ANALYSIS_PRICE_ID = "price_full_123";
+    createMockSession.mockResolvedValue({
+      url: "https://checkout.stripe.com/pay/test-session",
+    });
+
+    const { POST } = await import("@/app/api/checkout/route");
+
+    const response = await POST(createRequest({
+      analysisId: "analysis-789",
+      productType: "full_analysis",
+      plan: "full",
+    }));
+
+    expect(response.status).toBe(200);
+    expect(createMockSession).toHaveBeenCalledWith(expect.objectContaining({
+      metadata: {
+        analysisId: "analysis-789",
+        productType: "full_analysis",
+        accessLevel: "full",
+        plan: "full",
+      },
+    }));
+    expect(markAnalysisPendingMock).toHaveBeenCalledWith("analysis-789", "full_analysis", "full");
+  });
+
+  it("lehnt ungültigen productType ab", async () => {
+    const { POST } = await import("@/app/api/checkout/route");
+
+    const response = await POST(createRequest({
+      analysisId: "analysis-999",
+      productType: "invalid_type",
+    }));
+    const payload = (await response.json()) as { error: string };
+
+    expect(response.status).toBe(400);
+    expect(payload.error).toContain("Produkt-Typ");
+    expect(createMockSession).not.toHaveBeenCalled();
+    expect(markAnalysisPendingMock).not.toHaveBeenCalled();
+  });
+
+  it("ignoriert fehlende markAnalysisPending und fährt mit Checkout fort", async () => {
+    process.env.STRIPE_SECRET_KEY = "sk_test_123";
+    process.env.STRIPE_PREMIUM_ANALYSIS_PRICE_ID = "price_premium_123";
+    createMockSession.mockResolvedValue({
+      url: "https://checkout.stripe.com/pay/test-session",
+    });
+    markAnalysisPendingMock.mockRejectedValue(new Error("Supabase not configured"));
+
+    const { POST } = await import("@/app/api/checkout/route");
+
+    const response = await POST(createRequest({
+      analysisId: "analysis-123",
+      plan: "premium",
+    }));
+    const payload = (await response.json()) as { url: string };
+
+    expect(response.status).toBe(200);
     expect(payload.url).toBe("https://checkout.stripe.com/pay/test-session");
   });
 

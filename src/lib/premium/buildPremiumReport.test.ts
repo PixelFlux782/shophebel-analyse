@@ -142,7 +142,7 @@ describe("buildPremiumReport", () => {
     expect(report.isPaid).toBe(false);
   });
 
-  it("erstellt eine priorisierte Opportunity Roadmap aus analysis.opportunities", () => {
+  it("erstellt einen priorisierten Maßnahmenplan aus analysis.opportunities", () => {
     const report = buildPremiumReport({
       analysis: createAnalysis({
         opportunities: [
@@ -154,7 +154,7 @@ describe("buildPremiumReport", () => {
       paymentStatus: "paid",
     });
 
-    expect(report.opportunityRoadmap?.title).toBe("Priorisierte Opportunity Roadmap");
+    expect(report.opportunityRoadmap?.title).toBe("Priorisierter Maßnahmenplan");
     expect(report.opportunityRoadmap?.items).toHaveLength(3);
     expect(report.opportunityRoadmap?.items[0]).toMatchObject({
       title: "KI FAQ für kaufnahe Fragen aufbauen",

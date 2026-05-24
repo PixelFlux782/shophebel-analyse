@@ -1,4 +1,4 @@
-import { AnalysisResult } from "@/types/analysis";
+import { AnalysisResult, AnalysisScreenshots } from "@/types/analysis";
 import { getVisualHotspots, VisualHotspotTarget } from "@/lib/result-ui";
 
 import { ScreenshotFallback } from "@/components/results/screenshot-fallback";
@@ -8,6 +8,24 @@ import { VisualOverlay } from "@/components/results/visual-overlay";
 
 interface VisualPreviewCardProps {
   result: AnalysisResult;
+}
+
+export function getVisualPreviewCardState(screenshots: AnalysisScreenshots | undefined) {
+  const primaryVariant: keyof AnalysisScreenshots | null = screenshots?.viewport
+    ? "viewport"
+    : screenshots?.fullPage
+      ? "fullPage"
+      : screenshots?.hero
+        ? "hero"
+        : screenshots?.mobile
+          ? "mobile"
+          : null;
+
+  return {
+    hasPreview: Boolean(primaryVariant),
+    primaryVariant,
+    primaryImage: primaryVariant ? screenshots?.[primaryVariant] : undefined,
+  };
 }
 
 function notesForBlock(
@@ -50,17 +68,8 @@ function buildScreenshotNotes(result: AnalysisResult) {
 
 export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
   const screenshots = result.screenshots;
-  const hasPreview = Boolean(
-    screenshots?.viewport || screenshots?.fullPage || screenshots?.hero,
-  );
-  const primaryVariant: keyof NonNullable<typeof screenshots> | null = screenshots?.viewport
-    ? "viewport"
-    : screenshots?.fullPage
-      ? "fullPage"
-      : screenshots?.hero
-        ? "hero"
-        : null;
-  const primaryImage = primaryVariant ? screenshots?.[primaryVariant] : undefined;
+  const { hasPreview, primaryVariant, primaryImage } = getVisualPreviewCardState(screenshots);
+  const hasOverlayPreview = primaryVariant !== "mobile";
   const overlayTarget: VisualHotspotTarget =
     primaryVariant === "viewport" ? "viewport" : "fullPage";
   const hotspots = getVisualHotspots(result, overlayTarget);
@@ -90,7 +99,7 @@ export function VisualPreviewCard({ result }: VisualPreviewCardProps) {
         Die markierten Bereiche helfen dir, Probleme, Chancen und starke Signale direkt in deinem sichtbaren Layout nachzuvollziehen.
       </p>
 
-      {hasPreview && screenshots && primaryImage && result.visualMap ? (
+      {hasPreview && screenshots && primaryImage && hasOverlayPreview && result.visualMap ? (
         <div className="mt-6 space-y-5">
           <VisualOverlay
             imageSrc={primaryImage}

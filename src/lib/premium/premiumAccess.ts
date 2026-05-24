@@ -1,7 +1,8 @@
 export type AnalysisPlan = "free" | "full" | "premium";
-export type PaymentStatus = "free" | "unpaid" | "paid" | string;
+export type PaymentStatus = "free" | "pending" | "paid" | "failed" | string;
 
 export type AnalysisAccessInput = {
+  accessLevel?: string | null;
   paymentStatus?: PaymentStatus | null;
   plan?: string | null;
   productType?: string | null;
@@ -28,31 +29,33 @@ function normalizePlan(value?: string | null): AnalysisPlan | null {
   return null;
 }
 
+function normalizeAccessLevel(value?: string | null): AnalysisPlan | null {
+  return normalizePlan(value);
+}
+
 export function resolveAnalysisPlan(input: AnalysisAccessInput = {}): AnalysisPlan {
-  if (input.isPremium) {
-    return "premium";
-  }
+  const paymentStatus = input.paymentStatus?.trim() ?? "free";
+  const accessLevel = normalizeAccessLevel(input.accessLevel);
+  const productPlan = normalizePlan(input.productType);
+  const legacyPlan = normalizePlan(input.plan);
 
-  const normalizedPlan = normalizePlan(input.plan);
-  const normalizedProductType = normalizePlan(input.productType);
+  if (paymentStatus === "paid") {
+    if (accessLevel) {
+      return accessLevel;
+    }
 
-  if (
-    input.paymentStatus === "paid" &&
-    (!normalizedPlan || normalizedPlan === "free") &&
-    (!normalizedProductType || normalizedProductType === "free")
-  ) {
-    return "premium";
-  }
+    if (productPlan) {
+      return productPlan;
+    }
 
-  if (normalizedPlan) {
-    return normalizedPlan;
-  }
+    if (legacyPlan) {
+      return legacyPlan;
+    }
 
-  if (normalizedProductType) {
-    return normalizedProductType;
-  }
+    if (input.isPremium) {
+      return "premium";
+    }
 
-  if (input.paymentStatus === "paid") {
     return "premium";
   }
 

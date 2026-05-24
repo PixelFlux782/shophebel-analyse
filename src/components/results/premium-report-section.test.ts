@@ -73,11 +73,11 @@ describe("PremiumReportSection", () => {
     expect(markup).not.toContain("Ma\u00c3\u0178nahmen");
   });
 
-  it("rendert die optionale Opportunity Roadmap", () => {
+  it("rendert den optionalen Maßnahmenplan", () => {
     const report: PremiumReport = {
       ...createReport(),
       opportunityRoadmap: {
-        title: "Priorisierte Opportunity Roadmap",
+        title: "Priorisierter Maßnahmenplan",
         summary: "Die stärksten Chancen werden nach Wirkung und Aufwand geordnet.",
         items: [
           {
@@ -99,13 +99,13 @@ describe("PremiumReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Priorisierte Opportunity Roadmap");
-    expect(markup).toContain("Business Impact");
-    expect(markup).toContain("Shophebel-Modul");
+    expect(markup).toContain("Priorisierter Maßnahmenplan");
+    expect(markup).toContain("Geschäftliche Wirkung");
+    expect(markup).toContain("Empfohlener Umsetzungspfad");
     expect(markup).toContain("Service-Paket");
     expect(markup).toContain("Erwarteter Effekt");
     expect(markup).toContain("Nächster Schritt");
-    expect(markup).toContain("Schnelle Hebel");
+    expect(markup).toContain("Sofortmaßnahmen für mehr Anfragen");
     expect(markup).toContain("Quick Fix Sprint");
     expect(markup).toContain("Als Quick Fix priorisieren");
     expect(markup).toContain("Umsetzung besprechen");

@@ -65,12 +65,16 @@ export function getPremiumReportPdfStaticLabels() {
     "Dein Premium-Report",
     "Management-Zusammenfassung",
     "Top-Umsatzbremsen",
-    "Priorisierte Opportunity Roadmap",
+    "Priorisierter Maßnahmenplan",
     "Conversion-Hypothese",
     "7-Tage-Plan",
     "Priorisierte Maßnahmen",
     "Visuelle Prüfung",
     "sichtbarer Startbereich",
+    "Übersicht",
+    "Einführung",
+    "Nächster Schritt",
+    "Nutzerführung",
   ].map((label) => normalizeGermanText(label));
 }
 
@@ -94,6 +98,45 @@ function stringList(value: unknown): string[] {
   return value
     .map((item) => textValue(item, ""))
     .filter(Boolean);
+}
+
+function collectNormalizedTextLeaves(value: unknown, output: string[]) {
+  if (typeof value === "string" || typeof value === "number") {
+    const normalized = textValue(value, "");
+
+    if (normalized) {
+      output.push(normalized);
+    }
+
+    return;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectNormalizedTextLeaves(item, output));
+    return;
+  }
+
+  if (value && typeof value === "object") {
+    Object.values(value).forEach((item) => collectNormalizedTextLeaves(item, output));
+  }
+}
+
+export function getPremiumReportPdfRenderTextData({
+  analysis,
+  report,
+  consultantNotes,
+}: PremiumReportPdfInput) {
+  const output = [
+    ...getPremiumReportPdfStaticLabels(),
+    textValue(analysis.analysis.url, "Unbekannt"),
+  ];
+
+  collectNormalizedTextLeaves(report, output);
+  getCustomerFacingConsultantSections(consultantNotes).forEach((section) => {
+    collectNormalizedTextLeaves(section, output);
+  });
+
+  return output;
 }
 
 function formatDate(value: unknown) {
@@ -494,31 +537,31 @@ async function renderPremiumReportPdfWithFooterStats({
   }
 
   if (opportunityRoadmapItems.length > 0) {
-    drawSectionHeader(doc, "Priorisierte Opportunity Roadmap", "Opportunities");
+    drawSectionHeader(doc, "Priorisierter Maßnahmenplan", "Potenziale");
     writeCard(doc, {
-      title: textValue(opportunityRoadmap?.title, "Priorisierte Opportunity Roadmap"),
+      title: textValue(opportunityRoadmap?.title, "Priorisierter Maßnahmenplan"),
       tone: "cyan",
-      label: "Roadmap",
+      label: "Plan",
       minHeight: 82,
       body: [
         textValue(
           opportunityRoadmap?.summary,
-          "Die wichtigsten Opportunities werden nach Wirkung und Umsetzbarkeit priorisiert.",
+          "Die wichtigsten Potenziale werden nach Wirkung und Umsetzbarkeit priorisiert.",
         ),
       ],
     });
     opportunityRoadmapItems.forEach((item, index) => {
       writeCard(doc, {
-        title: `${index + 1}. ${textValue(item.title, "Opportunity")}`,
+        title: `${index + 1}. ${textValue(item.title, "Potenzial")}`,
         tone: index === 0 ? "emerald" : index <= 2 ? "amber" : "slate",
         label: `Score ${textValue(item.priorityScore, String(index + 1))}`,
         body: [
-          `Business Impact: ${textValue(item.businessImpact, "Nicht im gespeicherten Report enthalten.")}`,
-          `Shophebel-Modul: ${textValue(item.suggestedModule, "Nicht im gespeicherten Report enthalten.")}`,
+          `Geschäftliche Wirkung: ${textValue(item.businessImpact, "Nicht im gespeicherten Report enthalten.")}`,
+          `Empfohlener Umsetzungspfad: ${textValue(item.suggestedModule, "Nicht im gespeicherten Report enthalten.")}`,
           `Service-Paket: ${textValue(item.suggestedService, "Nicht im gespeicherten Report enthalten.")}`,
           `Aufwand: ${textValue(item.implementationEffort, "mittel")}`,
           `Erwarteter Effekt: ${textValue(item.expectedEffect, "Nicht im gespeicherten Report enthalten.")}`,
-          `NÃ¤chster Schritt: ${textValue(item.nextStep, "In die Premium Roadmap aufnehmen.")}`,
+          `Nächster Schritt: ${textValue(item.nextStep, "In den priorisierten Maßnahmenplan aufnehmen.")}`,
         ],
       });
     });
@@ -556,7 +599,7 @@ async function renderPremiumReportPdfWithFooterStats({
     });
   }
 
-  drawSectionHeader(doc, "Priorisierte Maßnahmen", "Roadmap");
+  drawSectionHeader(doc, "Priorisierte Maßnahmen", "Plan");
   if (priorityRoadmap.length > 0) {
     priorityRoadmap.forEach((item, index) => {
       const label = index === 0 ? "Sofort" : index <= 2 ? "Diese Woche" : "Später";

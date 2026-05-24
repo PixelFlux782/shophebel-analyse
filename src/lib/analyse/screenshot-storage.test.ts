@@ -3,13 +3,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { saveScreenshotBuffer } from "@/lib/analyse/screenshot-storage";
 import { captureAnalysisScreenshots } from "@/lib/analyse/screenshots";
 
-const { mkdirMock, writeFileMock } = vi.hoisted(() => ({
+const { mkdirMock, statMock, writeFileMock } = vi.hoisted(() => ({
   mkdirMock: vi.fn(),
+  statMock: vi.fn(),
   writeFileMock: vi.fn(),
 }));
 
 vi.mock("fs/promises", () => ({
   mkdir: mkdirMock,
+  stat: statMock,
   writeFile: writeFileMock,
 }));
 
@@ -34,6 +36,10 @@ describe("screenshot-storage", () => {
     vi.stubEnv("SUPABASE_SCREENSHOT_BUCKET", "");
     vi.stubEnv("SUPABASE_SCREENSHOT_PUBLIC_BASE_URL", "");
     mkdirMock.mockResolvedValue(undefined);
+    statMock.mockResolvedValue({
+      isFile: () => true,
+      size: 3,
+    });
     writeFileMock.mockResolvedValue(undefined);
   });
 
@@ -52,6 +58,29 @@ describe("screenshot-storage", () => {
     expect(result).toMatch(/^\/generated-screenshots\/analysis-test-viewport-/);
     expect(mkdirMock).toHaveBeenCalledTimes(1);
     expect(writeFileMock).toHaveBeenCalledTimes(1);
+    expect(statMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("gibt bei leerer lokaler Screenshot-Datei undefined zurueck", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    statMock.mockResolvedValue({
+      isFile: () => true,
+      size: 0,
+    });
+
+    const result = await saveScreenshotBuffer({
+      buffer: new Uint8Array([1, 2, 3]),
+      prefix: "analysis-test",
+      variant: "viewport",
+    });
+
+    expect(result).toBeUndefined();
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[screenshot-storage] Local screenshot write produced an empty or missing file",
+      expect.objectContaining({
+        variant: "viewport",
+      }),
+    );
   });
 
   it("schreibt in Production ohne Storage nicht ins lokale Dateisystem", async () => {

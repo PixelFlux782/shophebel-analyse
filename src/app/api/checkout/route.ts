@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
-import { getAnalysisResult } from "@/lib/analysisStore";
+import { getAnalysisResult, markAnalysisPending } from "@/lib/analysisStore";
 import { APP_URL } from "@/lib/env";
 
 export const runtime = "nodejs";
@@ -13,9 +13,11 @@ interface CheckoutRequestBody {
 }
 
 type CheckoutPlan = "full" | "premium";
+type ProductType = "full_analysis" | "premium_report";
+type AccessLevel = "full" | "premium";
 
 const checkoutProducts: Record<CheckoutPlan, {
-  productType: "full_analysis" | "premium_report";
+  productType: ProductType;
   envPriceId: string;
   legacyEnvPriceId?: string;
   amount: number;
@@ -38,6 +40,26 @@ const checkoutProducts: Record<CheckoutPlan, {
     description: "Strategischer Premium-Report mit Priorisierung, Visual Audit Notes und 7-Tage-Plan.",
   },
 };
+
+function normalizeProductType(value?: string): ProductType | null {
+  if (value === "full_analysis") {
+    return "full_analysis";
+  }
+
+  if (value === "premium_report") {
+    return "premium_report";
+  }
+
+  return null;
+}
+
+function productTypeToAccessLevel(productType: ProductType): AccessLevel {
+  if (productType === "full_analysis") {
+    return "full";
+  }
+
+  return "premium";
+}
 
 function normalizeCheckoutPlan(body: CheckoutRequestBody): CheckoutPlan | null {
   if (body.plan === "full" || body.productType === "full_analysis") {
@@ -92,6 +114,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (body.productType && !normalizeProductType(body.productType)) {
+      return NextResponse.json(
+        { error: "Ungültiger Produkt-Typ für Checkout." },
+        { status: 400 },
+      );
+    }
+
     const plan = normalizeCheckoutPlan(body);
 
     if (!plan) {
@@ -111,6 +140,7 @@ export async function POST(request: NextRequest) {
     }
 
     const product = checkoutProducts[plan];
+    const accessLevel = productTypeToAccessLevel(product.productType);
     const successUrl = new URL(`/analyse/result/${encodeURIComponent(body.analysisId)}`, APP_URL);
     successUrl.searchParams.set("upgrade", plan);
     successUrl.searchParams.set("success", "true");
@@ -146,6 +176,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         analysisId: body.analysisId,
         productType: product.productType,
+        accessLevel,
         plan,
       },
     });
@@ -153,6 +184,15 @@ export async function POST(request: NextRequest) {
     if (!session.url) {
       throw new Error("Stripe Checkout URL konnte nicht erstellt werden.");
     }
+
+    await markAnalysisPending(body.analysisId, product.productType, accessLevel).catch((error) => {
+      console.warn("[checkout] marking analysis pending failed", {
+        reason: error instanceof Error ? error.message : "unknown",
+        analysisId: body.analysisId,
+        productType: product.productType,
+        accessLevel,
+      });
+    });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {

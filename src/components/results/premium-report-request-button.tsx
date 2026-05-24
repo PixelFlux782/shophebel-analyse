@@ -14,7 +14,7 @@ interface PremiumReportRequestButtonProps {
 export function PremiumReportRequestButton({
   analysisId,
   url,
-  label = "Premium Analyse fuer 49 EUR starten",
+  label = "Premium Analyse für 49 EUR starten",
   className = "",
 }: PremiumReportRequestButtonProps) {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");

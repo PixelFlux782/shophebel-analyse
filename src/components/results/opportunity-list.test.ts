@@ -49,17 +49,17 @@ describe("OpportunityList", () => {
 
     expect(markup).toContain("KI- und Umsatzchancen aus deiner Analyse");
     expect(markup).toContain("Erkannter Hebel 1");
-    expect(markup).toContain("Business Impact");
+    expect(markup).toContain("Geschäftliche Wirkung");
     expect(markup).toContain("KI-Chance");
-    expect(markup).toContain("Shophebel-Modul");
-    expect(markup).toContain("Suggested Service");
-    expect(markup).toContain("Expected Effect");
+    expect(markup).toContain("Empfohlener Umsetzungspfad");
+    expect(markup).toContain("Empfohlene Begleitung");
+    expect(markup).toContain("Erwarteter Effekt");
     expect(markup).toContain("Wiederkehrendes Potenzial");
-    expect(markup).toContain("Naechsten Schritt planen");
+    expect(markup).toContain("Nächsten Schritt planen");
     expect(markup).toContain("https://shophebel.vercel.app/?opportunity=Erkannter+Hebel+1");
     expect(markup).toContain("opportunitySource=analysis");
-    expect(markup).toContain("module=AI+CTA+Rewrite");
-    expect(markup).toContain("service=Conversion+Sprint");
+    expect(markup).toContain("module=AI+Button+Rewrite");
+    expect(markup).toContain("service=Anfrage-%2FKaufwahrscheinlichkeit+Sprint");
     expect(markup).toContain("#kontakt");
     expect(markup).not.toContain("Erkannter Hebel 7");
   });
@@ -78,6 +78,6 @@ describe("OpportunityList", () => {
     );
 
     expect(markup).toContain('href="/kontakt?topic=legacy"');
-    expect(markup).toContain("Naechsten Schritt planen");
+    expect(markup).toContain("Nächsten Schritt planen");
   });
 });

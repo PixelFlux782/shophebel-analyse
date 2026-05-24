@@ -4,6 +4,7 @@ import {
   countPdfPages,
   getCustomerFacingConsultantSections,
   getPremiumReportPdfStaticLabels,
+  getPremiumReportPdfRenderTextData,
   renderPremiumReportPdfDiagnostics,
 } from "@/lib/premium/premiumReportPdf";
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
@@ -128,7 +129,11 @@ describe("premiumReportPdf consultant notes", () => {
 
     expect(labels).toContain("Management-Zusammenfassung");
     expect(labels).toContain("Conversion-Hypothese");
-    expect(labels).toContain("Priorisierte Opportunity Roadmap");
+    expect(labels).toContain("Priorisierter Maßnahmenplan");
+    expect(labels).toContain("Übersicht");
+    expect(labels).toContain("Einführung");
+    expect(labels).toContain("Nächster Schritt");
+    expect(labels).toContain("Nutzerführung");
     expect(labels).toContain("Visuelle Prüfung");
     expect(labels).toContain("sichtbarer Startbereich");
     expect(labels).toContain("Umsatzbremsen");
@@ -136,7 +141,42 @@ describe("premiumReportPdf consultant notes", () => {
     expect(labels).not.toContain("Executive Summary");
     expect(labels).not.toContain("Visual Audit Notes");
     expect(labels).not.toContain("Above the fold");
-    expect(labels).not.toMatch(/Pr\u00c3\u00bcfung|Ma\u00c3\u0178nahmen/);
+    expect(labels).not.toMatch(/N\u00c3|\u00c3\u0192|fuer|naech|Massnahmen|Nutzerfuehrung/);
+  });
+
+  it("normalisiert alte premium_reports Texte vor dem PDF-Rendern", () => {
+    const report: PremiumReport = {
+      ...createReport(),
+      premiumSummary: {
+        ...createReport().premiumSummary,
+        firstFocus: "NÃ¤chster Schritt: Nutzerfuehrung fuer den naechsten Kauf klaeren.",
+        fastestWin: "Massnahmen fuer Formularnaehe priorisieren.",
+      },
+      opportunityRoadmap: {
+        title: "Priorisierte Massnahmen",
+        summary: "Nutzerfuehrung und naechste Schritte pruefen.",
+        items: [
+          {
+            title: "Hero-Botschaft schÃƒÂ¤rfen",
+            businessImpact: "NÃ¤chster Klick wird klarer.",
+            nextStep: "Massnahmen fuer naechste Woche ableiten.",
+            priorityScore: 92,
+          },
+        ],
+      },
+    };
+    const renderText = getPremiumReportPdfRenderTextData({
+      analysis: createAnalysis(),
+      report,
+      consultantNotes: {
+        executiveComment: "Nutzerfuehrung fuer den naechsten Schritt pruefen.",
+      },
+    }).join(" ");
+
+    expect(renderText).toContain("Nächster Schritt");
+    expect(renderText).toContain("Nutzerführung");
+    expect(renderText).toContain("Maßnahmen");
+    expect(renderText).not.toMatch(/NÃ|Ãƒ|Nutzerfuehrung|naech|fuer|Massnahmen/);
   });
 
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {
@@ -185,12 +225,12 @@ describe("premiumReportPdf consultant notes", () => {
     expect(source).not.toMatch(/KRITISC\s+H|WICHTI\s+G|KURZFA\s+ZIT|Zus\s+ammenfassung/);
   });
 
-  it("rendert die Opportunity Roadmap als eigenen PDF-Abschnitt", async () => {
+  it("rendert den priorisierten Maßnahmenplan als eigenen PDF-Abschnitt", async () => {
     const report: PremiumReport = {
       ...createReport(),
       opportunityRoadmap: {
-        title: "Priorisierte Opportunity Roadmap",
-        summary: "Die wichtigsten Opportunities werden nach Wirkung und Aufwand sortiert.",
+        title: "Priorisierter Maßnahmenplan",
+        summary: "Die wichtigsten Potenziale werden nach Wirkung und Aufwand sortiert.",
         items: [
           {
             title: "Hero-Botschaft als Anfrage-Hebel schÃ¤rfen",
@@ -213,7 +253,7 @@ describe("premiumReportPdf consultant notes", () => {
     const source = pdf.toString("latin1");
 
     expect(countPdfPages(pdf)).toBeGreaterThan(0);
-    expect(source).toContain("4f70706f72");
-    expect(source).toContain("53686f70686562656c2d4d6f64756c");
+    expect(source).toContain("5072696f726973696572");
+    expect(source).toContain("456d7066");
   });
 });

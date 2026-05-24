@@ -12,6 +12,7 @@ import { PremiumReportSection } from "@/components/results/premium-report-sectio
 import { PremiumReportRequestButton } from "@/components/results/premium-report-request-button";
 import { RecommendationsList } from "@/components/results/recommendations-list";
 import { RevenueBlockersReport } from "@/components/results/revenue-blockers-report";
+import { ResultScreenshotTeaser } from "@/components/results/result-screenshot-teaser";
 import { ScoreGrid } from "@/components/results/score-grid";
 import { VisualAuditSection } from "@/components/results/visual-audit-section";
 import { getAnalysisResult } from "@/lib/analysisStore";
@@ -139,13 +140,13 @@ export default async function AnalyseResultPage({
                   <PremiumReportRequestButton
                     analysisId={result.id}
                     url={analysis.url}
-                    label="Premium Analyse fuer 49 EUR starten"
+                    label="Premium Analyse für 49 EUR starten"
                     className="mt-4 w-full"
                   />
                 ) : (
                   <CheckoutButton
                     analysisId={result.id}
-                    label="Vollanalyse fuer 5 EUR freischalten"
+                    label="Vollanalyse für 5 EUR freischalten"
                     className="mt-4 w-full justify-center bg-cyan-300 text-slate-950 hover:bg-cyan-200"
                   />
                 )}
@@ -186,13 +187,7 @@ export default async function AnalyseResultPage({
                   <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                     Screenshot-Teaser
                   </p>
-                  <div className="mt-4 max-h-[22rem] overflow-hidden rounded-[1.35rem] border border-slate-200 bg-slate-100">
-                    <img
-                      src={analysis.screenshots.viewport}
-                      alt="Screenshot-Teaser der analysierten Website"
-                      className="w-full object-cover object-top"
-                    />
-                  </div>
+                  <ResultScreenshotTeaser src={analysis.screenshots.viewport} />
                 </div>
               ) : null}
             </section>
@@ -202,7 +197,7 @@ export default async function AnalyseResultPage({
                 Gesperrte Bereiche
               </p>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
-                Vollanalyse fuer 5 EUR freischalten
+                Vollanalyse für 5 EUR freischalten
               </h2>
               <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {[
@@ -210,7 +205,7 @@ export default async function AnalyseResultPage({
                   "Kategorie-Breakdowns",
                   "Visual Audit",
                   "Konkrete KI- und Umsatzhebel",
-                  "Massnahmen",
+                  "Maßnahmen",
                   "AI Visibility",
                   "PDF Export",
                 ].map((item) => (
@@ -232,15 +227,15 @@ export default async function AnalyseResultPage({
                     Wir haben weitere konkrete KI- und Umsatzhebel erkannt.
                   </h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Die Vollanalyse zeigt die komplette Liste mit Business Impact, KI-Chance,
-                    Shophebel-Modul und dem naechsten sinnvollen Schritt.
+                    Die Vollanalyse zeigt die komplette Liste mit geschäftlicher Wirkung, KI-Chance,
+                    empfohlenem Umsetzungspfad und dem nächsten sinnvollen Schritt.
                   </p>
                 </div>
               ) : null}
               <div className="mt-6 flex flex-wrap gap-3">
                 <CheckoutButton
                   analysisId={result.id}
-                  label="Vollanalyse fuer 5 EUR freischalten"
+                  label="Vollanalyse für 5 EUR freischalten"
                   className="justify-center bg-slate-950 text-white hover:bg-slate-800"
                 />
                 <PremiumReportRequestButton

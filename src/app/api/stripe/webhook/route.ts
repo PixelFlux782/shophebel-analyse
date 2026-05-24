@@ -70,13 +70,23 @@ async function markAnalysisPaid(input: {
   }
 
   const plan = normalizePaidPlan(input.metadata);
+  const productType = normalizeProductType(input.metadata.productType);
+
+  if (!productType || !plan) {
+    console.warn("[stripe-webhook] checkout.session.completed with invalid productType metadata", {
+      metadata: input.metadata,
+    });
+    return;
+  }
+
   const payload = {
     updated_at: new Date().toISOString(),
+    access_level: plan,
     payment_status: "paid",
     paid_at: new Date().toISOString(),
     stripe_session_id: input.session.id,
     stripe_customer_email: getCustomerEmail(input.session),
-    product_type: plan === "full" ? "full_analysis" : "premium_report",
+    product_type: productType,
     plan,
     ...(plan === "premium" ? { is_premium: true } : {}),
   };
@@ -102,12 +112,36 @@ async function markAnalysisPaid(input: {
   }
 }
 
-function normalizePaidPlan(metadata: CheckoutSessionMetadata): PaidPlan {
-  if (metadata.plan === "full" || metadata.productType === "full_analysis") {
+function normalizeProductType(value?: string): "full_analysis" | "premium_report" | null {
+  if (value === "full_analysis") {
+    return "full_analysis";
+  }
+
+  if (value === "premium_report") {
+    return "premium_report";
+  }
+
+  return null;
+}
+
+function normalizePaidPlan(metadata: CheckoutSessionMetadata): PaidPlan | null {
+  if (metadata.productType === "full_analysis") {
     return "full";
   }
 
-  return "premium";
+  if (metadata.productType === "premium_report") {
+    return "premium";
+  }
+
+  if (metadata.plan === "full") {
+    return "full";
+  }
+
+  if (metadata.plan === "premium") {
+    return "premium";
+  }
+
+  return null;
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
@@ -116,6 +150,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   if (!analysisId) {
     console.warn("[stripe-webhook] checkout.session.completed without analysisId metadata");
+    return;
+  }
+
+  const productType = normalizeProductType(metadata.productType);
+
+  if (!productType) {
+    console.warn("[stripe-webhook] checkout.session.completed without valid productType metadata", {
+      metadata,
+    });
     return;
   }
 

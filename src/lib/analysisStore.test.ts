@@ -1,4 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdir, rm, writeFile } from "fs/promises";
+import path from "path";
 
 import { getAnalysisResult, saveAnalysisResult } from "@/lib/analysisStore";
 import { AnalysisResult } from "@/types/analysis";
@@ -46,6 +48,14 @@ function resetMemoryStore() {
       __shophebelAnalysisStore?: Map<string, unknown>;
     }
   ).__shophebelAnalysisStore = undefined;
+}
+
+async function resetGeneratedScreenshotFixture(filename: string) {
+  const absolutePath = path.join(process.cwd(), "public", "generated-screenshots", filename);
+
+  await rm(absolutePath, { force: true });
+
+  return absolutePath;
 }
 
 describe("analysisStore", () => {
@@ -340,13 +350,22 @@ describe("analysisStore", () => {
     expect(loaded?.analysis.visualPreviewAvailable).toBe(false);
   });
 
-  it("liest Screenshot-URLs aus dem separaten Supabase-Screenshots-Feld", async () => {
+  it("liest vorhandene lokale Screenshot-URLs aus dem separaten Supabase-Screenshots-Feld", async () => {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
 
+    const viewportFile = "analysis-test-viewport.png";
+    const mobileFile = "analysis-test-mobile.png";
+    const viewportPath = await resetGeneratedScreenshotFixture(viewportFile);
+    const mobilePath = await resetGeneratedScreenshotFixture(mobileFile);
+
+    await mkdir(path.dirname(viewportPath), { recursive: true });
+    await writeFile(viewportPath, Buffer.from("viewport"));
+    await writeFile(mobilePath, Buffer.from("mobile"));
+
     const screenshots = {
-      viewport: "/generated-screenshots/analysis-test-viewport.png",
-      mobile: "/generated-screenshots/analysis-test-mobile.png",
+      viewport: `/generated-screenshots/${viewportFile}`,
+      mobile: `/generated-screenshots/${mobileFile}`,
     };
     const stored = {
       id: "analysis-456",
@@ -366,6 +385,74 @@ describe("analysisStore", () => {
 
     expect(loaded?.analysis.screenshots).toEqual(screenshots);
     expect(loaded?.analysis.visualPreviewAvailable).toBe(true);
+
+    await resetGeneratedScreenshotFixture(viewportFile);
+    await resetGeneratedScreenshotFixture(mobileFile);
+  });
+
+  it("zeigt fehlende lokale Screenshot-Dateien als Fallback statt toter URL", async () => {
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const stored = {
+      id: "analysis-missing-screenshot",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult({
+        screenshots: {
+          viewport: "/generated-screenshots/does-not-exist.png",
+        },
+        visualPreviewAvailable: true,
+      }),
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-missing-screenshot");
+
+    expect(loaded?.analysis.screenshots).toBeUndefined();
+    expect(loaded?.analysis.visualPreviewAvailable).toBe(false);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "[analysis-store] Local screenshot file is missing or empty",
+      expect.objectContaining({
+        expectedPath: expect.stringContaining(path.join("public", "generated-screenshots", "does-not-exist.png")),
+      }),
+    );
+  });
+
+  it("behandelt relative generated-screenshots in Production als unstabil", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+
+    const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const stored = {
+      id: "analysis-production-local-screenshot",
+      created_at: "2026-05-08T12:00:00.000Z",
+      is_demo: false,
+      result: createAnalysisResult({
+        screenshots: {
+          viewport: "/generated-screenshots/old-local.png",
+        },
+        visualPreviewAvailable: true,
+      }),
+    };
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([stored]), { status: 200 }),
+    ));
+
+    const loaded = await getAnalysisResult("analysis-production-local-screenshot");
+
+    expect(loaded?.analysis.screenshots).toBeUndefined();
+    expect(loaded?.analysis.visualPreviewAvailable).toBe(false);
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
+      "[analysis-store] Ignoring legacy local screenshot path in production",
+      expect.objectContaining({
+        src: "/generated-screenshots/old-local.png",
+      }),
+    );
   });
 
   it("liest Screenshot-Fehler aus dem separaten Supabase-Metadata-Feld", async () => {

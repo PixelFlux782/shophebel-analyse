@@ -6,21 +6,34 @@ import {
   resolveAnalysisPlan,
 } from "@/lib/premium/premiumAccess";
 
-describe("canViewPremiumReport", () => {
-  it("zeigt Premiumdaten nur bei paid", () => {
-    expect(canViewPremiumReport("paid")).toBe(true);
-    expect(canViewPremiumReport("open")).toBe(false);
-    expect(canViewPremiumReport(null)).toBe(false);
-    expect(canViewPremiumReport(undefined)).toBe(false);
+describe("premium access logic", () => {
+  it("does not grant full or premium access for free analyses", () => {
+    expect(resolveAnalysisPlan({ paymentStatus: "free", accessLevel: "free" })).toBe("free");
+    expect(canViewFullAnalysis({ paymentStatus: "free", accessLevel: "free" })).toBe(false);
+    expect(canViewPremiumReport({ paymentStatus: "free", accessLevel: "premium" })).toBe(false);
   });
 
-  it("unterscheidet free, full und premium", () => {
-    expect(resolveAnalysisPlan({ paymentStatus: "free", plan: "free" })).toBe("free");
-    expect(resolveAnalysisPlan({ paymentStatus: "paid", plan: "full" })).toBe("full");
+  it("grants full access only for paid + full or premium access_level", () => {
+    expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: "full" })).toBe("full");
+    expect(canViewFullAnalysis({ paymentStatus: "paid", accessLevel: "full" })).toBe(true);
+    expect(canViewPremiumReport({ paymentStatus: "paid", accessLevel: "full" })).toBe(false);
+  });
+
+  it("grants premium access only for paid + premium access_level", () => {
+    expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: "premium" })).toBe("premium");
+    expect(canViewFullAnalysis({ paymentStatus: "paid", accessLevel: "premium" })).toBe(true);
+    expect(canViewPremiumReport({ paymentStatus: "paid", accessLevel: "premium" })).toBe(true);
+  });
+
+  it("does not grant paid access from success/upgrade query state without paid status", () => {
+    expect(resolveAnalysisPlan({ paymentStatus: "free", accessLevel: "premium" })).toBe("free");
+    expect(resolveAnalysisPlan({ paymentStatus: "pending", accessLevel: "full" })).toBe("free");
+  });
+
+  it("uses legacy plan/is_premium only when access_level is missing", () => {
     expect(resolveAnalysisPlan({ paymentStatus: "paid", plan: "premium" })).toBe("premium");
-    expect(resolveAnalysisPlan({ paymentStatus: "paid" })).toBe("premium");
-    expect(resolveAnalysisPlan({ isPremium: true, plan: "free" })).toBe("premium");
-    expect(canViewFullAnalysis({ paymentStatus: "paid", plan: "full" })).toBe(true);
-    expect(canViewPremiumReport({ paymentStatus: "paid", plan: "full" })).toBe(false);
+    expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: null, plan: "full" })).toBe("full");
+    expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: "free", plan: "premium" })).toBe("free");
+    expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: null, isPremium: true })).toBe("premium");
   });
 });

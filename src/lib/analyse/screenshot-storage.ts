@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir, stat, writeFile } from "fs/promises";
 import path from "path";
 import { randomUUID } from "crypto";
 
@@ -156,13 +156,36 @@ export async function saveScreenshotBuffer(input: {
   const filename = `${input.prefix}-${input.variant}-${Date.now()}-${randomUUID()}.png`;
   const absolutePath = path.join(GENERATED_SCREENSHOT_DIR, filename);
 
-  await writeFile(absolutePath, input.buffer);
+  try {
+    await writeFile(absolutePath, input.buffer);
+    const fileStats = await stat(absolutePath);
 
-  console.info("[screenshot-storage] Local screenshot stored", {
-    path: absolutePath,
-    variant: input.variant,
-    bytes: input.buffer.byteLength,
-  });
+    if (!fileStats.isFile() || fileStats.size <= 0) {
+      console.warn("[screenshot-storage] Local screenshot write produced an empty or missing file", {
+        path: absolutePath,
+        variant: input.variant,
+        bytes: fileStats.size,
+      });
+
+      return undefined;
+    }
+
+    console.info("[screenshot-storage] Local screenshot stored", {
+      path: absolutePath,
+      variant: input.variant,
+      bytes: fileStats.size,
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown local storage error";
+
+    console.warn("[screenshot-storage] Local screenshot storage failed", {
+      path: absolutePath,
+      variant: input.variant,
+      reason: message,
+    });
+
+    return undefined;
+  }
 
   return `/generated-screenshots/${filename}`;
 }

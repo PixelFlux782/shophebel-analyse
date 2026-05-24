@@ -370,8 +370,8 @@ function buildOpportunityRoadmap(opportunities?: AnalysisOpportunity[]): Premium
   }
 
   return {
-    title: "Priorisierte Opportunity Roadmap",
-    summary: "Diese Roadmap übersetzt die stärksten Analyse-Opportunities in konkrete Shophebel-Module, Service-Pakete und nächste Umsetzungsschritte.",
+    title: "Priorisierter Maßnahmenplan",
+    summary: "Dieser Plan übersetzt die stärksten Analyse-Potenziale in empfohlene Umsetzungspfade, Service-Pakete und nächste Umsetzungsschritte.",
     items,
   };
 }

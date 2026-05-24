@@ -1,4 +1,6 @@
 import { randomUUID } from "crypto";
+import { statSync } from "fs";
+import path from "path";
 
 import { AnalysisResult, AnalysisScreenshots } from "@/types/analysis";
 
@@ -9,6 +11,7 @@ export interface StoredAnalysisResult {
   isDemo?: boolean;
   contactRequestId?: string | null;
   auditContextId?: string | null;
+  accessLevel?: string | null;
   paymentStatus?: string | null;
   paidAt?: string | null;
   plan?: string | null;
@@ -33,6 +36,7 @@ type SupabaseAnalysisRow = {
   metadata?: AnalysisResult["metadata"] | null;
   contact_request_id?: string | null;
   audit_context_id?: string | null;
+  access_level?: string | null;
   payment_status?: string | null;
   paid_at?: string | null;
   plan?: string | null;
@@ -42,6 +46,8 @@ type SupabaseAnalysisRow = {
 };
 
 type SupabaseConfig = { url: string; serviceRoleKey: string };
+
+const GENERATED_SCREENSHOTS_ROUTE = "/generated-screenshots/";
 
 declare global {
   var __shophebelAnalysisStore: Map<string, StoredAnalysisResult> | undefined;
@@ -212,6 +218,7 @@ async function toStoredAnalysisResult(row: SupabaseAnalysisRow, config: Supabase
     isDemo: row.is_demo,
     contactRequestId: row.contact_request_id ?? analysis.metadata?.contactRequestId ?? null,
     auditContextId: row.audit_context_id ?? analysis.metadata?.auditContextId ?? null,
+    accessLevel: row.access_level ?? null,
     paymentStatus: row.payment_status ?? null,
     paidAt: row.paid_at ?? null,
     plan: row.plan ?? null,
@@ -226,11 +233,50 @@ function normalizeScreenshots(screenshots: AnalysisResult["screenshots"] | null 
     return undefined;
   }
 
+  const normalizeScreenshotValue = (value: unknown, variant: keyof AnalysisScreenshots) => {
+    if (typeof value !== "string" || !value) {
+      return undefined;
+    }
+
+    if (!value.startsWith(GENERATED_SCREENSHOTS_ROUTE)) {
+      return value;
+    }
+
+    const publicPath = path.join(process.cwd(), "public", value.slice(1));
+
+    if (process.env.NODE_ENV === "production") {
+      console.warn("[analysis-store] Ignoring legacy local screenshot path in production", {
+        variant,
+        src: value,
+        expectedPath: publicPath,
+      });
+      return undefined;
+    }
+
+    try {
+      const fileStats = statSync(publicPath);
+
+      if (fileStats.isFile() && fileStats.size > 0) {
+        return value;
+      }
+    } catch {
+      // The warning below carries the useful diagnostic details for development.
+    }
+
+    console.warn("[analysis-store] Local screenshot file is missing or empty", {
+      variant,
+      src: value,
+      expectedPath: publicPath,
+    });
+
+    return undefined;
+  };
+
   const normalized = {
-    fullPage: typeof screenshots.fullPage === "string" && screenshots.fullPage ? screenshots.fullPage : undefined,
-    viewport: typeof screenshots.viewport === "string" && screenshots.viewport ? screenshots.viewport : undefined,
-    mobile: typeof screenshots.mobile === "string" && screenshots.mobile ? screenshots.mobile : undefined,
-    hero: typeof screenshots.hero === "string" && screenshots.hero ? screenshots.hero : undefined,
+    fullPage: normalizeScreenshotValue(screenshots.fullPage, "fullPage"),
+    viewport: normalizeScreenshotValue(screenshots.viewport, "viewport"),
+    mobile: normalizeScreenshotValue(screenshots.mobile, "mobile"),
+    hero: normalizeScreenshotValue(screenshots.hero, "hero"),
   };
 
   return normalized.fullPage || normalized.viewport || normalized.mobile || normalized.hero
@@ -319,6 +365,7 @@ function shouldRetryWithoutAccessColumns(responseText: string) {
   const normalized = responseText.toLowerCase();
 
   return (
+    normalized.includes("access_level") ||
     normalized.includes("payment_status") ||
     normalized.includes("product_type") ||
     normalized.includes("plan")
@@ -355,6 +402,7 @@ function buildAnalysisInsertPayload({
     metadata: analysis.metadata ?? {},
     ...(includeAccessColumns
       ? {
+          access_level: "free",
           payment_status: "free",
           plan: "free",
           product_type: "analysis_teaser",
@@ -543,7 +591,8 @@ function saveAnalysisResultMemory(input: SaveAnalysisResultInput): StoredAnalysi
     isDemo: input.isDemo,
     contactRequestId: input.contactRequestId ?? input.analysis.metadata?.contactRequestId ?? null,
     auditContextId: input.auditContextId ?? input.analysis.metadata?.auditContextId ?? null,
-    paymentStatus: null,
+    accessLevel: "free",
+    paymentStatus: "free",
     paidAt: null,
     plan: "free",
     productType: "analysis_teaser",
@@ -564,7 +613,7 @@ async function getAnalysisResultSupabase(id: string): Promise<StoredAnalysisResu
     return getMemoryStore().get(id) ?? null;
   }
 
-  const extendedSelect = "id,created_at,is_demo,result,screenshots,metadata,contact_request_id,audit_context_id,payment_status,paid_at,plan,product_type,is_premium,stripe_session_id";
+  const extendedSelect = "id,created_at,is_demo,result,screenshots,metadata,contact_request_id,audit_context_id,access_level,payment_status,paid_at,plan,product_type,is_premium,stripe_session_id";
   const basicSelect = "id,created_at,is_demo,result,screenshots,metadata,contact_request_id,audit_context_id,payment_status,paid_at";
   let requestUrl = `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(id)}&select=${extendedSelect}&limit=1`;
   let response: Response;
@@ -649,4 +698,44 @@ export function createStoredAnalysisResult(input: SaveAnalysisResultInput) {
 export function getStoredAnalysisResult(id: string) {
   assertPersistenceConfigured();
   return getMemoryStore().get(id) ?? null;
+}
+
+export async function markAnalysisPending(
+  analysisId: string,
+  productType: "full_analysis" | "premium_report",
+  accessLevel: "full" | "premium",
+): Promise<void> {
+  const config = getSupabaseConfig();
+
+  if (!config) {
+    return;
+  }
+
+  const payload = {
+    updated_at: new Date().toISOString(),
+    payment_status: "pending",
+    access_level: accessLevel,
+    product_type: productType,
+    plan: accessLevel,
+  };
+
+  const response = await fetch(
+    `${config.url}/rest/v1/analysis_results?id=eq.${encodeURIComponent(analysisId)}`,
+    {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(payload),
+      cache: "no-store",
+    },
+  );
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`analysis_pending_update_failed: ${response.status} ${details}`);
+  }
 }

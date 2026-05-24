@@ -32,7 +32,11 @@ function createRequestWithoutSignature(body = "{}") {
   });
 }
 
-function createCheckoutCompletedEvent(metadata: Record<string, string> = { analysisId: "analysis-123" }) {
+function createCheckoutCompletedEvent(metadata: Record<string, string> = {
+  analysisId: "analysis-123",
+  productType: "premium_report",
+  plan: "premium",
+}) {
   return {
     type: "checkout.session.completed",
     data: {
@@ -99,6 +103,7 @@ describe("POST /api/stripe/webhook", () => {
 
     expect(patchInit.method).toBe("PATCH");
     expect(payload.payment_status).toBe("paid");
+    expect(payload.access_level).toBe("premium");
     expect(payload.stripe_session_id).toBe("cs_test_123");
     expect(payload.stripe_customer_email).toBe("kunde@example.test");
     expect(payload.product_type).toBe("premium_report");
@@ -131,9 +136,37 @@ describe("POST /api/stripe/webhook", () => {
       is_premium?: boolean;
     };
 
+    expect(payload.access_level).toBe("full");
     expect(payload.product_type).toBe("full_analysis");
     expect(payload.plan).toBe("full");
     expect(payload.is_premium).toBeUndefined();
+  });
+
+  it("ignoriert unbekannten productType und schreibt nichts", async () => {
+    constructEventMock.mockReturnValue(createCheckoutCompletedEvent({
+      analysisId: "analysis-123",
+      productType: "unknown_type",
+      plan: "premium",
+    }));
+    const fetchMock = vi.fn();
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await import("@/app/api/stripe/webhook/route");
+    const response = await POST(createRequest("stripe-body"));
+
+    expect(response.status).toBe(200);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[stripe-webhook] checkout.session.completed without valid productType metadata",
+      {
+        metadata: {
+          analysisId: "analysis-123",
+          productType: "unknown_type",
+          plan: "premium",
+        },
+      },
+    );
   });
 
   it("lehnt ungültige Signaturen ab", async () => {

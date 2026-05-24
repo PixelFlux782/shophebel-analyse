@@ -1,4 +1,5 @@
 import { buildOpportunityContactUrl } from "@/lib/opportunity-contact-url";
+import { polishPremiumText, sentenceCasePremiumText } from "@/lib/premium/premiumCopy";
 import type { AnalysisOpportunity, OpportunitySeverity } from "@/types/analysis";
 
 interface OpportunityListProps {
@@ -15,24 +16,24 @@ const severityClasses: Record<OpportunitySeverity, string> = {
 };
 
 const severityLabels: Record<OpportunitySeverity, string> = {
-  low: "Prioritaet niedrig",
-  medium: "Prioritaet mittel",
-  high: "Prioritaet hoch",
-  critical: "Prioritaet kritisch",
+  low: "Priorität niedrig",
+  medium: "Priorität mittel",
+  high: "Priorität hoch",
+  critical: "Priorität kritisch",
 };
 
 const categoryLabels: Record<string, string> = {
   seo: "Auffindbarkeit",
-  performance: "Ladegefuehl",
+  performance: "Ladegefühl",
   trust: "Vertrauen",
   conversion: "Conversion",
   design: "Design",
   aiVisibility: "KI-Sichtbarkeit",
-  ux: "Nutzerfuehrung",
+  ux: "Nutzerführung",
 };
 
 function getCategoryLabel(category: string) {
-  return categoryLabels[category] ?? category;
+  return polishPremiumText(categoryLabels[category] ?? category);
 }
 
 function getOpportunityCtaHref(opportunity: AnalysisOpportunity) {
@@ -46,10 +47,10 @@ function getOpportunityCtaHref(opportunity: AnalysisOpportunity) {
   try {
     return buildOpportunityContactUrl({
       opportunityTitle: opportunity.title,
-      businessImpact: opportunity.businessImpact,
-      suggestedModule: opportunity.suggestedModule,
-      suggestedService: opportunity.suggestedService,
-      ctaLabel: opportunity.ctaLabel,
+      businessImpact: polishPremiumText(opportunity.businessImpact),
+      suggestedModule: polishPremiumText(opportunity.suggestedModule),
+      suggestedService: polishPremiumText(opportunity.suggestedService),
+      ctaLabel: sentenceCasePremiumText(opportunity.ctaLabel),
       source: "analysis",
     });
   } catch {
@@ -67,7 +68,7 @@ function OpportunityField({
   return (
     <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
       <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-700">{value}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-700">{polishPremiumText(value)}</p>
     </div>
   );
 }
@@ -93,8 +94,8 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
             KI- und Umsatzchancen aus deiner Analyse
           </h2>
           <p className="mt-3 max-w-3xl text-base leading-8 text-slate-600">
-            Diese Opportunities uebersetzen die wichtigsten Signale in konkrete Hebel: Business Impact,
-            KI-Chance, passendes Shophebel-Modul und den naechsten sinnvollen Schritt.
+            Diese Potenziale übersetzen die wichtigsten Signale in konkrete Hebel: geschäftliche Wirkung,
+            KI-Chance, empfohlener Umsetzungspfad und der nächste sinnvolle Schritt.
           </p>
         </div>
         <div className="rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-3 text-sm font-bold text-cyan-900">
@@ -116,7 +117,7 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-200">
                   {getCategoryLabel(opportunity.category)}
                 </p>
-                <h3 className="mt-1 text-2xl font-bold tracking-tight">{opportunity.title}</h3>
+                <h3 className="mt-1 text-2xl font-bold tracking-tight">{polishPremiumText(opportunity.title)}</h3>
               </div>
               <span
                 className={`w-fit rounded-full px-4 py-2 text-sm font-bold ${severityClasses[opportunity.severity]}`}
@@ -126,11 +127,11 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
             </div>
 
             <div className="grid gap-4 p-5 lg:grid-cols-2">
-              <OpportunityField label="Business Impact" value={opportunity.businessImpact} />
+              <OpportunityField label="Geschäftliche Wirkung" value={opportunity.businessImpact} />
               <OpportunityField label="KI-Chance" value={opportunity.aiOpportunity} />
-              <OpportunityField label="Shophebel-Modul" value={opportunity.suggestedModule} />
-              <OpportunityField label="Suggested Service" value={opportunity.suggestedService} />
-              <OpportunityField label="Expected Effect" value={opportunity.expectedEffect} />
+              <OpportunityField label="Empfohlener Umsetzungspfad" value={opportunity.suggestedModule} />
+              <OpportunityField label="Empfohlene Begleitung" value={opportunity.suggestedService} />
+              <OpportunityField label="Erwarteter Effekt" value={opportunity.expectedEffect} />
               <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                   Wiederkehrendes Potenzial
@@ -138,7 +139,7 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
                 <p className="mt-2 text-sm leading-6 text-slate-700">
                   {opportunity.recurringPotential
                     ? "Eignet sich als wiederkehrender Optimierungs- oder Monitoring-Hebel."
-                    : "Vor allem als einmaliger naechster sinnvoller Schritt geeignet."}
+                    : "Vor allem als einmaliger nächster sinnvoller Schritt geeignet."}
                 </p>
               </div>
             </div>
@@ -148,7 +149,7 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
                 href={getOpportunityCtaHref(opportunity)}
                 className="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_36px_-20px_rgba(15,23,42,0.8)] transition hover:bg-slate-800 sm:w-auto"
               >
-                {opportunity.ctaLabel}
+                {sentenceCasePremiumText(opportunity.ctaLabel)}
               </a>
             </div>
           </article>

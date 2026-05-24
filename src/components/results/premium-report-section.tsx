@@ -105,13 +105,13 @@ export function PremiumReportSection({
         {opportunityRoadmap?.items?.length ? (
           <article className="mt-8 rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.5)]">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
-              Roadmap
+              Umsetzungsplan
             </p>
             <h3 className="mt-2 text-2xl font-bold text-slate-950">
-              {text(opportunityRoadmap.title, "Priorisierte Opportunity Roadmap")}
+              {text(opportunityRoadmap.title, "Priorisierter Maßnahmenplan")}
             </h3>
             <p className="mt-3 text-sm leading-7 text-slate-700">
-              {text(opportunityRoadmap.summary, "Die wichtigsten Opportunities werden nach Wirkung und Umsetzbarkeit priorisiert.")}
+              {text(opportunityRoadmap.summary, "Die wichtigsten Potenziale werden nach Wirkung und Umsetzbarkeit priorisiert.")}
             </p>
             <div className="mt-5 grid gap-4">
               {opportunityRoadmap.items.map((item, index) => (
@@ -119,7 +119,7 @@ export function PremiumReportSection({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                        Opportunity {index + 1} · Score {item.priorityScore}
+                        Potenzial {index + 1} · Score {item.priorityScore}
                       </p>
                       <h4 className="mt-2 text-xl font-bold text-slate-950">{text(item.title)}</h4>
                     </div>
@@ -129,11 +129,11 @@ export function PremiumReportSection({
                   </div>
                   <dl className="mt-4 grid gap-3 text-sm leading-7 text-slate-700 md:grid-cols-2">
                     <div>
-                      <dt className="font-bold text-slate-950">Business Impact</dt>
+                      <dt className="font-bold text-slate-950">Geschäftliche Wirkung</dt>
                       <dd>{text(item.businessImpact)}</dd>
                     </div>
                     <div>
-                      <dt className="font-bold text-slate-950">Shophebel-Modul</dt>
+                      <dt className="font-bold text-slate-950">Empfohlener Umsetzungspfad</dt>
                       <dd>{text(item.suggestedModule)}</dd>
                     </div>
                     <div>
