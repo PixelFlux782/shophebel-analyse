@@ -278,7 +278,7 @@ function buildQuickImplementationPlan(result: AnalysisResult, blockers: PremiumB
   ];
 }
 
-function buildVisualAuditNotes(result: AnalysisResult) {
+export function buildVisualAuditNotes(result: AnalysisResult) {
   if (!result.screenshots?.viewport && !result.screenshots?.fullPage && !result.screenshots?.mobile) {
     return [{
       area: "Visuelle Vorschau",
@@ -310,6 +310,94 @@ function buildVisualAuditNotes(result: AnalysisResult) {
       note: "Überschriften, Bilder und Abstände sollten den Blick zum nächsten sinnvollen Schritt führen.",
     },
   ];
+}
+
+function findVisualFinding(result: AnalysisResult, pattern: RegExp) {
+  return sortFindingsForPremium(result.findings).find((finding) =>
+    pattern.test(`${finding.title} ${finding.description} ${finding.category}`),
+  );
+}
+
+function visualNoteFromFinding(
+  result: AnalysisResult,
+  area: string,
+  pattern: RegExp,
+  fallback: string,
+  recommendation: string,
+) {
+  const finding = findVisualFinding(result, pattern);
+  const issue = finding
+    ? sentenceFragment(finding.description, fallback)
+    : fallback;
+
+  return {
+    area,
+    note: ensureGermanSentence(`${issue} Empfehlung: ${recommendation}`),
+  };
+}
+
+function buildPremiumVisualAuditNotes(result: AnalysisResult) {
+  if (!result.screenshots?.viewport && !result.screenshots?.fullPage && !result.screenshots?.mobile) {
+    return [{
+      area: "Visuelle Vorschau",
+      note: "Fuer diese Analyse war keine visuelle Vorschau verfuegbar. Der Premium-Report nutzt deshalb Struktur, Inhalte, Checks und erkannte Signale.",
+    }];
+  }
+
+  const notes = [
+    visualNoteFromFinding(
+      result,
+      "Screenshot-/Hero-Eindruck",
+      /(hero|startbereich|klarheit|botschaft|angebot|h1|ueberschrift|überschrift)/i,
+      "Der erste sichtbare Eindruck muss Nutzen, Zielgruppe und Angebot schneller zusammenbringen.",
+      "Hero-Botschaft, Hauptnutzen und primaeren Button als klare erste Blickachse ordnen.",
+    ),
+    visualNoteFromFinding(
+      result,
+      "Above-the-fold Klarheit",
+      /(above|fold|cta|button|naechster|nächster|anfrage|kauf|conversion)/i,
+      "Der naechste Schritt ist im sichtbaren Startbereich noch nicht stark genug priorisiert.",
+      "Den wichtigsten CTA ohne Scrollen sichtbar machen und sprachlich eindeutig formulieren.",
+    ),
+    visualNoteFromFinding(
+      result,
+      "CTA-Sichtbarkeit",
+      /(cta|button|handlungsaufforderung|kontakt|formular|anfrage|checkout|kaufen)/i,
+      "Die Handlungsaufforderung muss sich visuell klarer gegen Navigation, Text und Bilder behaupten.",
+      "Nur einen primaeren CTA visuell fuehren und nach zentralen Nutzenargumenten wiederholen.",
+    ),
+    visualNoteFromFinding(
+      result,
+      "Vertrauenssignale",
+      /(trust|vertrauen|bewertung|referenz|siegel|impressum|datenschutz|kontakt|zahlung)/i,
+      "Vor der Entscheidung fehlen frueh sichtbare Signale, die Sicherheit und Seriositaet geben.",
+      "Bewertungen, Referenzen, Kontaktmoeglichkeiten oder Sicherheitshinweise frueher sichtbar platzieren.",
+    ),
+    visualNoteFromFinding(
+      result,
+      "Mobile Lesbarkeit",
+      /(mobile|viewport|lesbarkeit|performance|lade|ux)/i,
+      result.screenshots.mobile
+        ? "Die mobile Ansicht sollte besonders auf Lesbarkeit, Reihenfolge und Button-Erreichbarkeit geprueft werden."
+        : "Es lag keine mobile Vorschau vor; die mobile Darstellung sollte als eigenes Risiko manuell gegengeprueft werden.",
+      "Mobile Schriftgroessen, Abstaende und CTA-Positionen mit dem ersten Smartphone-Viewport priorisieren.",
+    ),
+    visualNoteFromFinding(
+      result,
+      "Visuelle Fuehrung",
+      /(design|layout|blick|struktur|bild|abstand|hierarchie|content)/i,
+      "Bilder, Ueberschriften und Abstaende sollten den Blick konsequenter zum naechsten sinnvollen Schritt fuehren.",
+      "Wichtige Inhalte groesser und frueher zeigen, Nebeninformationen optisch zuruecknehmen.",
+    ),
+  ];
+
+  const seen = new Set<string>();
+  return notes.filter((note) => {
+    const key = `${note.area}:${note.note}`.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function buildPriorityRoadmap(blockers: PremiumBlocker[], result: AnalysisResult) {
@@ -443,7 +531,7 @@ export function buildPremiumReport(input: {
     opportunityRoadmap: buildOpportunityRoadmap(input.analysis.opportunities),
     priorityRoadmap: buildPriorityRoadmap(topRevenueBlockers, input.analysis),
     quickImplementationPlan: buildQuickImplementationPlan(input.analysis, topRevenueBlockers),
-    visualAuditNotes: buildVisualAuditNotes(input.analysis),
+    visualAuditNotes: buildPremiumVisualAuditNotes(input.analysis),
     conversionHypothesis: buildConversionHypothesis(topRevenueBlockers[0]),
   });
 }

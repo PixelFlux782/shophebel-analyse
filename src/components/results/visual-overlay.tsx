@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { getSuggestionForHotspot, VisualHotspot, VisualHotspotTarget } from "@/lib/result-ui";
 import { AiSuggestion, VisualMap } from "@/types/analysis";
-import { HotspotSuggestionPopover } from "@/components/results/hotspot-suggestion-popover";
 import {
   ScreenshotLightbox,
   ScreenshotLightboxNote,
@@ -19,26 +18,39 @@ interface VisualOverlayProps {
   target: VisualHotspotTarget;
   suggestions?: AiSuggestion[];
   notes?: ScreenshotLightboxNote[];
+  variant?: "compact" | "premium";
 }
 
 function buildHotspotNotes(
   hotspots: VisualHotspot[],
   suggestions: AiSuggestion[] | undefined,
+  variant: "compact" | "premium",
 ) {
-  return hotspots.slice(0, 6).map((hotspot) => {
+  const limit = variant === "premium" ? 10 : 4;
+
+  return hotspots.slice(0, limit).map((hotspot) => {
     const suggestion = getSuggestionForHotspot(suggestions, hotspot);
     const category =
       hotspot.label?.includes("Oberer") ? "Above the Fold" :
       hotspot.title.toLowerCase().includes("cta") ? "CTA Klarheit" :
       hotspot.title.toLowerCase().includes("trust") || hotspot.title.toLowerCase().includes("vertrauen") ? "Vertrauen" :
       "Visuelle Hierarchie";
+    const priority = hotspot.tone === "problem" ? "kritisch" : hotspot.tone === "improvement" ? "wichtig" : "chance";
 
     return {
+      id: hotspot.id,
+      hotspotId: hotspot.id,
       title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
       text: suggestion?.summary ?? hotspot.description,
       category,
-      badge: hotspot.tone === "problem" ? "Priorität" : hotspot.tone === "good" ? "Staerke" : "Hebel",
-    };
+      badge: hotspot.tone === "problem" ? "Kritisch" : hotspot.tone === "good" ? "Chance" : "Wichtig",
+      priority,
+      problem: hotspot.description,
+      impact: priority === "kritisch"
+        ? "Besucher koennen an dieser Stelle Vertrauen verlieren oder den naechsten Schritt uebersehen."
+        : "Der Bereich verschenkt Orientierung und macht die Entscheidung unnoetig schwerer.",
+      recommendation: suggestion?.actionSteps?.[0] ?? suggestion?.summary ?? "Den sichtbaren Bereich klarer auf Nutzen, Vertrauen und naechsten Schritt ausrichten.",
+    } satisfies ScreenshotLightboxNote;
   });
 }
 
@@ -54,7 +66,7 @@ function mergeNotes(
     }
     seen.add(key);
     return true;
-  }).slice(0, 8);
+  }).slice(0, 10);
 }
 
 function getHotspotToneClasses(tone: VisualHotspot["tone"]) {
@@ -90,19 +102,41 @@ export function VisualOverlay({
   target,
   suggestions,
   notes,
+  variant = "compact",
 }: VisualOverlayProps) {
   const [showHotspots, setShowHotspots] = useState(true);
   const [showHintCards, setShowHintCards] = useState(true);
+  const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<"alle" | "kritisch" | "wichtig" | "chance">("alle");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
+  const noteRefs = useRef<Record<string, HTMLElement | null>>({});
   const mappedWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
   const mappedHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
   const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
   const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
   const aspectRatio = `${baseWidth} / ${baseHeight}`;
-  const lightboxNotes = mergeNotes(notes, buildHotspotNotes(hotspots, suggestions));
+  const lightboxNotes = useMemo(
+    () => mergeNotes(notes, buildHotspotNotes(hotspots, suggestions, variant)),
+    [hotspots, notes, suggestions, variant],
+  );
+  const filteredNotes = useMemo(
+    () => lightboxNotes.filter((note) => activeFilter === "alle" || note.priority === activeFilter || note.badge?.toLowerCase() === activeFilter),
+    [activeFilter, lightboxNotes],
+  );
+  const visibleHotspots = useMemo(() => {
+    if (activeFilter === "alle") return hotspots;
+
+    const visibleIds = new Set(
+      filteredNotes
+        .map((note) => note.hotspotId ?? note.id)
+        .filter((id): id is string => Boolean(id)),
+    );
+
+    return hotspots.filter((hotspot) => visibleIds.has(hotspot.id));
+  }, [activeFilter, filteredNotes, hotspots]);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -110,10 +144,21 @@ export function VisualOverlay({
       setImageFailed(false);
       setNaturalSize(null);
       setShowHintCards(true);
+      setShowHotspots(true);
+      setActiveHotspotId(null);
+      setActiveFilter("alle");
     }, 0);
 
     return () => window.clearTimeout(timeout);
   }, [imageSrc]);
+
+  const focusNote = (hotspotId: string) => {
+    setActiveHotspotId(hotspotId);
+    setShowHintCards(true);
+    window.setTimeout(() => {
+      noteRefs.current[hotspotId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
+  };
 
   return (
     <article className="rounded-[1.45rem] border border-slate-200 bg-slate-50/80 p-4">
@@ -123,9 +168,9 @@ export function VisualOverlay({
             {title}
           </p>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            {hotspots.length > 0
-              ? "Die Markierungen zeigen Problemzonen, Verbesserungshebel und positive Signale direkt auf deiner Seite."
-              : "Die Vorschau zeigt die sichtbare Seite ohne zusaetzliche Markierungen."}
+            {variant === "premium"
+              ? "Marker und Hinweise zeigen konkret, wo Vertrauen, Orientierung oder der naechste Klick verloren gehen."
+              : "Kompakte Markierungen zeigen die wichtigsten visuellen Reibungspunkte."}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -159,12 +204,9 @@ export function VisualOverlay({
         </div>
       </div>
 
-      <div className={`mt-4 grid gap-4 ${showHintCards && lightboxNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_22rem]" : ""}`}>
-        <div className="relative overflow-x-auto rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-          <div
-            className="relative min-w-[42rem] overflow-hidden bg-slate-100"
-            style={{ aspectRatio }}
-          >
+      <div className={`mt-4 grid gap-4 ${showHintCards && lightboxNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
+        <div className="relative overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
+          <div className="relative w-full overflow-hidden bg-slate-100" style={{ aspectRatio }}>
             {!imageFailed ? (
               <img
                 src={imageSrc}
@@ -199,43 +241,51 @@ export function VisualOverlay({
 
             {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
               <div className="pointer-events-none absolute inset-0">
-                {hotspots.map((hotspot) => {
+                {visibleHotspots.map((hotspot, index) => {
                   const tone = getHotspotToneClasses(hotspot.tone);
-                  const suggestion = getSuggestionForHotspot(suggestions, hotspot);
+                  const left = Math.max(1.2, Math.min(96, (hotspot.x / baseWidth) * 100));
+                  const top = Math.max(1.2, Math.min(96, (hotspot.y / baseHeight) * 100));
+                  const width = Math.max(4, Math.min(98 - left, (hotspot.width / baseWidth) * 100));
+                  const height = Math.max(4, Math.min(98 - top, (hotspot.height / baseHeight) * 100));
+                  const labelRight = left > 72 ? "0" : "auto";
+                  const labelLeft = left > 72 ? "auto" : "0";
+                  const labelBottom = top > 76 ? "100%" : "auto";
+                  const labelTop = top > 76 ? "auto" : "100%";
+                  const isActive = activeHotspotId === hotspot.id;
 
                   return (
-                    <div
+                    <button
                       key={hotspot.id}
-                      className="group pointer-events-auto absolute"
+                      type="button"
+                      onClick={() => focusNote(hotspot.id)}
+                      className={`group pointer-events-auto absolute rounded-xl text-left outline-none transition ${
+                        isActive ? "z-40 ring-4 ring-cyan-300/40" : "z-20"
+                      }`}
                       style={{
-                        left: `${(hotspot.x / baseWidth) * 100}%`,
-                        top: `${(hotspot.y / baseHeight) * 100}%`,
-                        width: `${(hotspot.width / baseWidth) * 100}%`,
-                        height: `${(hotspot.height / baseHeight) * 100}%`,
+                        left: `${left}%`,
+                        top: `${top}%`,
+                        width: `${width}%`,
+                        height: `${height}%`,
                       }}
+                      aria-label={`Marker ${index + 1}: ${hotspot.title}`}
                     >
-                      <div
-                        className={`relative h-full w-full rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}
-                      >
-                        <div className="absolute left-2 top-2 flex items-center gap-2">
-                          <span className={`h-3 w-3 rounded-full ${tone.dot}`} />
-                          <span
-                            className={`rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] ${tone.badge}`}
-                          >
-                            {hotspot.tone === "problem"
-                              ? "Problem"
-                              : hotspot.tone === "good"
-                                ? "Staerke"
-                                : "Hebel"}
+                      <div className={`relative h-full w-full rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}>
+                        <div className="absolute left-2 top-2 z-30 flex items-center gap-2">
+                          <span className={`grid h-7 w-7 place-items-center rounded-full border border-white text-xs font-bold text-white shadow-lg ${tone.dot}`}>
+                            {index + 1}
+                          </span>
+                          <span className={`hidden rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] shadow sm:inline-flex ${tone.badge}`}>
+                            {hotspot.tone === "problem" ? "Problem" : hotspot.tone === "good" ? "Chance" : "Wichtig"}
                           </span>
                         </div>
-                        <HotspotSuggestionPopover
-                          hotspot={hotspot}
-                          suggestion={suggestion}
-                          toneClasses={{ dot: tone.dot, badge: tone.badge }}
-                        />
+                        <span
+                          className="absolute z-30 mt-2 hidden max-w-[13rem] rounded-xl border border-slate-200 bg-white/98 px-3 py-2 text-xs font-bold leading-5 text-slate-950 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.45)] group-hover:block group-focus-visible:block"
+                          style={{ left: labelLeft, right: labelRight, top: labelTop, bottom: labelBottom }}
+                        >
+                          {hotspot.title}
+                        </span>
                       </div>
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -244,35 +294,90 @@ export function VisualOverlay({
         </div>
 
         {showHintCards && lightboxNotes.length > 0 ? (
-          <div className="max-h-[32rem] overflow-y-auto rounded-[1.2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_-58px_rgba(15,23,42,0.35)]">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-              Hinweise
-            </p>
+          <div className="max-h-[42rem] overflow-y-auto rounded-[1.2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_-58px_rgba(15,23,42,0.35)]">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                Hinweise
+              </p>
+              {variant === "premium" ? (
+                <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                  Arbeitsansicht
+                </span>
+              ) : null}
+            </div>
+            {variant === "premium" ? (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {(["alle", "kritisch", "wichtig", "chance"] as const).map((filter) => (
+                  <button
+                    key={filter}
+                    type="button"
+                    onClick={() => setActiveFilter(filter)}
+                    className={`rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition ${
+                      activeFilter === filter
+                        ? "border-slate-950 bg-slate-950 text-white"
+                        : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300"
+                    }`}
+                  >
+                    {filter}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             <div className="mt-3 grid gap-3">
-              {lightboxNotes.map((note, index) => (
-                <article key={`${note.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
-                        {note.category ?? "Visual Audit"}
-                      </p>
-                      <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
+              {filteredNotes.map((note, index) => {
+                const hotspotId = note.hotspotId ?? note.id;
+
+                return (
+                  <article
+                    key={`${note.title}-${index}`}
+                    ref={(element) => {
+                      if (hotspotId) noteRefs.current[hotspotId] = element;
+                    }}
+                    onClick={() => hotspotId ? setActiveHotspotId(hotspotId) : undefined}
+                    className={`rounded-2xl border p-4 transition ${
+                      hotspotId && activeHotspotId === hotspotId
+                        ? "border-cyan-300 bg-cyan-50 shadow-[0_16px_50px_-38px_rgba(8,145,178,0.8)]"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
+                          {note.category ?? "Visual Audit"}
+                        </p>
+                        <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
+                      </div>
+                      {note.badge ? (
+                        <span className="shrink-0 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                          {note.badge}
+                        </span>
+                      ) : null}
                     </div>
-                    {note.badge ? (
-                      <span className="shrink-0 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-                        {note.badge}
-                      </span>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">{note.text}</p>
+                    {variant === "premium" && (note.problem || note.impact || note.recommendation) ? (
+                      <div className="mt-3 grid gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs leading-5 text-slate-700">
+                        {note.problem ? <p><strong className="text-slate-950">Was ist das Problem?</strong> {note.problem}</p> : null}
+                        {note.impact ? <p><strong className="text-slate-950">Warum kostet das?</strong> {note.impact}</p> : null}
+                        {note.recommendation ? <p><strong className="text-slate-950">Was aendern?</strong> {note.recommendation}</p> : null}
+                      </div>
                     ) : null}
-                  </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-600">{note.text}</p>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </div>
         ) : null}
       </div>
       <ScreenshotLightbox
-        images={[{ src: imageSrc, alt: imageAlt, title, notes: lightboxNotes }]}
+        images={[{
+          src: imageSrc,
+          alt: imageAlt,
+          title,
+          notes: lightboxNotes,
+          visualMap,
+          hotspots,
+          target,
+        }]}
         currentIndex={0}
         isOpen={isLightboxOpen && !imageFailed}
         onClose={() => setIsLightboxOpen(false)}

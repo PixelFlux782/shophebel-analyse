@@ -35,7 +35,7 @@ const toneBadgeClasses: Record<VisualProblemTone, string> = {
 const friendlyTitleMap: Record<string, string> = {
   "Title/Description": "Erster Eindruck in Such- und Linkvorschauen",
   "Suchergebnis-Klarheit": "Erster Eindruck in Such- und Linkvorschauen",
-  "H1/H2-Struktur": "Klarheit der Überschriften",
+  "H1/H2-Struktur": "Klarheit der Ueberschriften",
   "Klarheit der Seitenbotschaft": "Klarheit der Seitenbotschaft",
   "Alt-Texte": "Bildverstaendnis",
   Bildverstaendnis: "Bildverstaendnis",
@@ -45,54 +45,34 @@ const friendlyTitleMap: Record<string, string> = {
   "Mobile Darstellung": "Mobile Darstellung",
   HTTPS: "Sicheres Laden",
   "Sicheres Laden": "Sicheres Laden",
-  Ladezeit: "Ladegefühl",
-  Ladegefühl: "Ladegefühl",
-  "Core Web Vitals": "Gefühlte Performance",
+  Ladezeit: "Ladegefuehl",
+  Ladegefuehl: "Ladegefuehl",
+  "Core Web Vitals": "Gefuehlte Performance",
   "Stabilitaet beim Laden": "Stabilitaet beim Laden",
   Impressum: "Rechtliches Vertrauen",
   Datenschutz: "Datenschutz-Vertrauen",
   Kontaktvertrauen: "Kontakt sichtbar",
   "Bewertungen/Siegel/Zahlungsarten": "Kaufvertrauen",
   Vertrauensbelege: "Kaufvertrauen",
-  "CTA-Erkennung": "Nächster Schritt",
-  "Nächster Schritt": "Nächster Schritt",
+  "CTA-Erkennung": "Naechster Schritt",
+  "Naechster Schritt": "Naechster Schritt",
   "Formular/Lead-Erfassung": "Anfrageweg",
   "Einfacher Anfrageweg": "Anfrageweg",
   Angebotsklarheit: "Angebot sofort verstehen",
-  "Screenshot/Visual-Check": "Visuelle Prüfung",
-  "Visuelle Seitenprüfung": "Visuelle Prüfung",
-  "Layout-Signale": "Layout-Führung",
-  Blickführung: "Blickführung",
+  "Screenshot/Visual-Check": "Visuelle Pruefung",
+  "Visuelle Seitenpruefung": "Visuelle Pruefung",
+  "Layout-Signale": "Layout-Fuehrung",
+  Blickfuehrung: "Blickfuehrung",
   "Lesbarkeit/Content-Dichte": "Lesbarkeit und Dichte",
   "Lesbarkeit und Inhaltstiefe": "Lesbarkeit und Inhaltstiefe",
-  "Strukturierte Daten": "AI-Verständlichkeit",
-  "Verständliche Daten für Google und KI": "AI-Verständlichkeit",
-  "Klare Unternehmensbeschreibung": "Marke klar erkennbar",
-  "Produkt-/Serviceverständlichkeit": "Angebot für KI-Systeme",
-  "FAQ-Bereiche": "Antwort-Potenzial",
-  "Kundenfragen als Antworten": "Antwort-Potenzial",
-  "About-Seite": "Unternehmenssignale",
-  "Lokale Signale": "Lokale Einordnung",
-  "robots.txt / AI-Crawler-Hinweise": "AI-Crawler-Hinweise",
-  "Regeln für KI-Systeme": "Regeln für KI-Systeme",
-  "Kontakt-/Standortdaten": "Kontakt und Standort",
-  "Semantische Überschriftenstruktur": "Inhalte für KI-Systeme",
-  "Klare Themenstruktur": "Inhalte für KI-Systeme",
+  "Strukturierte Daten": "AI-Verstaendlichkeit",
+  "Verstaendliche Daten fuer Google und KI": "AI-Verstaendlichkeit",
 };
 
 function checkTone(status: AuditCheckStatus): VisualProblemTone | null {
-  if (status === "critical") {
-    return "Kritisch";
-  }
-
-  if (status === "warning") {
-    return "Wichtig";
-  }
-
-  if (status === "unknown" || status === "not_checked") {
-    return "Chance";
-  }
-
+  if (status === "critical") return "Kritisch";
+  if (status === "warning") return "Wichtig";
+  if (status === "unknown" || status === "not_checked") return "Chance";
   return null;
 }
 
@@ -112,10 +92,7 @@ function firstProblem(category: string, block: ScoreBlock): VisualProblem | null
   }
 
   const tone = checkTone(check.status);
-
-  if (!tone) {
-    return null;
-  }
+  if (!tone) return null;
 
   return {
     category,
@@ -132,10 +109,9 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     ["Mobile UX", result.categories.performance],
     ["CTA", result.categories.conversion],
     ["Design", result.categories.design],
-    ["Ladegefühl", result.categories.performance],
+    ["Ladegefuehl", result.categories.performance],
     ["AI-Sichtbarkeit", result.categories.aiVisibility],
   ];
-
   const seen = new Set<string>();
 
   return blocks
@@ -145,9 +121,7 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     })
     .filter((problem) => {
       const key = `${problem.category}:${problem.title}`;
-      if (seen.has(key)) {
-        return false;
-      }
+      if (seen.has(key)) return false;
       seen.add(key);
       return true;
     })
@@ -157,36 +131,74 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
 function noteCategory(category: string, title: string) {
   const text = `${category} ${title}`.toLowerCase();
   if (text.includes("mobile")) return "Mobile UX";
-  if (text.includes("lade")) return "Ladegefühl";
+  if (text.includes("lade")) return "Ladegefuehl";
   if (text.includes("vertrauen")) return "Vertrauen";
-  if (text.includes("cta") || text.includes("nächster")) return "CTA Klarheit";
+  if (text.includes("cta") || text.includes("naechster")) return "CTA Klarheit";
   if (text.includes("design") || text.includes("blick") || text.includes("layout")) return "Visuelle Hierarchie";
   if (text.includes("klarheit")) return "Above the Fold";
   return category;
 }
 
-function noteText(problem: VisualProblem) {
-  if (problem.text.length > 180) {
-    return `${problem.text.slice(0, 177)}...`;
-  }
-
-  return problem.text;
+function noteText(problem: VisualProblem, isPremium: boolean) {
+  const maxLength = isPremium ? 260 : 150;
+  return problem.text.length > maxLength ? `${problem.text.slice(0, maxLength - 3)}...` : problem.text;
 }
 
-function notesFromProblems(problems: VisualProblem[], scope: "desktop" | "mobile" | "fullPage") {
+function problemImpact(problem: VisualProblem) {
+  if (problem.category === "Vertrauen") {
+    return "Wenn Sicherheit, Bewertungen oder Kontaktwege zu spaet sichtbar werden, zoegern Besucher eher vor Anfrage oder Kauf.";
+  }
+
+  if (problem.category === "CTA" || problem.category === "Klarheit") {
+    return "Wenn der naechste Schritt nicht sofort klar ist, muss der Besucher selbst nachdenken und springt schneller ab.";
+  }
+
+  if (problem.category === "Mobile UX") {
+    return "Auf dem Smartphone kostet jede Unklarheit mehr Aufmerksamkeit, weil weniger Platz fuer Orientierung vorhanden ist.";
+  }
+
+  return "Der Bereich bremst die Blickfuehrung und macht es schwerer, den Wert der Seite schnell zu erkennen.";
+}
+
+function problemRecommendation(problem: VisualProblem) {
+  if (problem.category === "Vertrauen") {
+    return "Trust-Elemente wie Bewertungen, Referenzen, Kontaktmoeglichkeiten oder Sicherheitshinweise vor der Entscheidung platzieren.";
+  }
+
+  if (problem.category === "CTA" || problem.category === "Klarheit") {
+    return "Hauptversprechen und primaeren Button im sichtbaren Startbereich klarer priorisieren und sprachlich eindeutiger machen.";
+  }
+
+  if (problem.category === "Mobile UX") {
+    return "Mobile Reihenfolge, Schriftgroessen und Button-Abstaende pruefen, damit der naechste Schritt ohne Suchen erreichbar bleibt.";
+  }
+
+  return "Abschnitte, Abstaende und visuelle Gewichtung so ordnen, dass der wichtigste Inhalt zuerst wahrgenommen wird.";
+}
+
+function notesFromProblems(
+  problems: VisualProblem[],
+  scope: "desktop" | "mobile" | "fullPage",
+  isPremium: boolean,
+) {
   const filteredProblems =
     scope === "mobile"
-      ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefühl")
+      ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefuehl")
       : scope === "fullPage"
         ? problems.filter((problem) => problem.category !== "Mobile UX")
-        : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefühl");
+        : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefuehl");
 
-  return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, 5).map((problem) => ({
+  return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, isPremium ? 8 : 4).map((problem, index) => ({
+    id: `visual-problem-${scope}-${index}`,
     title: problem.title,
-    text: noteText(problem),
+    text: noteText(problem, isPremium),
     category: noteCategory(problem.category, problem.title),
     badge: problem.tone,
-  }));
+    priority: problem.tone === "Kritisch" ? "kritisch" : problem.tone === "Wichtig" ? "wichtig" : "chance",
+    problem: problem.text,
+    impact: problemImpact(problem),
+    recommendation: problemRecommendation(problem),
+  } satisfies ScreenshotLightboxNote));
 }
 
 function MobileScreenshotCard({
@@ -219,7 +231,7 @@ function MobileScreenshotCard({
             Mobile
           </p>
           <p className="mt-1 text-sm text-slate-600">
-            Kleine Ansicht, große Reibung.
+            Kleine Ansicht, grosse Reibung.
           </p>
         </div>
         <span className="rounded-full bg-slate-950 px-3 py-1 text-xs font-bold text-white">
@@ -263,7 +275,7 @@ function MobileScreenshotCard({
               src,
               alt: "Mobile Vorschau der analysierten Seite",
               title,
-              notes: notes ?? notesFromProblems(problems, "mobile"),
+              notes: notes ?? notesFromProblems(problems, "mobile", false),
             }]}
             currentIndex={0}
             isOpen={isLightboxOpen}
@@ -280,13 +292,21 @@ function MobileScreenshotCard({
   );
 }
 
-export function VisualAuditSection({ result }: { result: AnalysisResult }) {
+export function VisualAuditSection({
+  result,
+  plan = "premium",
+}: {
+  result: AnalysisResult;
+  plan?: "full" | "premium";
+}) {
   const screenshots = result.screenshots;
   const desktopImage = screenshots?.viewport ?? screenshots?.fullPage ?? screenshots?.hero;
+  const isPremium = plan === "premium";
   const problems = buildVisualProblems(result);
+  const visibleProblems = isPremium ? problems : problems.slice(0, 4);
   const hotspots =
     result.visualMap && desktopImage
-      ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage")
+      ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage").slice(0, isPremium ? 10 : 4)
       : [];
   const desktopScope = screenshots?.viewport ? "desktop" : "fullPage";
 
@@ -298,10 +318,14 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
             Visuelle Website-Analyse
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
-            Hier sieht man sofort, wo die Seite Reibung erzeugt.
+            {isPremium
+              ? "Hier sieht man sofort, wo die Seite Vertrauen und Anfragen verliert."
+              : "Kompakter visueller Check der wichtigsten Reibungspunkte."}
           </h2>
           <p className="mt-3 text-base leading-8 text-slate-600">
-            Die Markierungen und Karten übersetzen den Check in klare Problemzonen: Was stört Vertrauen, Klarheit, mobile Nutzung und den nächsten Klick?
+            {isPremium
+              ? "Die nummerierten Marker erklaeren die sichtbaren Problemzonen in Alltagssprache: was stoert, warum es wirtschaftlich relevant ist und welche Aenderung zuerst sinnvoll ist."
+              : "Die Vollanalyse zeigt bewusst nur eine kompakte visuelle Einordnung. Die vollstaendige Screenshot-Auswertung ist Teil des Premium-Reports."}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
@@ -309,7 +333,7 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
         </div>
       </div>
 
-      <div className="mt-7 grid gap-5 xl:grid-cols-[1.25fr_0.75fr]">
+      <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,0.9fr)]">
         <div className="space-y-5">
           {desktopImage && result.visualMap ? (
             <VisualOverlay
@@ -320,28 +344,31 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
               hotspots={hotspots}
               target={screenshots?.viewport ? "viewport" : "fullPage"}
               suggestions={result.aiSuggestions}
-              notes={notesFromProblems(problems, desktopScope)}
+              notes={notesFromProblems(problems, desktopScope, isPremium)}
+              variant={isPremium ? "premium" : "compact"}
             />
           ) : screenshots ? (
             <MobileScreenshotCard
               src={desktopImage}
               problems={problems}
               title="Desktop-Vorschau"
-              notes={notesFromProblems(problems, desktopScope)}
+              notes={notesFromProblems(problems, desktopScope, isPremium)}
             />
           ) : (
             <ScreenshotFallback />
           )}
-          <MobileScreenshotCard
-            src={screenshots?.mobile}
-            problems={problems}
-            title="Mobile Vorschau"
-            notes={notesFromProblems(problems, "mobile")}
-          />
+          {isPremium ? (
+            <MobileScreenshotCard
+              src={screenshots?.mobile}
+              problems={problems}
+              title="Mobile Vorschau"
+              notes={notesFromProblems(problems, "mobile", true)}
+            />
+          ) : null}
         </div>
 
         <div className="grid gap-3">
-          {problems.map((problem, index) => (
+          {visibleProblems.map((problem, index) => (
             <article
               key={`${problem.category}-${problem.title}`}
               className={`rounded-2xl border p-4 ${toneClasses[problem.tone]}`}
@@ -358,10 +385,51 @@ export function VisualAuditSection({ result }: { result: AnalysisResult }) {
                 </span>
               </div>
               <p className="mt-3 text-sm leading-7 opacity-90">{problem.text}</p>
+              {isPremium ? (
+                <div className="mt-3 grid gap-2 rounded-xl border border-white/50 bg-white/45 p-3 text-sm leading-6">
+                  <p><strong>Was bedeutet das konkret?</strong> {problem.text}</p>
+                  <p><strong>Warum kostet das Anfragen/Kaeufe?</strong> {problemImpact(problem)}</p>
+                  <p><strong>Empfohlene Aenderung:</strong> {problemRecommendation(problem)}</p>
+                </div>
+              ) : null}
             </article>
           ))}
+          {!isPremium ? (
+            <article className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-cyan-950">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                Premium-Visual-Audit
+              </p>
+              <h3 className="mt-2 text-lg font-bold">Vollstaendige visuelle Auswertung freischalten</h3>
+              <p className="mt-3 text-sm leading-7">
+                Premium zeigt alle relevanten Marker, erklaert jeden Punkt laienverstaendlich und priorisiert die groessten visuellen Umsatzbremsen.
+              </p>
+            </article>
+          ) : null}
         </div>
       </div>
+
+      {isPremium ? (
+        <div className="mt-6 grid gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-5 lg:grid-cols-3">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Was bedeutet das konkret?</p>
+            <p className="mt-2 text-sm leading-7 text-slate-700">
+              Die Seite wird wie ein Erstbesuch gelesen: Was faellt sofort auf, was fehlt und welcher Klick wirkt am wahrscheinlichsten?
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Warum kostet das?</p>
+            <p className="mt-2 text-sm leading-7 text-slate-700">
+              Unsichtbare CTAs, schwache Trust-Signale oder unklare Hierarchie senken die Sicherheit des Besuchers genau vor der Entscheidung.
+            </p>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Vorher-nachher-Denkweise</p>
+            <p className="mt-2 text-sm leading-7 text-slate-700">
+              Ziel ist kein versprochenes Redesign, sondern eine klare Richtung: was nach vorne muss, was weniger Gewicht braucht und welcher naechste Schritt sichtbarer wird.
+            </p>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

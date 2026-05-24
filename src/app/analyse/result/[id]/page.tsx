@@ -249,7 +249,7 @@ export default async function AnalyseResultPage({
         ) : (
           <>
             <section className="mt-8">
-              <VisualAuditSection result={analysis} />
+              <VisualAuditSection result={analysis} plan={canViewPremium ? "premium" : "full"} />
             </section>
 
             <section className="mt-10">
