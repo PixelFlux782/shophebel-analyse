@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 import { buildCheckoutRequestPayload, CheckoutPlan } from "@/lib/checkout-client";
@@ -12,57 +13,97 @@ interface AnalyseDashboardEntryProps {
 }
 
 type ScanState = "idle" | "scanning" | "error";
+type PanelState = "queued" | "running" | "complete";
 
-const scanSteps = [
-  "URL erreichbar pruefen",
-  "Sichtbarkeit und Struktur lesen",
-  "Trust-Signale erkennen",
-  "Nutzerfuehrung bewerten",
-  "Conversion-Hebel priorisieren",
-];
-
-const demoSignals = [
-  { label: "Trust Signal", value: 58, tone: "risk" },
-  { label: "CTA Klarheit", value: 64, tone: "watch" },
-  { label: "Mobile UX", value: 72, tone: "stable" },
-  { label: "AI Visibility", value: 49, tone: "risk" },
-];
-
-const demoLevers = [
+const analysisStages = [
   {
-    label: "Hero und Angebot klarer machen",
-    detail: "Besucher sollen in wenigen Sekunden verstehen, was angeboten wird und was der naechste Schritt ist.",
-    priority: "Kritisch",
+    label: "Scanning visual hierarchy...",
+    detail: "Capturing above-the-fold structure, headline weight and CTA position.",
+    progress: 13,
+    targetScore: 24,
   },
   {
-    label: "Vertrauen vor dem ersten Klick zeigen",
-    detail: "Bewertungen, Kontakt und Sicherheit sollten frueher sichtbar werden.",
-    priority: "Wichtig",
+    label: "Detecting conversion friction...",
+    detail: "Checking purchase paths, action clarity and decision blockers.",
+    progress: 28,
+    targetScore: 39,
   },
   {
-    label: "Mobile Orientierung reduzieren",
-    detail: "Auf kleinen Screens zaehlen Reihenfolge, Lesbarkeit und Button-Naehe besonders stark.",
-    priority: "Chance",
+    label: "Analyzing trust architecture...",
+    detail: "Mapping social proof, contact signals, legal confidence and risk cues.",
+    progress: 44,
+    targetScore: 53,
+  },
+  {
+    label: "Evaluating mobile experience...",
+    detail: "Comparing mobile readability, fold priority and thumb-zone actions.",
+    progress: 61,
+    targetScore: 66,
+  },
+  {
+    label: "Checking AI visibility...",
+    detail: "Reading semantic clarity, entity signals and answer-engine readiness.",
+    progress: 78,
+    targetScore: 76,
+  },
+  {
+    label: "Building intelligence report...",
+    detail: "Prioritizing findings into revenue levers and next actions.",
+    progress: 92,
+    targetScore: 84,
   },
 ];
 
-const statCards = [
-  { label: "Sichtbarkeit", value: "SEO + AI" },
-  { label: "Vertrauen", value: "Trust" },
-  { label: "Nutzerfuehrung", value: "UX" },
-  { label: "Conversion", value: "CTA" },
+const intelligencePanels = [
+  {
+    title: "Visual Audit",
+    metric: "Hierarchy map",
+    finding: "Hero, CTA density and first-screen clarity are being mapped.",
+    accent: "bg-sky-300",
+  },
+  {
+    title: "Conversion Signals",
+    metric: "Friction model",
+    finding: "Primary actions, form effort and decision paths are compared.",
+    accent: "bg-emerald-300",
+  },
+  {
+    title: "AI Visibility",
+    metric: "Entity layer",
+    finding: "Offer language, topical signals and crawlable context are checked.",
+    accent: "bg-violet-300",
+  },
+  {
+    title: "Mobile UX",
+    metric: "Viewport pass",
+    finding: "Fold sequence, spacing and action reach are evaluated for mobile.",
+    accent: "bg-cyan-300",
+  },
+  {
+    title: "Trust Layer",
+    metric: "Confidence graph",
+    finding: "Reviews, contact routes, guarantees and risk reducers are located.",
+    accent: "bg-amber-300",
+  },
+  {
+    title: "Technical Scan",
+    metric: "Runtime signals",
+    finding: "Indexability, response behavior and rendered structure are validated.",
+    accent: "bg-rose-300",
+  },
+];
+
+const scanMarkers = [
+  { label: "CTA", top: "38%", left: "16%", delay: 0.1 },
+  { label: "Trust", top: "64%", left: "69%", delay: 0.28 },
+  { label: "Hero", top: "24%", left: "51%", delay: 0.46 },
+  { label: "Mobile", top: "76%", left: "33%", delay: 0.64 },
 ];
 
 function planLabel(plan?: CheckoutPlan) {
-  if (plan === "full") return "Vollanalyse nach dem Scan";
-  if (plan === "premium") return "Premium-Report nach dem Scan";
-  return "Kostenloser Einstieg";
-}
-
-function signalColor(tone: string) {
-  if (tone === "risk") return "bg-rose-300/70";
-  if (tone === "watch") return "bg-cyan-300/70";
-  return "bg-emerald-300/70";
+  if (plan === "full") return "Full analysis pipeline";
+  if (plan === "premium") return "Premium report pipeline";
+  return "Live website intelligence";
 }
 
 function normalizeUrlInput(value: string) {
@@ -70,6 +111,28 @@ function normalizeUrlInput(value: string) {
   if (!trimmed) return "";
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
+}
+
+function formatTarget(value: string) {
+  if (!value) return "waiting-for-target";
+  try {
+    return new URL(normalizeUrlInput(value)).hostname.replace(/^www\./, "");
+  } catch {
+    return value.replace(/^https?:\/\//i, "").replace(/^www\./, "") || "target";
+  }
+}
+
+function getPanelState(index: number, scanIndex: number, isScanning: boolean): PanelState {
+  if (!isScanning) return index < 2 ? "complete" : "queued";
+  if (index < scanIndex) return "complete";
+  if (index === scanIndex) return "running";
+  return "queued";
+}
+
+function panelProgress(state: PanelState, scanIndex: number, index: number) {
+  if (state === "complete") return 100;
+  if (state === "running") return 42 + ((scanIndex + index) % 4) * 11;
+  return 0;
 }
 
 export function AnalyseDashboardEntry({
@@ -84,35 +147,37 @@ export function AnalyseDashboardEntry({
   const [displayScore, setDisplayScore] = useState(84);
   const scoreRef = useRef(84);
   const isScanning = scanState === "scanning";
-  const currentStep = scanSteps[scanIndex];
-  const progress = isScanning ? Math.max(14, (scanIndex + 1) * 18) : 84;
-  const visibleSignals = useMemo(
-    () =>
-      demoSignals.map((signal, index) => ({
-        ...signal,
-        value: isScanning ? [32, 47, 61, 74, 68][(scanIndex + index) % 5] : signal.value,
-      })),
-    [isScanning, scanIndex],
+  const currentStage = analysisStages[scanIndex] ?? analysisStages[analysisStages.length - 1];
+  const progress = isScanning ? currentStage.progress : scanState === "error" ? 22 : 0;
+  const targetHost = formatTarget(url);
+  const activeSystems = useMemo(
+    () => [
+      { label: "renderer", value: isScanning ? "capturing" : "standby" },
+      { label: "crawler", value: isScanning ? "reading DOM" : "ready" },
+      { label: "vision", value: isScanning ? "mapping UI" : "ready" },
+      { label: "model", value: isScanning ? "scoring" : "idle" },
+    ],
+    [isScanning],
   );
 
   useEffect(() => {
     if (!isScanning) return;
 
     const timer = window.setInterval(() => {
-      setScanIndex((index) => (index + 1) % scanSteps.length);
-    }, 720);
+      setScanIndex((index) => Math.min(index + 1, analysisStages.length - 1));
+    }, 980);
 
     return () => window.clearInterval(timer);
   }, [isScanning]);
 
   useEffect(() => {
-    const target = isScanning ? [18, 34, 51, 67, 79][scanIndex] : scanState === "error" ? 42 : 84;
+    const target = isScanning ? currentStage.targetScore : scanState === "error" ? 38 : 84;
     const start = scoreRef.current;
     const startedAt = performance.now();
     let frame = 0;
 
     const tick = (now: number) => {
-      const progressValue = Math.min(1, (now - startedAt) / 520);
+      const progressValue = Math.min(1, (now - startedAt) / 560);
       const eased = 1 - Math.pow(1 - progressValue, 3);
       const next = Math.round(start + (target - start) * eased);
       scoreRef.current = next;
@@ -122,7 +187,7 @@ export function AnalyseDashboardEntry({
 
     frame = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frame);
-  }, [scanIndex, scanState, isScanning]);
+  }, [currentStage.targetScore, scanState, isScanning]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -193,27 +258,30 @@ export function AnalyseDashboardEntry({
   }
 
   return (
-    <section className="relative overflow-hidden px-4 py-8 text-white sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(34,211,238,0.14),transparent_34%),radial-gradient(circle_at_80%_24%,rgba(59,130,246,0.12),transparent_30%)]" />
-      <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] w-full max-w-7xl gap-6 lg:grid-cols-[minmax(0,0.78fr)_minmax(0,1.22fr)] lg:items-center">
-        <div className="pt-8 lg:pt-0">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100">
-            <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
-            {planLabel(initialPlan)}
+    <section className="relative min-h-[calc(100vh-6rem)] overflow-hidden bg-[#07090d] px-3 py-4 text-slate-100 sm:px-5 lg:px-8">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.035),transparent_32%),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(180deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:auto,64px_64px,64px_64px]" />
+
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-4">
+        <header className="grid gap-3 border-b border-white/[0.08] pb-4 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,0.44fr)] lg:items-end">
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex h-7 items-center gap-2 rounded-md border border-white/10 bg-white/[0.04] px-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-300">
+                <span className={`h-1.5 w-1.5 rounded-full ${isScanning ? "bg-emerald-300" : scanState === "error" ? "bg-rose-300" : "bg-slate-500"}`} />
+                {planLabel(initialPlan)}
+              </span>
+              <span className="inline-flex h-7 max-w-full items-center rounded-md border border-white/10 bg-black/20 px-2.5 font-mono text-[10px] uppercase tracking-[0.16em] text-slate-500">
+                target / <span className="ml-1 truncate text-slate-300">{targetHost}</span>
+              </span>
+            </div>
+            <h1 className="mt-4 text-2xl font-semibold tracking-tight text-white sm:text-3xl lg:text-4xl">
+              Website Analysis Operating System
+            </h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
+              Live-Erfassung fuer visuelle Hierarchie, Conversion-Reibung, Trust, Mobile UX und AI Visibility.
+            </p>
           </div>
 
-          <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl lg:leading-[1.02]">
-            Website eingeben. Analyse starten. Klarheit gewinnen.
-          </h1>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-slate-300 sm:text-lg">
-            Der Scanner prueft Sichtbarkeit, Vertrauen, Nutzerfuehrung und Conversion-Hebel. Du bekommst ein Ergebnis, das direkt zeigt, wo deine Website bremst.
-          </p>
-
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="mt-8 overflow-hidden rounded-2xl border border-white/12 bg-white/[0.06] p-2 shadow-[0_24px_90px_-42px_rgba(34,211,238,0.5)] backdrop-blur-xl"
-          >
+          <form onSubmit={handleSubmit} noValidate className="rounded-lg border border-white/[0.08] bg-white/[0.035] p-2">
             <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto]">
               <label htmlFor="analyse-url" className="sr-only">
                 Website URL
@@ -227,190 +295,301 @@ export function AnalyseDashboardEntry({
                 onChange={(event) => setUrl(event.target.value)}
                 placeholder="https://deine-website.de"
                 disabled={isScanning}
-                className="min-h-14 min-w-0 rounded-xl border border-white/10 bg-slate-950/72 px-4 text-base text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-4 focus:ring-cyan-300/10 disabled:opacity-70 sm:min-h-16 sm:px-5"
+                className="h-11 min-w-0 rounded-md border border-white/10 bg-[#05070a] px-3 font-mono text-sm text-white outline-none placeholder:text-slate-600 focus:border-sky-300 focus:ring-2 focus:ring-sky-300/15 disabled:opacity-70"
               />
               <button
                 type="submit"
                 disabled={isScanning}
-                className="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-cyan-300 px-6 text-sm font-extrabold text-slate-950 shadow-[0_18px_50px_-24px_rgba(103,232,249,0.95)] transition hover:-translate-y-0.5 hover:bg-cyan-200 focus:outline-none focus:ring-2 focus:ring-cyan-100 focus:ring-offset-2 focus:ring-offset-slate-950 disabled:cursor-not-allowed disabled:opacity-75 sm:min-h-16"
+                className="inline-flex h-11 items-center justify-center rounded-md bg-white px-4 text-sm font-semibold text-slate-950 shadow-[0_16px_38px_-24px_rgba(255,255,255,0.7)] hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-[#07090d] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {isScanning ? (
-                  <>
-                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-950/25 border-t-slate-950" />
-                    Analyse laeuft
-                  </>
-                ) : (
-                  "Website analysieren"
-                )}
+                {isScanning ? "Analyzing" : "Start analysis"}
               </button>
             </div>
+            {error ? (
+              <p className="mt-2 rounded-md border border-rose-300/20 bg-rose-400/10 px-3 py-2 text-xs leading-5 text-rose-100">
+                {error}
+              </p>
+            ) : null}
           </form>
+        </header>
 
-          {error ? (
-            <p className="mt-4 rounded-2xl border border-rose-300/20 bg-rose-400/10 px-4 py-3 text-sm leading-6 text-rose-100">
-              {error}
-            </p>
-          ) : null}
-
-          <div className="mt-5 flex flex-wrap gap-2">
-            {["Keine Registrierung", "Ergebnis sofort sichtbar", "Screenshots inklusive", "Upgrade optional"].map((item) => (
-              <span key={item} className="rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-slate-300">
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative min-w-0 pb-8 lg:pb-0">
-          <div className="pointer-events-none absolute -inset-6 rounded-full bg-cyan-400/10 blur-3xl" />
-          <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#020408]/95 shadow-[0_38px_140px_-62px_rgba(0,0,0,0.95),0_0_90px_rgba(34,211,238,0.08)] backdrop-blur-2xl">
-            <div className="flex flex-col gap-3 border-b border-white/[0.06] bg-white/[0.018] px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="flex gap-2" aria-hidden="true">
-                  <span className="h-2 w-2 rounded-full bg-white/[0.16]" />
-                  <span className="h-2 w-2 rounded-full bg-white/[0.1]" />
-                  <span className="h-2 w-2 rounded-full bg-white/[0.06]" />
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(21rem,0.52fr)]">
+          <div className="grid gap-4">
+            <section className="overflow-hidden rounded-lg border border-white/[0.08] bg-[#0b0e13] shadow-[0_28px_90px_-58px_rgba(0,0,0,0.95)]">
+              <div className="flex flex-col gap-3 border-b border-white/[0.08] bg-white/[0.025] px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                    live analysis runtime
+                  </p>
+                  <AnimatePresence mode="wait">
+                    <motion.p
+                      key={currentStage.label}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.22, ease: "easeOut" }}
+                      className="mt-1 truncate text-sm font-semibold text-white sm:text-base"
+                    >
+                      {isScanning ? currentStage.label : scanState === "error" ? "Input validation stopped" : "System ready for target"}
+                    </motion.p>
+                  </AnimatePresence>
                 </div>
-                <p className="truncate font-mono text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                  shophebel scanner / {url || "deine website"}
-                </p>
+                <div className="grid grid-cols-2 gap-2 sm:flex">
+                  {activeSystems.map((system) => (
+                    <div key={system.label} className="rounded-md border border-white/[0.08] bg-black/20 px-2.5 py-1.5">
+                      <p className="font-mono text-[9px] uppercase tracking-[0.16em] text-slate-600">{system.label}</p>
+                      <p className="mt-0.5 font-mono text-[10px] text-slate-300">{system.value}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <span className="w-fit rounded-md border border-cyan-300/15 bg-cyan-300/[0.07] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.22em] text-cyan-200">
-                {isScanning ? currentStep : scanState === "error" ? "Eingabe pruefen" : "Live bereit"}
-              </span>
-            </div>
 
-            <div className="grid gap-4 p-4 sm:p-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(17rem,0.85fr)]">
-              <div className="grid gap-4">
-                <article className="relative overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.032] p-5 sm:p-6">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-200/30 to-transparent" />
-                  <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200/80">
-                        Analyse-Ueberblick
-                      </p>
-                      <div className="mt-4 flex items-end gap-3">
-                        <p className="font-mono text-6xl font-semibold leading-none text-white tabular-nums sm:text-7xl">
+              <div className="grid gap-4 p-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(17rem,0.7fr)]">
+                <div className="relative min-h-[22rem] overflow-hidden rounded-lg border border-white/[0.08] bg-[#11151c]">
+                  <div className="absolute inset-x-0 top-0 z-20 flex items-center justify-between border-b border-white/[0.08] bg-[#080b10]/88 px-3 py-2 backdrop-blur">
+                    <p className="truncate font-mono text-[10px] text-slate-500">
+                      viewport-capture://{targetHost}
+                    </p>
+                    <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-slate-400">
+                      {isScanning ? `${progress}%` : "standby"}
+                    </span>
+                  </div>
+
+                  <motion.div
+                    initial={false}
+                    animate={{ opacity: isScanning ? 1 : 0.64, y: isScanning ? 0 : 10 }}
+                    transition={{ duration: 0.45, ease: "easeOut" }}
+                    className="absolute inset-0 pt-10"
+                  >
+                    <div className="mx-auto mt-6 w-[88%] overflow-hidden rounded-md border border-slate-700/70 bg-slate-100 shadow-[0_32px_80px_-55px_rgba(255,255,255,0.35)]">
+                      <div className="flex h-9 items-center gap-2 border-b border-slate-200 bg-white px-3">
+                        <span className="h-2 w-2 rounded-full bg-slate-300" />
+                        <span className="h-2 w-2 rounded-full bg-slate-300" />
+                        <span className="h-2 w-2 rounded-full bg-slate-300" />
+                        <span className="ml-2 h-3 w-36 rounded bg-slate-200" />
+                      </div>
+                      <div className="grid gap-4 bg-white p-5 md:grid-cols-[minmax(0,1fr)_13rem]">
+                        <div>
+                          <div className="h-7 w-3/4 rounded bg-slate-900" />
+                          <div className="mt-3 h-3 w-5/6 rounded bg-slate-300" />
+                          <div className="mt-2 h-3 w-2/3 rounded bg-slate-300" />
+                          <div className="mt-5 flex gap-2">
+                            <div className="h-9 w-28 rounded bg-slate-950" />
+                            <div className="h-9 w-24 rounded border border-slate-300 bg-white" />
+                          </div>
+                        </div>
+                        <div className="hidden rounded border border-slate-200 bg-slate-50 md:block" />
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 bg-slate-50 p-5">
+                        <div className="h-16 rounded border border-slate-200 bg-white" />
+                        <div className="h-16 rounded border border-slate-200 bg-white" />
+                        <div className="h-16 rounded border border-slate-200 bg-white" />
+                      </div>
+                    </div>
+                  </motion.div>
+
+                  <AnimatePresence>
+                    {isScanning ? (
+                      <>
+                        <motion.div
+                          initial={{ y: "-18%", opacity: 0 }}
+                          animate={{ y: "112%", opacity: [0, 1, 1, 0] }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
+                          className="absolute left-0 right-0 top-0 z-30 h-24 border-y border-sky-300/30 bg-sky-300/[0.055]"
+                        />
+                        <div className="absolute inset-0 z-20 bg-[linear-gradient(180deg,transparent_0,rgba(255,255,255,0.045)_50%,transparent_100%)] bg-[length:100%_6px]" />
+                        {scanMarkers.map((marker, index) => (
+                          <motion.div
+                            key={marker.label}
+                            initial={{ opacity: 0, scale: 0.92 }}
+                            animate={{ opacity: scanIndex >= Math.min(index + 1, analysisStages.length - 1) ? 1 : 0.2, scale: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ delay: marker.delay, duration: 0.25 }}
+                            className="absolute z-40"
+                            style={{ top: marker.top, left: marker.left }}
+                          >
+                            <div className="relative">
+                              <span className="absolute -inset-2 rounded-full border border-sky-300/25" />
+                              <span className="grid h-7 w-7 place-items-center rounded-full border border-sky-200/70 bg-[#071018]/85 font-mono text-[9px] text-sky-100 shadow-[0_0_24px_rgba(125,211,252,0.22)]">
+                                {index + 1}
+                              </span>
+                              <span className="absolute left-8 top-0 whitespace-nowrap rounded border border-white/10 bg-[#071018]/90 px-2 py-1 font-mono text-[9px] uppercase tracking-[0.12em] text-slate-300">
+                                {marker.label}
+                              </span>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
+
+                <aside className="grid content-start gap-3">
+                  <div className="rounded-lg border border-white/[0.08] bg-black/20 p-4">
+                    <div className="flex items-end justify-between gap-4">
+                      <div>
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">intelligence score</p>
+                        <p className="mt-2 font-mono text-5xl font-semibold leading-none text-white tabular-nums">
                           {displayScore}
-                        </p>
-                        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                          /100 Klarheitsindex
+                          <span className="text-base text-slate-600">/100</span>
                         </p>
                       </div>
-                      <p className="mt-4 max-w-md text-sm leading-7 text-slate-400">
-                        {isScanning
-                          ? "Die Analyse laeuft live. Sichtbare Signale werden gerade in konkrete Findings uebersetzt."
-                          : "Beispielhafte Preview: Nach dem Start ersetzt Shophebel diese Werte durch echte Website-Signale."}
-                      </p>
+                      <span className="rounded-md border border-white/10 bg-white/[0.04] px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-400">
+                        {isScanning ? "calibrating" : "preview"}
+                      </span>
                     </div>
-
-                    <div className="relative mx-auto grid h-32 w-32 shrink-0 place-items-center sm:mx-0">
-                      <div className="absolute inset-0 rounded-full border border-cyan-200/10" />
-                      <div className="absolute inset-3 rounded-full border border-white/10" />
-                      <div className="absolute inset-7 rounded-full border border-white/[0.06]" />
-                      <div className={`h-11 w-11 rounded-full border-2 ${isScanning ? "animate-spin border-cyan-300/20 border-t-cyan-200" : "border-cyan-200/25 bg-cyan-300/10"}`} />
-                      {!isScanning ? <span className="absolute text-lg font-bold text-cyan-100">SH</span> : null}
+                    <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+                      <motion.div
+                        initial={false}
+                        animate={{ width: `${progress}%` }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                        className="h-full rounded-full bg-white"
+                      />
                     </div>
+                    <p className="mt-4 text-xs leading-5 text-slate-500">
+                      {isScanning ? currentStage.detail : "Start the analysis to replace the preview state with live website signals."}
+                    </p>
                   </div>
 
-                  <div className="mt-6 h-px w-full bg-white/[0.06]">
-                    <div
-                      className="h-px bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.55)] transition-all duration-500"
-                      style={{ width: `${Math.min(100, progress)}%` }}
-                    />
-                  </div>
-                </article>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <article className="rounded-xl border border-white/[0.07] bg-white/[0.028] p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                        Scan-Schritte
-                      </p>
-                      <span className="font-mono text-[10px] text-slate-600">{isScanning ? `${scanIndex + 1}/5` : "bereit"}</span>
-                    </div>
-                    <div className="mt-4 grid gap-2">
-                      {scanSteps.map((step, index) => {
-                        const active = index === scanIndex && isScanning;
+                  <div className="rounded-lg border border-white/[0.08] bg-black/20 p-4">
+                    <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">stage sequence</p>
+                    <div className="mt-3 grid gap-2">
+                      {analysisStages.map((stage, index) => {
+                        const active = isScanning && index === scanIndex;
                         const complete = isScanning && index < scanIndex;
 
                         return (
-                          <div key={step} className="flex items-center gap-2">
-                            <span className={`h-2 w-2 rounded-full ${active ? "bg-cyan-200" : complete ? "bg-emerald-300/70" : "bg-white/12"}`} />
-                            <span className={`truncate text-xs ${active ? "text-cyan-100" : complete ? "text-slate-300" : "text-slate-600"}`}>
-                              {step}
+                          <div key={stage.label} className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+                            <span className={`mt-1 h-2 w-2 rounded-full ${active ? "bg-white" : complete ? "bg-emerald-300" : "bg-white/14"}`} />
+                            <span className={`truncate text-xs ${active ? "text-white" : complete ? "text-slate-300" : "text-slate-600"}`}>
+                              {stage.label.replace("...", "")}
                             </span>
                           </div>
                         );
                       })}
                     </div>
-                  </article>
-
-                  <article className="rounded-xl border border-white/[0.07] bg-white/[0.028] p-5">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-slate-400">
-                      Reibungssignale
-                    </p>
-                    <div className="mt-4 grid gap-3">
-                      {visibleSignals.map((signal) => (
-                        <div key={signal.label}>
-                          <div className="flex items-center justify-between gap-3 text-xs">
-                            <span className="truncate text-slate-400">{signal.label}</span>
-                            <span className="font-mono text-slate-600">{signal.value}%</span>
-                          </div>
-                          <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
-                            <div
-                              className={`h-full rounded-full ${signalColor(signal.tone)} transition-all duration-500`}
-                              style={{ width: `${signal.value}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </article>
-                </div>
+                  </div>
+                </aside>
               </div>
+            </section>
 
-              <aside className="rounded-xl border border-white/[0.07] bg-white/[0.028] p-5">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.24em] text-cyan-200/80">
-                    Top Opportunities
-                  </p>
-                  <span className="rounded-full border border-white/10 bg-white/[0.05] px-2 py-1 text-[10px] font-bold text-slate-400">
-                    Preview
-                  </span>
-                </div>
+            <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {intelligencePanels.map((panel, index) => {
+                const state = getPanelState(index, scanIndex, isScanning);
+                const value = panelProgress(state, scanIndex, index);
 
-                <div className="mt-5 grid gap-3">
-                  {demoLevers.map((lever, index) => (
-                    <article key={lever.label} className="rounded-xl border border-white/[0.06] bg-black/25 p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-sm font-semibold leading-5 text-slate-200">
-                            {isScanning && index > scanIndex % 3 ? "Signal wird geprueft" : lever.label}
-                          </p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
-                            {isScanning && index > scanIndex % 3 ? currentStep : lever.detail}
-                          </p>
-                        </div>
-                        <span className="shrink-0 rounded-md border border-white/10 bg-white/[0.06] px-2 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-slate-300">
-                          {lever.priority}
-                        </span>
+                return (
+                  <motion.article
+                    key={panel.title}
+                    layout
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.04, duration: 0.28, ease: "easeOut" }}
+                    className="min-h-40 rounded-lg border border-white/[0.08] bg-[#0b0e13] p-4"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-white">{panel.title}</p>
+                        <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-slate-600">{panel.metric}</p>
                       </div>
-                    </article>
-                  ))}
-                </div>
-
-                <div className="mt-5 grid grid-cols-2 gap-2">
-                  {statCards.map((item) => (
-                    <div key={item.label} className="rounded-lg border border-white/[0.055] bg-white/[0.022] p-3">
-                      <p className="text-[9px] uppercase tracking-[0.18em] text-slate-600">{item.label}</p>
-                      <p className="mt-1 text-sm font-semibold text-slate-300">{item.value}</p>
+                      <span className={`h-2 w-2 rounded-full ${state === "complete" ? panel.accent : state === "running" ? "bg-white" : "bg-white/14"}`} />
                     </div>
-                  ))}
-                </div>
-              </aside>
-            </div>
+
+                    <div className="mt-4 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                      <motion.div
+                        initial={false}
+                        animate={{ width: `${value}%` }}
+                        transition={{ duration: 0.45, ease: "easeOut" }}
+                        className={`h-full rounded-full ${state === "complete" ? panel.accent : "bg-white"}`}
+                      />
+                    </div>
+
+                    <AnimatePresence mode="wait">
+                      {state === "queued" ? (
+                        <motion.div
+                          key="skeleton"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="mt-5 grid gap-2"
+                        >
+                          <div className="h-2.5 w-11/12 rounded bg-white/[0.07]" />
+                          <div className="h-2.5 w-4/5 rounded bg-white/[0.05]" />
+                          <div className="h-2.5 w-2/3 rounded bg-white/[0.04]" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          key="content"
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -8 }}
+                          transition={{ duration: 0.22, ease: "easeOut" }}
+                          className="mt-5"
+                        >
+                          <p className="text-xs leading-5 text-slate-400">{panel.finding}</p>
+                          <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3 font-mono text-[10px] uppercase tracking-[0.12em]">
+                            <span className={state === "complete" ? "text-emerald-300" : "text-white"}>{state}</span>
+                            <span className="text-slate-600">{value}%</span>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.article>
+                );
+              })}
+            </section>
           </div>
+
+          <aside className="grid content-start gap-4">
+            <section className="rounded-lg border border-white/[0.08] bg-[#0b0e13] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">system feedback</p>
+                <span className="rounded border border-white/10 bg-white/[0.04] px-2 py-1 font-mono text-[9px] uppercase tracking-[0.14em] text-slate-500">
+                  live log
+                </span>
+              </div>
+              <div className="mt-4 grid gap-2 font-mono text-[11px] leading-5">
+                {analysisStages.slice(0, Math.max(2, scanIndex + 1)).map((stage, index) => (
+                  <motion.div
+                    key={stage.label}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.22 }}
+                    className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-2 border-b border-white/[0.05] pb-2 last:border-0 last:pb-0"
+                  >
+                    <span className="text-slate-600">{`00:${String(index * 3 + 4).padStart(2, "0")}`}</span>
+                    <span className={isScanning && index === scanIndex ? "text-white" : "text-slate-500"}>
+                      {stage.label.replace("...", "")}
+                    </span>
+                  </motion.div>
+                ))}
+              </div>
+            </section>
+
+            <section className="rounded-lg border border-white/[0.08] bg-[#0b0e13] p-4">
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">detected work queue</p>
+              <div className="mt-4 grid gap-3">
+                {["Above-the-fold clarity", "Primary CTA contrast", "Review proof placement", "Mobile purchase path"].map((item, index) => {
+                  const visible = isScanning && scanIndex >= index + 1;
+
+                  return (
+                    <motion.div
+                      key={item}
+                      initial={false}
+                      animate={{ opacity: visible ? 1 : 0.42 }}
+                      className="rounded-md border border-white/[0.07] bg-black/20 p-3"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-xs font-semibold text-slate-300">{item}</p>
+                        <span className="font-mono text-[10px] text-slate-600">{visible ? "found" : "pending"}</span>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </section>
+          </aside>
         </div>
       </div>
     </section>

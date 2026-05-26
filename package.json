@@ -16,6 +16,7 @@
   "dependencies": {
     "@sparticuz/chromium": "^147.0.0",
     "cheerio": "^1.2.0",
+    "framer-motion": "^12.40.0",
     "next": "16.2.4",
     "pdfkit": "^0.18.0",
     "puppeteer-core": "^24.43.1",

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   canViewFullAnalysis,
   canViewPremiumReport,
+  resolveAccessLevel,
   resolveAnalysisPlan,
 } from "@/lib/premium/premiumAccess";
 
@@ -35,5 +36,12 @@ describe("premium access logic", () => {
     expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: null, plan: "full" })).toBe("full");
     expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: "free", plan: "premium" })).toBe("free");
     expect(resolveAnalysisPlan({ paymentStatus: "paid", accessLevel: null, isPremium: true })).toBe("premium");
+  });
+
+  it("resolves access from all persisted payment fields in one helper", () => {
+    expect(resolveAccessLevel({ paidAt: "2026-05-08T12:30:00.000Z", productType: "full_analysis" })).toBe("full");
+    expect(resolveAccessLevel({ paidAt: "2026-05-08T12:30:00.000Z", productType: "premium_report" })).toBe("premium");
+    expect(resolveAccessLevel({ paymentStatus: "pending", accessLevel: "premium", stripeSessionId: "cs_test_123" })).toBe("free");
+    expect(resolveAccessLevel({ paymentStatus: "pending", isPremium: true })).toBe("free");
   });
 });

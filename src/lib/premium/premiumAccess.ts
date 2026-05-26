@@ -4,9 +4,11 @@ export type PaymentStatus = "free" | "pending" | "paid" | "failed" | string;
 export type AnalysisAccessInput = {
   accessLevel?: string | null;
   paymentStatus?: PaymentStatus | null;
+  paidAt?: string | null;
   plan?: string | null;
   productType?: string | null;
   isPremium?: boolean | null;
+  stripeSessionId?: string | null;
 };
 
 function normalizePlan(value?: string | null): AnalysisPlan | null {
@@ -34,12 +36,17 @@ function normalizeAccessLevel(value?: string | null): AnalysisPlan | null {
 }
 
 export function resolveAnalysisPlan(input: AnalysisAccessInput = {}): AnalysisPlan {
-  const paymentStatus = input.paymentStatus?.trim() ?? "free";
+  return resolveAccessLevel(input);
+}
+
+export function resolveAccessLevel(input: AnalysisAccessInput = {}): AnalysisPlan {
+  const paymentStatus = input.paymentStatus?.trim().toLowerCase() ?? "free";
   const accessLevel = normalizeAccessLevel(input.accessLevel);
   const productPlan = normalizePlan(input.productType);
   const legacyPlan = normalizePlan(input.plan);
+  const hasPaidSignal = paymentStatus === "paid" || Boolean(input.paidAt);
 
-  if (paymentStatus === "paid") {
+  if (hasPaidSignal) {
     if (accessLevel) {
       return accessLevel;
     }

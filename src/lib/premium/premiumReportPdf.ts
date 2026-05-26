@@ -1,4 +1,6 @@
 import PDFDocument from "pdfkit/js/pdfkit.standalone";
+import { readFile } from "fs/promises";
+import path from "path";
 
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumBlocker, PremiumReport } from "@/lib/premium/buildPremiumReport";
@@ -16,6 +18,18 @@ type PremiumReportPdfInput = {
 };
 
 type BoxTone = "dark" | "cyan" | "emerald" | "amber" | "rose" | "slate";
+type PdfImageFormat = "png" | "jpeg" | "webp" | "unsupported";
+type PdfImageAsset = {
+  buffer: Buffer;
+  src: string;
+  label: string;
+  contentType: string;
+  detectedFormat: PdfImageFormat;
+};
+type VisualPreviewAsset =
+  | { kind: "image"; asset: PdfImageAsset }
+  | { kind: "fallback"; src: string; label: string }
+  | null;
 
 const COLORS = {
   slate950: "#0f172a",
@@ -60,6 +74,10 @@ const LAYOUT = {
   labelMarginTop: 16,
 };
 
+const MIN_SCREENSHOT_BUFFER_LENGTH = 1000;
+const VISUAL_PREVIEW_EMBED_FALLBACK =
+  "Die visuelle Vorschau wurde erfasst, konnte aber fuer diesen PDF-Export nicht eingebettet werden.";
+
 export function getPremiumReportPdfStaticLabels() {
   return [
     "Dein Premium-Report",
@@ -70,6 +88,9 @@ export function getPremiumReportPdfStaticLabels() {
     "7-Tage-Plan",
     "Priorisierte Maßnahmen",
     "Visuelle Prüfung",
+    "Website Intelligence Score",
+    "Screenshot Intelligence Console",
+    "Strategische Premium-Ebene",
     "sichtbarer Startbereich",
     "Übersicht",
     "Einführung",
@@ -300,6 +321,409 @@ function timelineLabel(index: number) {
   return "Später";
 }
 
+function subscoreRows(analysis: StoredAnalysisResult) {
+  const categories = analysis.analysis.categories;
+
+  return [
+    ["Klarheit", categories.conversion.score],
+    ["Vertrauen", categories.trust.score],
+    ["Design", categories.design.score],
+    ["Mobile UX", categories.performance.score],
+    ["AI-Sichtbarkeit", categories.aiVisibility.score],
+    ["SEO", categories.seo.score],
+  ] as const;
+}
+
+function isDevelopment() {
+  return process.env.NODE_ENV === "development";
+}
+
+function logScreenshotDebug(message: string, details: {
+  contentType?: string;
+  bufferLength?: number;
+  detectedFormat?: PdfImageFormat;
+  screenshotUrl: string;
+  errorMessage?: string;
+}) {
+  if (!isDevelopment()) {
+    return;
+  }
+
+  console.warn(`[premium-report-pdf] ${message}`, details);
+}
+
+function inferImageContentType(src: string) {
+  const pathname = src.split("?")[0].toLowerCase();
+
+  if (pathname.endsWith(".png")) return "image/png";
+  if (pathname.endsWith(".jpg") || pathname.endsWith(".jpeg")) return "image/jpeg";
+  if (pathname.endsWith(".webp")) return "image/webp";
+
+  return "application/octet-stream";
+}
+
+function normalizeContentType(contentType: string) {
+  return contentType.split(";")[0].trim().toLowerCase();
+}
+
+function detectImageFormat(buffer: Buffer): PdfImageFormat {
+  if (
+    buffer.length >= 8 &&
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  ) {
+    return "png";
+  }
+
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+    return "jpeg";
+  }
+
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WEBP"
+  ) {
+    return "webp";
+  }
+
+  return "unsupported";
+}
+
+function validateScreenshotBuffer(input: {
+  buffer: Buffer;
+  src: string;
+  label: string;
+  contentType: string;
+}): PdfImageAsset | null {
+  const contentType = normalizeContentType(input.contentType);
+  const bufferLength = input.buffer.length;
+  const detectedFormat = detectImageFormat(input.buffer);
+  const debugDetails = {
+    contentType,
+    bufferLength,
+    detectedFormat,
+    screenshotUrl: input.src,
+  };
+
+  if (bufferLength <= MIN_SCREENSHOT_BUFFER_LENGTH) {
+    logScreenshotDebug("Screenshot buffer is too small for PDF embedding", debugDetails);
+    return null;
+  }
+
+  if (!contentType.startsWith("image/")) {
+    logScreenshotDebug("Screenshot response is not an image", debugDetails);
+    return null;
+  }
+
+  if (detectedFormat === "unsupported") {
+    logScreenshotDebug("Screenshot image signature is unsupported", debugDetails);
+    return null;
+  }
+
+  return {
+    buffer: input.buffer,
+    src: input.src,
+    label: input.label,
+    contentType,
+    detectedFormat,
+  };
+}
+
+async function convertScreenshotForPdfKit(asset: PdfImageAsset): Promise<PdfImageAsset | null> {
+  if (asset.detectedFormat === "png" || asset.detectedFormat === "jpeg") {
+    return asset;
+  }
+
+  try {
+    const sharpModule = await import("sharp");
+    const sharp = sharpModule.default;
+    const buffer = await sharp(asset.buffer).png().toBuffer();
+    const convertedFormat = detectImageFormat(buffer);
+
+    if (buffer.length <= MIN_SCREENSHOT_BUFFER_LENGTH || convertedFormat !== "png") {
+      logScreenshotDebug("Screenshot conversion produced an invalid PDF image", {
+        contentType: "image/png",
+        bufferLength: buffer.length,
+        detectedFormat: convertedFormat,
+        screenshotUrl: asset.src,
+      });
+      return null;
+    }
+
+    return {
+      ...asset,
+      buffer,
+      contentType: "image/png",
+      detectedFormat: "png",
+    };
+  } catch (error) {
+    logScreenshotDebug("Screenshot conversion for PDF embedding failed", {
+      contentType: asset.contentType,
+      bufferLength: asset.buffer.length,
+      detectedFormat: asset.detectedFormat,
+      screenshotUrl: asset.src,
+      errorMessage: error instanceof Error ? error.message : "unknown",
+    });
+    return null;
+  }
+}
+
+function resolveGeneratedScreenshotPath(src: string) {
+  if (!src.startsWith("/generated-screenshots/") || process.env.NODE_ENV === "production") {
+    return null;
+  }
+
+  const screenshotRoot = path.join(process.cwd(), "public", "generated-screenshots");
+  let relativePath = "";
+
+  try {
+    relativePath = decodeURIComponent(src.slice("/generated-screenshots/".length));
+  } catch (error) {
+    logScreenshotDebug("Local screenshot path could not be decoded", {
+      contentType: inferImageContentType(src),
+      bufferLength: 0,
+      detectedFormat: "unsupported",
+      screenshotUrl: src,
+      errorMessage: error instanceof Error ? error.message : "unknown",
+    });
+    return null;
+  }
+
+  const absolutePath = path.resolve(screenshotRoot, relativePath);
+  const relativeToRoot = path.relative(screenshotRoot, absolutePath);
+
+  if (relativeToRoot.startsWith("..") || path.isAbsolute(relativeToRoot)) {
+    logScreenshotDebug("Local screenshot path escaped the generated screenshot directory", {
+      contentType: inferImageContentType(src),
+      bufferLength: 0,
+      detectedFormat: "unsupported",
+      screenshotUrl: src,
+    });
+    return null;
+  }
+
+  return absolutePath;
+}
+
+async function fetchPdfImage(src: string, label: string): Promise<PdfImageAsset | null> {
+  const localScreenshotPath = resolveGeneratedScreenshotPath(src);
+
+  if (localScreenshotPath) {
+    try {
+      const buffer = await readFile(localScreenshotPath);
+      const asset = validateScreenshotBuffer({
+        buffer,
+        src,
+        label,
+        contentType: inferImageContentType(src),
+      });
+
+      return asset ? convertScreenshotForPdfKit(asset) : null;
+    } catch (error) {
+      logScreenshotDebug("Local screenshot read failed", {
+        contentType: inferImageContentType(src),
+        bufferLength: 0,
+        detectedFormat: "unsupported",
+        screenshotUrl: src,
+        errorMessage: error instanceof Error ? error.message : "unknown",
+      });
+      return null;
+    }
+  }
+
+  if (!/^https?:\/\//i.test(src)) {
+    return null;
+  }
+
+  try {
+    const response = await fetch(src, { cache: "no-store" });
+
+    if (!response.ok) {
+      logScreenshotDebug("Screenshot fetch failed", {
+        contentType: response.headers.get("content-type") ?? "",
+        bufferLength: 0,
+        detectedFormat: "unsupported",
+        screenshotUrl: src,
+        errorMessage: `HTTP ${response.status}`,
+      });
+      return null;
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    const asset = validateScreenshotBuffer({
+      buffer,
+      src,
+      label,
+      contentType: response.headers.get("content-type") ?? "",
+    });
+
+    return asset ? convertScreenshotForPdfKit(asset) : null;
+  } catch (error) {
+    logScreenshotDebug("Screenshot fetch threw", {
+      contentType: "",
+      bufferLength: 0,
+      detectedFormat: "unsupported",
+      screenshotUrl: src,
+      errorMessage: error instanceof Error ? error.message : "unknown",
+    });
+    return null;
+  }
+}
+
+async function resolveVisualPreviewAsset(analysis: StoredAnalysisResult) {
+  const screenshots = analysis.analysis.screenshots;
+  const candidates = [
+    { src: screenshots?.viewport, label: "Desktop Screenshot" },
+    { src: screenshots?.fullPage, label: "Full Page Screenshot" },
+    { src: screenshots?.mobile, label: "Mobile Screenshot" },
+    { src: screenshots?.hero, label: "Hero Screenshot" },
+  ];
+  let attemptedScreenshot = null as { src: string; label: string } | null;
+
+  for (const candidate of candidates) {
+    if (!candidate.src) continue;
+    attemptedScreenshot = { src: candidate.src, label: candidate.label };
+    const asset = await fetchPdfImage(candidate.src, candidate.label);
+    if (asset) return { kind: "image", asset } satisfies VisualPreviewAsset;
+  }
+
+  return attemptedScreenshot
+    ? ({ kind: "fallback", ...attemptedScreenshot } satisfies VisualPreviewAsset)
+    : null;
+}
+
+function writeScoreDashboard(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
+  drawSectionHeader(doc, "Website Intelligence Score", "Executive Snapshot");
+  const width = pageWidth(doc);
+  const x = doc.page.margins.left;
+  const y = doc.y;
+  const score = analysis.analysis.overallScore;
+  const status = scoreStatus(score);
+  const rows = subscoreRows(analysis);
+  const leftWidth = 164;
+  const rightX = x + leftWidth + 18;
+  const rightWidth = width - leftWidth - 18;
+  const height = 176;
+
+  ensureSpace(doc, height + 18);
+  doc.rect(x, y, leftWidth, height).fillAndStroke(COLORS.slate950, COLORS.slate950);
+  doc.font("Helvetica-Bold").fontSize(9).fillColor("#67e8f9").text("INTELLIGENCE SCORE", x + 16, y + 18, {
+    width: leftWidth - 32,
+    characterSpacing: 0.8,
+  });
+  doc.font("Helvetica-Bold").fontSize(42).fillColor(COLORS.white).text(typeof score === "number" ? String(score) : "n/a", x + 16, y + 52, {
+    width: leftWidth - 32,
+  });
+  doc.font("Helvetica").fontSize(10).fillColor(COLORS.slate200).text(status.label, x + 16, y + 108, {
+    width: leftWidth - 32,
+    lineGap: 2,
+  });
+
+  rows.forEach(([label, value], index) => {
+    const rowY = y + index * 28;
+    const numericValue = Number(value);
+    const barWidth = Math.max(6, Math.min(100, numericValue)) / 100 * (rightWidth - 130);
+
+    doc.font("Helvetica-Bold").fontSize(9.5).fillColor(COLORS.slate800).text(String(label), rightX, rowY + 2, {
+      width: 104,
+      height: 14,
+      lineBreak: false,
+    });
+    doc.rect(rightX + 112, rowY + 5, rightWidth - 130, 8).fill(COLORS.slate100);
+    doc.rect(rightX + 112, rowY + 5, barWidth, 8).fill(numericValue >= 70 ? COLORS.emerald700 : numericValue >= 55 ? COLORS.amber700 : COLORS.rose700);
+    doc.font("Helvetica-Bold").fontSize(9).fillColor(COLORS.slate700).text(`${value}/100`, rightX + rightWidth - 44, rowY + 1, {
+      width: 44,
+      align: "right",
+      lineBreak: false,
+    });
+  });
+
+  doc.y = y + height + LAYOUT.cardSpacing;
+}
+
+function writeVisualPreviewPage(
+  doc: PDFKit.PDFDocument,
+  analysis: StoredAnalysisResult,
+  visualPreview: VisualPreviewAsset,
+) {
+  doc.addPage();
+  drawSectionHeader(doc, "Screenshot Intelligence Console", "Visual Audit");
+  const width = pageWidth(doc);
+  const x = doc.page.margins.left;
+
+  if (visualPreview) {
+    const visualAsset = visualPreview.kind === "image" ? visualPreview.asset : null;
+    const visualLabel = visualPreview.kind === "image" ? visualPreview.asset.label : visualPreview.label;
+
+    writeCard(doc, {
+      title: visualLabel,
+      tone: "cyan",
+      label: "Capture",
+      minHeight: 68,
+      body: [
+        "Diese Vorschau dokumentiert den sichtbaren Website-Eindruck des Analyse-Laufs und dient als Grundlage fuer die markierten Umsatzbremsen.",
+      ],
+    });
+
+    ensureSpace(doc, 390);
+    const y = doc.y;
+    doc.rect(x, y, width, 370).fillAndStroke(COLORS.slate50, COLORS.slate200);
+
+    if (visualAsset) {
+      try {
+        doc.image(visualAsset.buffer, x + 12, y + 12, {
+          fit: [width - 24, 346],
+          align: "center",
+        });
+      } catch (error) {
+        logScreenshotDebug("Screenshot embed failed", {
+          contentType: visualAsset.contentType,
+          bufferLength: visualAsset.buffer.length,
+          detectedFormat: visualAsset.detectedFormat,
+          screenshotUrl: visualAsset.src,
+          errorMessage: error instanceof Error ? error.message : "unknown",
+        });
+        doc.font("Helvetica").fontSize(11).fillColor(COLORS.slate700).text(
+          normalizeGermanText(VISUAL_PREVIEW_EMBED_FALLBACK),
+          x + 20,
+          y + 28,
+          { width: width - 40, lineGap: 3 },
+        );
+      }
+    } else {
+      doc.font("Helvetica").fontSize(11).fillColor(COLORS.slate700).text(
+        normalizeGermanText(VISUAL_PREVIEW_EMBED_FALLBACK),
+        x + 20,
+        y + 28,
+        { width: width - 40, lineGap: 3 },
+      );
+    }
+    doc.y = y + 392;
+    return;
+  }
+
+  writeCard(doc, {
+    title: "Visual Capture nicht verfuegbar",
+    tone: "amber",
+    label: "Fallback",
+    minHeight: 150,
+    body: [
+      "Visual Capture war in diesem Lauf nicht verfuegbar. Der strategische Report basiert auf strukturellen, semantischen und conversion-relevanten Signalen.",
+      "Fuer vollstaendige Visual Intelligence bitte die Analyse neu ausfuehren, damit Desktop- und Mobile-Screenshots gespeichert werden.",
+      analysis.analysis.metadata?.screenshotError
+        ? `Technischer Hinweis: ${analysis.analysis.metadata.screenshotError}`
+        : "Dieser Hinweis betrifft nur die visuelle Vorschau; Score, Umsatzbremsen und Strategie-Layer bleiben auswertbar.",
+    ],
+  });
+}
+
 export function getCustomerFacingConsultantSections(notes: ConsultantNotes | null | undefined) {
   const normalized = normalizeConsultantNotes(notes);
   const sections: Array<{ title: string; body: string[]; label?: string; tone?: BoxTone }> = [];
@@ -489,10 +913,12 @@ async function renderPremiumReportPdfWithFooterStats({
     ? opportunityRoadmap.items
     : [];
   const customerConsultantSections = getCustomerFacingConsultantSections(consultantNotes);
+  const visualAsset = await resolveVisualPreviewAsset(analysis);
 
   writeCover(doc, analysis);
+  writeScoreDashboard(doc, analysis);
 
-  drawSectionHeader(doc, "Management-Zusammenfassung", "Einordnung");
+  drawSectionHeader(doc, "Management-Zusammenfassung", "Premium Strategie");
   writeCard(doc, {
     title: textValue(summary.headline, "Premium Anfrage- und Vertrauens-Audit"),
     tone: "cyan",
@@ -512,6 +938,8 @@ async function renderPremiumReportPdfWithFooterStats({
       writeCard(doc, section);
     });
   }
+
+  writeVisualPreviewPage(doc, analysis, visualAsset);
 
   drawSectionHeader(doc, "Top-Umsatzbremsen", "Prioritäten");
   if (topRevenueBlockers.length > 0) {
@@ -619,7 +1047,7 @@ async function renderPremiumReportPdfWithFooterStats({
     });
   }
 
-  drawSectionHeader(doc, "Visuelle Prüfung", "Sichtbarkeit");
+  drawSectionHeader(doc, "Strategische Premium-Ebene", "Visual Audit");
   if (visualAuditNotes.length > 0) {
     visualAuditNotes.forEach((note) => {
       writeCard(doc, {

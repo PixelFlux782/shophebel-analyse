@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import {
   countPdfPages,
@@ -55,6 +55,15 @@ function createAnalysis(): StoredAnalysisResult {
   };
 }
 
+function largePngBuffer() {
+  const onePixelPng = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/l2J7WQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+
+  return Buffer.concat([onePixelPng, Buffer.alloc(1200)]);
+}
+
 function createReport(): PremiumReport {
   return {
     isPaid: true,
@@ -96,6 +105,11 @@ function createReport(): PremiumReport {
 }
 
 describe("premiumReportPdf consultant notes", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
   it("nimmt kundenrelevante Consultant-Kommentare in die PDF-Struktur auf", () => {
     const sections = getCustomerFacingConsultantSections({
       executiveComment: "Der Hero braucht mehr Klarheit.",
@@ -255,5 +269,60 @@ describe("premiumReportPdf consultant notes", () => {
     expect(countPdfPages(pdf)).toBeGreaterThan(0);
     expect(source).toContain("5072696f726973696572");
     expect(source).toContain("456d7066");
+  });
+
+  it("laedt Supabase Storage Screenshots als Buffer und bettet PNGs in das PDF ein", async () => {
+    const screenshotUrl =
+      "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/viewport.png";
+    const analysis = createAnalysis();
+    analysis.analysis.screenshots = { viewport: screenshotUrl };
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(largePngBuffer(), {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      }),
+    );
+
+    const { pdf } = await renderPremiumReportPdfDiagnostics({
+      analysis,
+      report: createReport(),
+      consultantNotes: {},
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(screenshotUrl, { cache: "no-store" });
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(countPdfPages(pdf)).toBeGreaterThan(0);
+  });
+
+  it("fallbackt ohne Crash, wenn ein Screenshot nicht als PDF-Bild geeignet ist", async () => {
+    vi.stubEnv("NODE_ENV", "development");
+    const screenshotUrl =
+      "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/viewport.png";
+    const analysis = createAnalysis();
+    analysis.analysis.screenshots = { viewport: screenshotUrl };
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(Buffer.alloc(1500, "x"), {
+        status: 200,
+        headers: { "content-type": "text/html" },
+      }),
+    );
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const { pdf } = await renderPremiumReportPdfDiagnostics({
+      analysis,
+      report: createReport(),
+      consultantNotes: {},
+    });
+
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(warnSpy).toHaveBeenCalledWith(
+      "[premium-report-pdf] Screenshot response is not an image",
+      expect.objectContaining({
+        contentType: "text/html",
+        bufferLength: 1500,
+        detectedFormat: "unsupported",
+        screenshotUrl,
+      }),
+    );
   });
 });

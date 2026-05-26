@@ -8,6 +8,19 @@ import {
   ScreenshotLightbox,
   ScreenshotLightboxNote,
 } from "@/components/results/screenshot-lightbox";
+import {
+  isLayerVisible,
+  layerAccentClasses,
+  normalizeVisualLayer,
+  normalizeVisualSeverity,
+  planLimits,
+  priorityFromSeverity,
+  severityClasses,
+  severityLabel,
+  VISUAL_LAYERS,
+  VisualLayerFilter,
+  VisualPlan,
+} from "@/components/results/visual-intelligence-model";
 
 interface VisualOverlayProps {
   imageSrc: string;
@@ -19,78 +32,7 @@ interface VisualOverlayProps {
   suggestions?: AiSuggestion[];
   notes?: ScreenshotLightboxNote[];
   variant?: "compact" | "premium";
-}
-
-function buildHotspotNotes(
-  hotspots: VisualHotspot[],
-  suggestions: AiSuggestion[] | undefined,
-  variant: "compact" | "premium",
-) {
-  const limit = variant === "premium" ? 10 : 4;
-
-  return hotspots.slice(0, limit).map((hotspot) => {
-    const suggestion = getSuggestionForHotspot(suggestions, hotspot);
-    const category =
-      hotspot.label?.includes("Oberer") ? "Above the Fold" :
-      hotspot.title.toLowerCase().includes("cta") ? "CTA Klarheit" :
-      hotspot.title.toLowerCase().includes("trust") || hotspot.title.toLowerCase().includes("vertrauen") ? "Vertrauen" :
-      "Visuelle Hierarchie";
-    const priority = hotspot.tone === "problem" ? "kritisch" : hotspot.tone === "improvement" ? "wichtig" : "chance";
-
-    return {
-      id: hotspot.id,
-      hotspotId: hotspot.id,
-      title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
-      text: suggestion?.summary ?? hotspot.description,
-      category,
-      badge: hotspot.tone === "problem" ? "Kritisch" : hotspot.tone === "good" ? "Chance" : "Wichtig",
-      priority,
-      problem: hotspot.description,
-      impact: priority === "kritisch"
-        ? "Besucher koennen an dieser Stelle Vertrauen verlieren oder den naechsten Schritt uebersehen."
-        : "Der Bereich verschenkt Orientierung und macht die Entscheidung unnoetig schwerer.",
-      recommendation: suggestion?.actionSteps?.[0] ?? suggestion?.summary ?? "Den sichtbaren Bereich klarer auf Nutzen, Vertrauen und naechsten Schritt ausrichten.",
-    } satisfies ScreenshotLightboxNote;
-  });
-}
-
-function mergeNotes(
-  primaryNotes: ScreenshotLightboxNote[] | undefined,
-  hotspotNotes: ScreenshotLightboxNote[],
-) {
-  const seen = new Set<string>();
-  return [...(primaryNotes ?? []), ...hotspotNotes].filter((note) => {
-    const key = `${note.category ?? ""}:${note.title}:${note.text}`;
-    if (seen.has(key)) {
-      return false;
-    }
-    seen.add(key);
-    return true;
-  }).slice(0, 10);
-}
-
-function getHotspotToneClasses(tone: VisualHotspot["tone"]) {
-  if (tone === "good") {
-    return {
-      box: "border-emerald-500/80 bg-emerald-400/15",
-      dot: "bg-emerald-500",
-      badge: "bg-emerald-100 text-emerald-800",
-    };
-  }
-
-  if (tone === "problem") {
-    return {
-      box: "border-rose-500/80 bg-rose-400/15",
-      dot: "bg-rose-500",
-      badge: "bg-rose-100 text-rose-800",
-    };
-  }
-
-  return {
-    box: "border-amber-500/80 bg-amber-400/15",
-    dot: "bg-amber-500",
-    badge: "bg-amber-100 text-amber-800",
-  };
+  plan?: VisualPlan;
 }
 
 function getBoundedHotspotBox(hotspot: VisualHotspot, baseWidth: number, baseHeight: number) {
@@ -98,25 +40,107 @@ function getBoundedHotspotBox(hotspot: VisualHotspot, baseWidth: number, baseHei
   const rawTop = (hotspot.y / baseHeight) * 100;
   const rawWidth = (hotspot.width / baseWidth) * 100;
   const rawHeight = (hotspot.height / baseHeight) * 100;
-  const left = Math.max(0.75, Math.min(96, rawLeft));
-  const top = Math.max(0.75, Math.min(96, rawTop));
-  const width = Math.max(4, Math.min(99 - left, rawWidth));
-  const height = Math.max(4, Math.min(99 - top, rawHeight));
-  const nearRight = left + width > 72;
-  const nearBottom = top + height > 74;
+  const left = Math.max(1.25, Math.min(94, rawLeft));
+  const top = Math.max(1.25, Math.min(94, rawTop));
+  const width = Math.max(4.5, Math.min(98 - left, rawWidth));
+  const height = Math.max(4.5, Math.min(98 - top, rawHeight));
 
-  return {
-    left,
-    top,
-    width,
-    height,
-    labelStyle: {
-      left: nearRight ? "auto" : "0",
-      right: nearRight ? "0" : "auto",
-      top: nearBottom ? "auto" : "100%",
-      bottom: nearBottom ? "100%" : "auto",
+  return { left, top, width, height };
+}
+
+function getNoteMeta(note: ScreenshotLightboxNote) {
+  const layer = note.layer ?? normalizeVisualLayer(note.category, note.title, note.text);
+  const severity = note.severity ?? normalizeVisualSeverity(note.badge, note.priority);
+
+  return { layer, severity };
+}
+
+function buildHotspotNotes(
+  hotspots: VisualHotspot[],
+  suggestions: AiSuggestion[] | undefined,
+): ScreenshotLightboxNote[] {
+  return hotspots.map((hotspot, index) => {
+    const suggestion = getSuggestionForHotspot(suggestions, hotspot);
+    const layer = normalizeVisualLayer(hotspot.title, hotspot.description, hotspot.label);
+    const severity = normalizeVisualSeverity(hotspot.tone);
+    const isCritical = severity === "critical";
+
+    return {
+      id: hotspot.id,
+      hotspotId: hotspot.id,
+      title: hotspot.label ? `${hotspot.label}: ${hotspot.title}` : hotspot.title,
+      text: suggestion?.summary ?? hotspot.description,
+      category: layer,
+      layer,
+      severity,
+      badge: severityLabel[severity],
+      priority: priorityFromSeverity(severity),
+      problem: hotspot.description,
+      businessImpact: isCritical
+        ? "Diese Zone liegt im Entscheidungsfluss und kann Vertrauen, Orientierung oder den naechsten Klick abbremsen."
+        : "Der Bereich kann klarer fuehren und die Aufmerksamkeit staerker auf den naechsten sinnvollen Schritt lenken.",
+      action: suggestion?.actionSteps?.[0] ?? "Elemente in diesem Bereich klarer priorisieren, visuelle Konkurrenz reduzieren und den naechsten Schritt eindeutiger machen.",
+      unlockLabel: index > 1 ? "Weitere Detailtiefe in der Vollanalyse" : undefined,
+    };
+  });
+}
+
+function mergeNotes(primaryNotes: ScreenshotLightboxNote[] | undefined, hotspotNotes: ScreenshotLightboxNote[]) {
+  const seen = new Set<string>();
+
+  return [...hotspotNotes, ...(primaryNotes ?? [])].filter((note) => {
+    const key = `${note.hotspotId ?? note.id ?? ""}:${note.title}:${note.text}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function lockedNotes(plan: VisualPlan): ScreenshotLightboxNote[] {
+  if (plan !== "free") {
+    return [];
+  }
+
+  return [
+    {
+      title: "Full Visual Audit",
+      text: "Alle erkannten visuellen Reibungspunkte mit vollstaendiger Diagnose und konkreter Priorisierung.",
+      layer: "UX",
+      severity: "important",
+      locked: true,
+      unlockLabel: "In der 5 EUR Analyse freischalten",
     },
-  };
+    {
+      title: "Attention Flow",
+      text: "Wie der Blick vom ersten Eindruck zum naechsten Klick gefuehrt wird und wo Aufmerksamkeit verloren geht.",
+      layer: "Conversion",
+      severity: "important",
+      locked: true,
+      unlockLabel: "In der 5 EUR Analyse freischalten",
+    },
+    {
+      title: "Revenue Impact",
+      text: "Welche sichtbaren Stellen wahrscheinlich Anfrage-, Kauf- oder Kontaktbereitschaft bremsen.",
+      layer: "Trust",
+      severity: "critical",
+      locked: true,
+      unlockLabel: "In der 5 EUR Analyse freischalten",
+    },
+    {
+      title: "Mobile Friction",
+      text: "Mobile Orientierungskosten, Button-Abstaende und Reihenfolge im kleinen Viewport.",
+      layer: "Mobile",
+      severity: "important",
+      locked: true,
+      unlockLabel: "In der 5 EUR Analyse freischalten",
+    },
+  ];
+}
+
+function planLabel(plan: VisualPlan, target: VisualHotspotTarget) {
+  if (plan === "free") return "Free Preview";
+  if (plan === "full") return target === "viewport" ? "Desktop / Full" : "Full Page / Full";
+  return target === "viewport" ? "Desktop / Premium" : "Full Page / Premium";
 }
 
 export function VisualOverlay({
@@ -129,115 +153,160 @@ export function VisualOverlay({
   suggestions,
   notes,
   variant = "compact",
+  plan,
 }: VisualOverlayProps) {
+  const resolvedPlan: VisualPlan = plan ?? (variant === "premium" ? "premium" : "full");
+  const limits = planLimits(resolvedPlan);
   const [showHotspots, setShowHotspots] = useState(true);
   const [showHintCards, setShowHintCards] = useState(true);
   const [activeHotspotId, setActiveHotspotId] = useState<string | null>(null);
-  const [activeFilter, setActiveFilter] = useState<"alle" | "kritisch" | "wichtig" | "chance">("alle");
+  const [activeLayer, setActiveLayer] = useState<VisualLayerFilter>("all");
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const noteRefs = useRef<Record<string, HTMLElement | null>>({});
+  const markerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const mappedWidth = target === "viewport" ? visualMap.viewportWidth : visualMap.pageWidth;
   const mappedHeight = target === "viewport" ? visualMap.viewportHeight : visualMap.pageHeight;
   const baseWidth = mappedWidth > 0 ? mappedWidth : naturalSize?.width ?? 1280;
   const baseHeight = mappedHeight > 0 ? mappedHeight : naturalSize?.height ?? 720;
-  const lightboxNotes = useMemo(
-    () => mergeNotes(notes, buildHotspotNotes(hotspots, suggestions, variant)),
-    [hotspots, notes, suggestions, variant],
+
+  const displayHotspots = useMemo(() => hotspots.slice(0, limits.hotspots), [hotspots, limits.hotspots]);
+  const intelligenceNotes = useMemo(
+    () => mergeNotes(notes, buildHotspotNotes(displayHotspots, suggestions)).slice(0, limits.notes),
+    [displayHotspots, limits.notes, notes, suggestions],
   );
+  const allNotes = useMemo(
+    () => [...intelligenceNotes, ...lockedNotes(resolvedPlan)],
+    [intelligenceNotes, resolvedPlan],
+  );
+  const noteByHotspotId = useMemo(() => {
+    const map = new Map<string, ScreenshotLightboxNote>();
+    intelligenceNotes.forEach((note) => {
+      const id = note.hotspotId ?? note.id;
+      if (id) map.set(id, note);
+    });
+    return map;
+  }, [intelligenceNotes]);
   const filteredNotes = useMemo(
-    () => lightboxNotes.filter((note) => activeFilter === "alle" || note.priority === activeFilter || note.badge?.toLowerCase() === activeFilter),
-    [activeFilter, lightboxNotes],
+    () => allNotes.filter((note) => isLayerVisible(getNoteMeta(note).layer, activeLayer)),
+    [activeLayer, allNotes],
   );
   const visibleHotspots = useMemo(() => {
-    if (activeFilter === "alle") return hotspots;
+    if (activeLayer === "all") return displayHotspots;
 
-    const visibleIds = new Set(
-      filteredNotes
-        .map((note) => note.hotspotId ?? note.id)
-        .filter((id): id is string => Boolean(id)),
-    );
-
-    return hotspots.filter((hotspot) => visibleIds.has(hotspot.id));
-  }, [activeFilter, filteredNotes, hotspots]);
+    return displayHotspots.filter((hotspot) => {
+      const note = noteByHotspotId.get(hotspot.id);
+      const layer = note ? getNoteMeta(note).layer : normalizeVisualLayer(hotspot.title, hotspot.description);
+      return isLayerVisible(layer, activeLayer);
+    });
+  }, [activeLayer, displayHotspots, noteByHotspotId]);
+  const activeHotspot = visibleHotspots.find((hotspot) => hotspot.id === activeHotspotId);
+  const activeBox = activeHotspot ? getBoundedHotspotBox(activeHotspot, baseWidth, baseHeight) : null;
 
   useEffect(() => {
-    setImageLoaded(false);
-    setImageFailed(false);
-    setNaturalSize(null);
-    setShowHintCards(true);
-    setShowHotspots(true);
-    setActiveHotspotId(null);
-    setActiveFilter("alle");
+    const timeout = window.setTimeout(() => {
+      setImageLoaded(false);
+      setImageFailed(false);
+      setNaturalSize(null);
+      setShowHintCards(true);
+      setShowHotspots(true);
+      setActiveHotspotId(null);
+      setActiveLayer("all");
 
-    const image = imageRef.current;
-    if (image?.complete && image.naturalWidth > 0) {
-      setNaturalSize({
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-      });
-      setImageLoaded(true);
-    }
+      const image = imageRef.current;
+      if (image?.complete && image.naturalWidth > 0) {
+        setNaturalSize({ width: image.naturalWidth, height: image.naturalHeight });
+        setImageLoaded(true);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(timeout);
   }, [imageSrc]);
 
-  const focusNote = (hotspotId: string) => {
-    setActiveHotspotId(hotspotId);
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setActiveHotspotId(null);
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  function focusHotspot(hotspotId: string, source: "marker" | "note") {
+    setActiveHotspotId((current) => (current === hotspotId ? null : hotspotId));
     setShowHintCards(true);
     window.setTimeout(() => {
-      noteRefs.current[hotspotId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (source === "marker") {
+        noteRefs.current[hotspotId]?.scrollIntoView({ behavior: "smooth", block: "center" });
+      } else {
+        markerRefs.current[hotspotId]?.scrollIntoView({ behavior: "smooth", block: "center", inline: "center" });
+      }
     }, 0);
-  };
+  }
 
   return (
-    <article className="rounded-[1.45rem] border border-slate-200 bg-slate-50/80 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-            {title}
-          </p>
-          <p className="mt-1 text-sm leading-6 text-slate-600">
-            {variant === "premium"
-              ? "Marker und Hinweise zeigen konkret, wo Vertrauen, Orientierung oder der naechste Klick verloren gehen."
-              : "Kompakte Markierungen zeigen die wichtigsten visuellen Reibungspunkte."}
-          </p>
+    <article className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_30px_90px_-62px_rgba(15,23,42,0.38)]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
+        <div className="min-w-0">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visual Intelligence</p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <h3 className="text-sm font-bold">{title}</h3>
+            <span className="rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-200">
+              {planLabel(resolvedPlan, target)}
+            </span>
+            <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">
+              {intelligenceNotes.length} Issues
+            </span>
+          </div>
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
-          {hotspots.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setShowHotspots((current) => !current)}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-            >
-              {showHotspots ? "Markierungen ausblenden" : "Markierungen anzeigen"}
+          {displayHotspots.length > 0 ? (
+            <button type="button" onClick={() => setShowHotspots((current) => !current)} className="rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-bold text-slate-100 transition hover:border-cyan-300/60">
+              {showHotspots ? "Marker aus" : "Marker ein"}
             </button>
           ) : null}
-          {lightboxNotes.length > 0 ? (
-            <button
-              type="button"
-              onClick={() => setShowHintCards((current) => !current)}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-100"
-            >
-              {showHintCards ? "Hinweise ausblenden" : "Hinweise anzeigen"}
+          {allNotes.length > 0 ? (
+            <button type="button" onClick={() => setShowHintCards((current) => !current)} className="rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-bold text-slate-100 transition hover:border-cyan-300/60">
+              {showHintCards ? "Hinweise aus" : "Hinweise ein"}
             </button>
           ) : null}
-          {!imageFailed ? (
-            <button
-              type="button"
-              onClick={() => setIsLightboxOpen(true)}
-              className="rounded-full border border-slate-900/10 bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_14px_36px_-20px_rgba(15,23,42,0.8)] transition hover:border-cyan-300/60 hover:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-cyan-300/70"
-            >
-              Vollansicht
+          {!imageFailed && resolvedPlan !== "free" ? (
+            <button type="button" onClick={() => setIsLightboxOpen(true)} className="rounded-full border border-cyan-300/60 bg-cyan-300 px-3 py-2 text-xs font-bold text-slate-950 transition hover:bg-cyan-200">
+              Fullscreen
             </button>
           ) : null}
         </div>
       </div>
 
-      <div className={`mt-4 grid gap-4 ${showHintCards && lightboxNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
-        <div className="relative overflow-hidden rounded-[1.2rem] border border-slate-200 bg-white shadow-[0_24px_80px_-50px_rgba(15,23,42,0.28)]">
-          <div className="max-h-[clamp(34rem,72vh,58rem)] overflow-auto bg-slate-100">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 bg-slate-50 px-4 py-3">
+        {(["all", ...VISUAL_LAYERS] as VisualLayerFilter[]).map((layer) => (
+          <button
+            key={layer}
+            type="button"
+            onClick={() => {
+              setActiveLayer(layer);
+              setActiveHotspotId(null);
+            }}
+            className={`rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition ${
+              activeLayer === layer
+                ? "border-slate-950 bg-slate-950 text-white"
+                : "border-slate-200 bg-white text-slate-600 hover:border-cyan-300"
+            } ${resolvedPlan === "free" && layer !== "all" && !filteredNotes.some((note) => getNoteMeta(note).layer === layer) ? "opacity-60" : ""}`}
+          >
+            {layer === "all" ? "Alle Layer" : layer}
+          </button>
+        ))}
+      </div>
+
+      <div className={`grid gap-0 ${showHintCards && allNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
+        <div className="relative border-b border-slate-200 bg-slate-100 xl:border-b-0 xl:border-r">
+          <div className="max-h-[clamp(34rem,72vh,58rem)] overflow-auto">
             {!imageFailed ? (
               <div className="relative min-h-[18rem] w-full">
                 <img
@@ -247,10 +316,7 @@ export function VisualOverlay({
                   loading="lazy"
                   onLoad={(event) => {
                     const image = event.currentTarget;
-                    setNaturalSize({
-                      width: image.naturalWidth,
-                      height: image.naturalHeight,
-                    });
+                    setNaturalSize({ width: image.naturalWidth, height: image.naturalHeight });
                     setImageLoaded(true);
                   }}
                   onError={() => {
@@ -260,45 +326,42 @@ export function VisualOverlay({
                   className="block h-auto w-full bg-white object-contain object-top"
                 />
 
-                {showHotspots && imageLoaded && !imageFailed && hotspots.length > 0 ? (
-                  <div className="pointer-events-none absolute inset-0 z-20">
+                {showHotspots && imageLoaded && activeBox ? (
+                  <div className="pointer-events-none absolute inset-0 z-20 bg-slate-950/28 transition-opacity" />
+                ) : null}
+
+                {showHotspots && imageLoaded && displayHotspots.length > 0 ? (
+                  <div className="pointer-events-none absolute inset-0 z-30">
                     {visibleHotspots.map((hotspot, index) => {
-                      const tone = getHotspotToneClasses(hotspot.tone);
+                      const note = noteByHotspotId.get(hotspot.id);
+                      const meta = note ? getNoteMeta(note) : {
+                        layer: normalizeVisualLayer(hotspot.title, hotspot.description),
+                        severity: normalizeVisualSeverity(hotspot.tone),
+                      };
                       const box = getBoundedHotspotBox(hotspot, baseWidth, baseHeight);
                       const isActive = activeHotspotId === hotspot.id;
+                      const severity = severityClasses[meta.severity];
 
                       return (
                         <button
                           key={hotspot.id}
-                          type="button"
-                          onClick={() => focusNote(hotspot.id)}
-                          className={`group pointer-events-auto absolute rounded-xl text-left outline-none transition ${
-                            isActive ? "z-40 ring-4 ring-cyan-300/40" : "z-20"
-                          }`}
-                          style={{
-                            left: `${box.left}%`,
-                            top: `${box.top}%`,
-                            width: `${box.width}%`,
-                            height: `${box.height}%`,
+                          ref={(element) => {
+                            markerRefs.current[hotspot.id] = element;
                           }}
+                          type="button"
+                          onClick={() => focusHotspot(hotspot.id, "marker")}
+                          className={`group pointer-events-auto absolute rounded-xl border-2 text-left outline-none transition duration-200 ${
+                            isActive ? `z-40 ${severity.marker} ${severity.glow}` : `z-30 ${severity.marker} hover:scale-[1.01]`
+                          }`}
+                          style={{ left: `${box.left}%`, top: `${box.top}%`, width: `${box.width}%`, height: `${box.height}%` }}
                           aria-label={`Marker ${index + 1}: ${hotspot.title}`}
                         >
-                          <div className={`relative h-full min-h-11 w-full min-w-11 rounded-xl border-2 ${tone.box} shadow-[0_8px_24px_-18px_rgba(15,23,42,0.7)]`}>
-                            <div className="absolute left-2 top-2 z-30 flex max-w-[calc(100%-1rem)] items-center gap-2">
-                              <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white text-xs font-bold text-white shadow-lg ${tone.dot}`}>
-                                {index + 1}
-                              </span>
-                              <span className={`hidden max-w-[9rem] truncate rounded-full px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] shadow sm:inline-flex ${tone.badge}`}>
-                                {hotspot.tone === "problem" ? "Problem" : hotspot.tone === "good" ? "Chance" : "Wichtig"}
-                              </span>
-                            </div>
-                            <span
-                              className="absolute z-30 mt-2 hidden max-w-[min(13rem,calc(100vw-3rem))] rounded-xl border border-slate-200 bg-white/98 px-3 py-2 text-xs font-bold leading-5 text-slate-950 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.45)] group-hover:block group-focus-visible:block"
-                              style={box.labelStyle}
-                            >
-                              {hotspot.title}
-                            </span>
-                          </div>
+                          <span className={`absolute left-2 top-2 grid h-8 w-8 place-items-center rounded-full border border-white text-xs font-bold text-white shadow-lg ${severity.dot} ${isActive || meta.severity === "critical" ? "animate-pulse" : ""}`}>
+                            {index + 1}
+                          </span>
+                          <span className="absolute bottom-2 left-2 hidden max-w-[calc(100%-1rem)] rounded-full border border-white/20 bg-slate-950/88 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white shadow-xl backdrop-blur-sm sm:inline-flex">
+                            {meta.layer}
+                          </span>
                         </button>
                       );
                     })}
@@ -308,51 +371,28 @@ export function VisualOverlay({
             ) : (
               <div className="flex min-h-[24rem] items-center justify-center bg-slate-100">
                 <div className="w-2/3 max-w-lg rounded-2xl border border-slate-200 bg-white/80 p-6 text-center">
-                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Screenshot nicht geladen
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">
-                    Die Analyse ist vorhanden, aber die visuelle Vorschau konnte nicht angezeigt werden.
-                  </p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">Screenshot nicht geladen</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">Die Analyse ist vorhanden, aber die visuelle Vorschau konnte nicht angezeigt werden.</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {showHintCards && lightboxNotes.length > 0 ? (
-          <div className="max-h-[42rem] overflow-y-auto rounded-[1.2rem] border border-slate-200 bg-white/90 p-4 shadow-[0_24px_80px_-58px_rgba(15,23,42,0.35)]">
+        {showHintCards && allNotes.length > 0 ? (
+          <aside className="max-h-[42rem] overflow-y-auto bg-white p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-                Hinweise
-              </p>
-              {variant === "premium" ? (
-                <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-                  Arbeitsansicht
-                </span>
-              ) : null}
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Insight Cards</p>
+              <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
+                {activeHotspotId ? "Focus" : "Live"}
+              </span>
             </div>
-            {variant === "premium" ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {(["alle", "kritisch", "wichtig", "chance"] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setActiveFilter(filter)}
-                    className={`rounded-full border px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.12em] transition ${
-                      activeFilter === filter
-                        ? "border-slate-950 bg-slate-950 text-white"
-                        : "border-slate-200 bg-white text-slate-700 hover:border-cyan-300"
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            ) : null}
             <div className="mt-3 grid gap-3">
               {filteredNotes.map((note, index) => {
                 const hotspotId = note.hotspotId ?? note.id;
+                const meta = getNoteMeta(note);
+                const isActive = Boolean(hotspotId && activeHotspotId === hotspotId);
+                const severity = severityClasses[meta.severity];
 
                 return (
                   <article
@@ -360,51 +400,50 @@ export function VisualOverlay({
                     ref={(element) => {
                       if (hotspotId) noteRefs.current[hotspotId] = element;
                     }}
-                    onClick={() => hotspotId ? setActiveHotspotId(hotspotId) : undefined}
-                    className={`rounded-2xl border p-4 transition ${
-                      hotspotId && activeHotspotId === hotspotId
-                        ? "border-cyan-300 bg-cyan-50 shadow-[0_16px_50px_-38px_rgba(8,145,178,0.8)]"
-                        : "border-slate-200 bg-slate-50"
-                    }`}
+                    onClick={() => {
+                      if (hotspotId && !note.locked) focusHotspot(hotspotId, "note");
+                    }}
+                    className={`rounded-[1.1rem] border p-4 transition ${
+                      note.locked
+                        ? "border-dashed border-slate-300 bg-slate-50"
+                        : isActive
+                          ? "border-cyan-300 bg-cyan-50 shadow-[0_20px_70px_-48px_rgba(8,145,178,0.8)]"
+                          : `${severity.surface} hover:border-cyan-300`
+                    } ${hotspotId && !note.locked ? "cursor-pointer" : ""}`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
-                          {note.category ?? "Visual Audit"}
+                        <p className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${layerAccentClasses[meta.layer]}`}>
+                          {meta.layer}
                         </p>
                         <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
                       </div>
-                      {note.badge ? (
-                        <span className="shrink-0 rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-                          {note.badge}
-                        </span>
-                      ) : null}
+                      <span className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${severity.badge}`}>
+                        {severityLabel[meta.severity]}
+                      </span>
                     </div>
-                    <p className="mt-3 text-sm leading-6 text-slate-600">{note.text}</p>
-                    {variant === "premium" && (note.problem || note.impact || note.recommendation) ? (
-                      <div className="mt-3 grid gap-2 rounded-xl border border-slate-200 bg-white p-3 text-xs leading-5 text-slate-700">
-                        {note.problem ? <p><strong className="text-slate-950">Was ist das Problem?</strong> {note.problem}</p> : null}
-                        {note.impact ? <p><strong className="text-slate-950">Warum kostet das?</strong> {note.impact}</p> : null}
-                        {note.recommendation ? <p><strong className="text-slate-950">Was aendern?</strong> {note.recommendation}</p> : null}
+                    <p className="mt-3 text-sm leading-6 text-slate-700">{note.text}</p>
+                    {!note.locked ? (
+                      <div className="mt-3 grid gap-2 rounded-xl border border-white/70 bg-white/70 p-3 text-xs leading-5 text-slate-700">
+                        {note.problem ? <p><strong className="text-slate-950">Diagnose:</strong> {note.problem}</p> : null}
+                        {(note.businessImpact ?? note.impact) ? <p><strong className="text-slate-950">Business-Relevanz:</strong> {note.businessImpact ?? note.impact}</p> : null}
+                        {(note.action ?? note.recommendation) ? <p><strong className="text-slate-950">Handlung:</strong> {note.action ?? note.recommendation}</p> : null}
                       </div>
-                    ) : null}
+                    ) : (
+                      <p className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700">
+                        {note.unlockLabel ?? "Unlock deeper intelligence"}
+                      </p>
+                    )}
                   </article>
                 );
               })}
             </div>
-          </div>
+          </aside>
         ) : null}
       </div>
+
       <ScreenshotLightbox
-        images={[{
-          src: imageSrc,
-          alt: imageAlt,
-          title,
-          notes: lightboxNotes,
-          visualMap,
-          hotspots,
-          target,
-        }]}
+        images={[{ src: imageSrc, alt: imageAlt, title, notes: intelligenceNotes, visualMap, hotspots: displayHotspots, target }]}
         currentIndex={0}
         isOpen={isLightboxOpen && !imageFailed}
         onClose={() => setIsLightboxOpen(false)}

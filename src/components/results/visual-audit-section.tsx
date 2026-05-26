@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 import { AnalysisResult, AuditCheckStatus, ScoreBlock } from "@/types/analysis";
 import { getVisualHotspots } from "@/lib/result-ui";
@@ -10,6 +11,12 @@ import {
   ScreenshotLightboxNote,
 } from "@/components/results/screenshot-lightbox";
 import { VisualOverlay } from "@/components/results/visual-overlay";
+import {
+  normalizeVisualLayer,
+  normalizeVisualSeverity,
+  priorityFromSeverity,
+  VisualPlan,
+} from "@/components/results/visual-intelligence-model";
 
 type VisualProblemTone = "Kritisch" | "Wichtig" | "Chance";
 
@@ -18,6 +25,14 @@ type VisualProblem = {
   tone: VisualProblemTone;
   title: string;
   text: string;
+};
+
+type ScreenshotDiagnostic = {
+  title: string;
+  description: string;
+  reason: string;
+  details: string[];
+  cta: string;
 };
 
 const toneClasses: Record<VisualProblemTone, string> = {
@@ -179,8 +194,9 @@ function problemRecommendation(problem: VisualProblem) {
 function notesFromProblems(
   problems: VisualProblem[],
   scope: "desktop" | "mobile" | "fullPage",
-  isPremium: boolean,
+  plan: VisualPlan,
 ) {
+  const isPremium = plan === "premium";
   const filteredProblems =
     scope === "mobile"
       ? problems.filter((problem) => problem.category === "Mobile UX" || problem.category === "Ladegefuehl")
@@ -188,17 +204,120 @@ function notesFromProblems(
         ? problems.filter((problem) => problem.category !== "Mobile UX")
         : problems.filter((problem) => problem.category !== "Mobile UX" && problem.category !== "Ladegefuehl");
 
-  return (filteredProblems.length > 0 ? filteredProblems : problems).slice(0, isPremium ? 8 : 4).map((problem, index) => ({
-    id: `visual-problem-${scope}-${index}`,
-    title: problem.title,
-    text: noteText(problem, isPremium),
-    category: noteCategory(problem.category, problem.title),
-    badge: problem.tone,
-    priority: problem.tone === "Kritisch" ? "kritisch" : problem.tone === "Wichtig" ? "wichtig" : "chance",
-    problem: problem.text,
-    impact: problemImpact(problem),
-    recommendation: problemRecommendation(problem),
-  } satisfies ScreenshotLightboxNote));
+  return (filteredProblems.length > 0 ? filteredProblems : problems)
+    .slice(0, plan === "free" ? 2 : isPremium ? 8 : 6)
+    .map((problem, index) => {
+      const layer = normalizeVisualLayer(problem.category, problem.title);
+      const severity = normalizeVisualSeverity(problem.tone);
+
+      return {
+        id: `visual-problem-${scope}-${index}`,
+        title: problem.title,
+        text: noteText(problem, isPremium),
+        category: noteCategory(problem.category, problem.title),
+        layer,
+        severity,
+        badge: problem.tone,
+        priority: priorityFromSeverity(severity),
+        problem: problem.text,
+        businessImpact: problemImpact(problem),
+        action: problemRecommendation(problem),
+      } satisfies ScreenshotLightboxNote;
+    });
+}
+
+function screenshotKeys(result: AnalysisResult) {
+  return Object.entries(result.screenshots ?? {})
+    .filter(([, value]) => Boolean(value))
+    .map(([key]) => key);
+}
+
+function classifyScreenshotSource(src?: string) {
+  if (!src) return "missing";
+  if (src.startsWith("/generated-screenshots/")) return "local";
+  if (/\/storage\/v1\/object\//.test(src) || src.includes("supabase")) return "storage";
+  if (/^https?:\/\//i.test(src)) return "public";
+  return "unknown";
+}
+
+function buildScreenshotDiagnostic(
+  result: AnalysisResult,
+  accessLevel: VisualPlan,
+  analysisId?: string,
+): ScreenshotDiagnostic {
+  const metadata = result.metadata;
+  const keys = screenshotKeys(result);
+  const attempted = metadata?.screenshotVariantsAttempted ?? [];
+  const stored = metadata?.screenshotVariantsStored ?? [];
+  const desktopUrl = result.screenshots?.viewport ?? result.screenshots?.fullPage ?? result.screenshots?.hero;
+  const mobileUrl = result.screenshots?.mobile;
+  const source = classifyScreenshotSource(desktopUrl ?? mobileUrl);
+  const hasScreenshotError = Boolean(metadata?.screenshotError);
+  const isLegacy = attempted.length === 0 && stored.length === 0 && keys.length === 0;
+  const reason = hasScreenshotError
+    ? "Screenshot-Erstellung wurde beim Analyse-Lauf nicht abgeschlossen."
+    : isLegacy
+      ? "Legacy Result ohne gespeicherte Screenshot-Daten."
+      : source === "local" && process.env.NODE_ENV === "production"
+        ? "Lokale Screenshot-URL ist in Production nicht stabil erreichbar."
+        : "Screenshot wurde fuer diesen Lauf nicht gespeichert oder ist nicht mehr erreichbar.";
+
+  return {
+    title: "Visual Capture nicht verfuegbar",
+    description:
+      "Die Analyse bleibt nutzbar, aber die Screenshot Intelligence Console braucht einen gespeicherten Desktop- oder Mobile-Capture.",
+    reason,
+    cta: isLegacy
+      ? "Fuer vollstaendige Visual Intelligence bitte Analyse neu ausfuehren."
+      : "Analyse neu ausfuehren oder Visual Audit erneut erzeugen, sobald der Capture-Service verfuegbar ist.",
+    details: [
+      `analysisId: ${analysisId ?? "unbekannt"}`,
+      `accessLevel: ${accessLevel}`,
+      `screenshots keys: ${keys.length ? keys.join(", ") : "keine"}`,
+      `desktop url vorhanden: ${desktopUrl ? "ja" : "nein"}`,
+      `mobile url vorhanden: ${mobileUrl ? "ja" : "nein"}`,
+      `source: ${source}`,
+      `attempted: ${attempted.length ? attempted.join(", ") : "unbekannt"}`,
+      `stored: ${stored.length ? stored.join(", ") : "keine"}`,
+      `reason: ${reason}`,
+    ],
+  };
+}
+
+function ScreenshotDiagnosticPanel({
+  diagnostic,
+}: {
+  diagnostic: ScreenshotDiagnostic;
+}) {
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
+  return (
+    <div className="rounded-[1.6rem] border border-amber-200 bg-amber-50 p-5 text-amber-950">
+      <p className="text-xs font-bold uppercase tracking-[0.16em] text-amber-700">
+        Screenshot Intelligence
+      </p>
+      <h3 className="mt-2 text-xl font-bold">{diagnostic.title}</h3>
+      <p className="mt-3 text-sm leading-7">{diagnostic.description}</p>
+      <div className="mt-4 rounded-2xl border border-amber-200 bg-white/60 p-4">
+        <p className="text-sm font-bold">Diagnose</p>
+        <p className="mt-2 text-sm leading-7">{diagnostic.reason}</p>
+        <p className="mt-2 text-sm leading-7">{diagnostic.cta}</p>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <Link
+          href="/analyse"
+          className="rounded-xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800"
+        >
+          Analyse neu ausfuehren
+        </Link>
+      </div>
+      {isDevelopment ? (
+        <pre className="mt-4 overflow-auto rounded-2xl border border-amber-200 bg-slate-950 p-4 text-xs leading-6 text-slate-100">
+          {diagnostic.details.join("\n")}
+        </pre>
+      ) : null}
+    </div>
+  );
 }
 
 function MobileScreenshotCard({
@@ -275,7 +394,7 @@ function MobileScreenshotCard({
               src,
               alt: "Mobile Vorschau der analysierten Seite",
               title,
-              notes: notes ?? notesFromProblems(problems, "mobile", false),
+              notes: notes ?? notesFromProblems(problems, "mobile", "full"),
             }]}
             currentIndex={0}
             isOpen={isLightboxOpen}
@@ -295,20 +414,24 @@ function MobileScreenshotCard({
 export function VisualAuditSection({
   result,
   plan = "premium",
+  analysisId,
 }: {
   result: AnalysisResult;
-  plan?: "full" | "premium";
+  plan?: VisualPlan;
+  analysisId?: string;
 }) {
   const screenshots = result.screenshots;
   const desktopImage = screenshots?.viewport ?? screenshots?.fullPage ?? screenshots?.hero;
   const isPremium = plan === "premium";
+  const isFree = plan === "free";
   const problems = buildVisualProblems(result);
-  const visibleProblems = isPremium ? problems : problems.slice(0, 4);
+  const visibleProblems = isPremium ? problems : problems.slice(0, isFree ? 2 : 4);
   const hotspots =
     result.visualMap && desktopImage
-      ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage").slice(0, isPremium ? 10 : 4)
+      ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage").slice(0, isFree ? 2 : isPremium ? 10 : 8)
       : [];
   const desktopScope = screenshots?.viewport ? "desktop" : "fullPage";
+  const screenshotDiagnostic = buildScreenshotDiagnostic(result, plan, analysisId);
 
   return (
     <section className="rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-[0_28px_90px_-58px_rgba(15,23,42,0.35)] sm:p-7">
@@ -320,12 +443,16 @@ export function VisualAuditSection({
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
             {isPremium
               ? "Hier sieht man sofort, wo die Seite Vertrauen und Anfragen verliert."
+              : isFree
+                ? "Erste visuelle Signale zeigen, wo Aufmerksamkeit und Vertrauen kippen koennen."
               : "Kompakter visueller Check der wichtigsten Reibungspunkte."}
           </h2>
           <p className="mt-3 text-base leading-8 text-slate-600">
             {isPremium
               ? "Die nummerierten Marker erklaeren die sichtbaren Problemzonen in Alltagssprache: was stoert, warum es wirtschaftlich relevant ist und welche Aenderung zuerst sinnvoll ist."
-              : "Die Vollanalyse zeigt bewusst nur eine kompakte visuelle Einordnung. Die vollstaendige Screenshot-Auswertung ist Teil des Premium-Reports."}
+              : isFree
+                ? "Die kostenlose Vorschau zeigt wenige echte Marker und sperrt tiefere Layer bewusst an. Die Vollanalyse oeffnet alle visuellen Hinweise."
+                : "Die Vollanalyse zeigt alle zentralen Marker, Layer-Filter und eine Fullscreen Intelligence View. Premium ergaenzt die strategische Priorisierung."}
           </p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
@@ -344,25 +471,19 @@ export function VisualAuditSection({
               hotspots={hotspots}
               target={screenshots?.viewport ? "viewport" : "fullPage"}
               suggestions={result.aiSuggestions}
-              notes={notesFromProblems(problems, desktopScope, isPremium)}
+              notes={notesFromProblems(problems, desktopScope, plan)}
               variant={isPremium ? "premium" : "compact"}
-            />
-          ) : screenshots ? (
-            <MobileScreenshotCard
-              src={desktopImage}
-              problems={problems}
-              title="Desktop-Vorschau"
-              notes={notesFromProblems(problems, desktopScope, isPremium)}
+              plan={plan}
             />
           ) : (
-            <ScreenshotFallback />
+            <ScreenshotDiagnosticPanel diagnostic={screenshotDiagnostic} />
           )}
-          {isPremium ? (
+          {!isFree && screenshots?.mobile ? (
             <MobileScreenshotCard
               src={screenshots?.mobile}
               problems={problems}
               title="Mobile Vorschau"
-              notes={notesFromProblems(problems, "mobile", true)}
+              notes={notesFromProblems(problems, "mobile", plan)}
             />
           ) : null}
         </div>
@@ -397,11 +518,15 @@ export function VisualAuditSection({
           {!isPremium ? (
             <article className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-cyan-950">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-                Premium-Visual-Audit
+                {isFree ? "Full Visual Audit" : "Premium Strategy Layer"}
               </p>
-              <h3 className="mt-2 text-lg font-bold">Vollstaendige visuelle Auswertung freischalten</h3>
+              <h3 className="mt-2 text-lg font-bold">
+                {isFree ? "Alle Marker und Layer fuer 5 EUR freischalten" : "Strategische Priorisierung freischalten"}
+              </h3>
               <p className="mt-3 text-sm leading-7">
-                Premium zeigt alle relevanten Marker, erklaert jeden Punkt laienverstaendlich und priorisiert die groessten visuellen Umsatzbremsen.
+                {isFree
+                  ? "Die Vollanalyse zeigt die komplette Screenshot-Auswertung, Attention Flow, Revenue Impact und Mobile Friction."
+                  : "Premium verdichtet die visuellen Hinweise zu Executive Recommendations, Business Priorities und einem 7-Day Action Plan."}
               </p>
             </article>
           ) : null}
