@@ -9,6 +9,7 @@ import { MeasuresPlan } from "@/components/results/measures-plan";
 import { MissionResultHero } from "@/components/results/mission-result-hero";
 import { OpportunityList } from "@/components/results/opportunity-list";
 import { PremiumPreviewLock } from "@/components/results/premium-preview-lock";
+import { PremiumAiReportSection } from "@/components/results/premium-ai-report-section";
 import { PremiumReportSection } from "@/components/results/premium-report-section";
 import { PremiumReportRequestButton } from "@/components/results/premium-report-request-button";
 import { RecommendationsList } from "@/components/results/recommendations-list";
@@ -209,6 +210,10 @@ export default async function AnalyseResultPage({
                 <PremiumReportSection report={premiumReport} analysisId={result.id} />
               </section>
             ) : null}
+
+            <section className="mt-10">
+              <PremiumAiReportSection analysisId={result.id} canViewPremium={canViewPremium} />
+            </section>
 
             <section className="mt-10">
               <MeasuresPlan measures={analysis.measures ?? []} />
