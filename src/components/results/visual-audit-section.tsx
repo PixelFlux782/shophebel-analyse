@@ -435,7 +435,7 @@ export function VisualAuditSection({
   const screenshotDiagnostic = buildScreenshotDiagnostic(result, plan, analysisId);
 
   return (
-    <section className="rounded-[1.15rem] border border-slate-200 bg-white p-5 shadow-[0_30px_100px_-68px_rgba(15,23,42,0.42)] sm:p-6">
+    <section data-component="VisualAuditSection" className="border border-slate-200 bg-white p-5 shadow-[0_30px_100px_-68px_rgba(15,23,42,0.42)] sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -461,7 +461,7 @@ export function VisualAuditSection({
         </div>
       </div>
 
-      <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.75fr)_minmax(20rem,0.85fr)]">
+      <div className="mt-7 grid gap-5">
         <div className="space-y-5">
           {desktopImage && result.visualMap ? (
             <VisualOverlay
@@ -489,7 +489,7 @@ export function VisualAuditSection({
           ) : null}
         </div>
 
-        <div className="rounded-[1rem] border border-slate-200 bg-[#fbfaf7] p-4">
+        <div className="border border-slate-200 bg-[#fbfaf7] p-4">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -503,11 +503,11 @@ export function VisualAuditSection({
               {visibleProblems.length} sichtbar
             </span>
           </div>
-          <div className="mt-4 grid gap-2">
+          <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {visibleProblems.map((problem, index) => (
             <article
               key={`${problem.category}-${problem.title}`}
-              className={`rounded-[0.85rem] border p-3 ${toneClasses[problem.tone]}`}
+              className={`border p-3 ${toneClasses[problem.tone]}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -534,7 +534,7 @@ export function VisualAuditSection({
             </article>
           ))}
           {!isPremium ? (
-            <article className="mt-3 rounded-[0.85rem] border border-slate-200 bg-white p-4 text-slate-950">
+            <article className="border border-slate-200 bg-white p-4 text-slate-950">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
                 {isFree ? "Vollständige visuelle Analyse" : "Strategische Premium-Ebene"}
               </p>
@@ -549,7 +549,7 @@ export function VisualAuditSection({
             </article>
           ) : null}
           {hiddenProblems.length ? (
-            <details className="mt-3 rounded-[0.85rem] border border-slate-200 bg-white p-4 text-slate-950">
+            <details className="border border-slate-200 bg-white p-4 text-slate-950 md:col-span-2 xl:col-span-4">
               <summary className="cursor-pointer text-sm font-bold">
                 Weitere Befunde anzeigen
               </summary>
