@@ -18,6 +18,20 @@ const CONSENT_BUTTON_LABELS = [
   "ok",
 ];
 
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isTransientNavigationError(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  return (
+    message.includes("Execution context was destroyed") ||
+    message.includes("Cannot find context with specified id") ||
+    message.includes("Most likely the page has been closed")
+  );
+}
+
 export class FetchRenderedHtmlError extends Error {}
 
 export interface FetchRenderedHtmlResult {
@@ -76,8 +90,40 @@ async function dismissCommonConsentOverlays(
     console.info("[analysis] dismissed common consent overlay", {
       label: clicked,
     });
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    await Promise.race([
+      page.waitForNavigation({ waitUntil: "networkidle2", timeout: 5000 }).catch(() => undefined),
+      wait(900),
+    ]);
+    await wait(300);
   }
+}
+
+async function readPageWithNavigationRetry<T>(
+  operation: () => Promise<T>,
+  label: string,
+): Promise<T> {
+  let lastError: unknown;
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      return await operation();
+    } catch (error) {
+      lastError = error;
+
+      if (!isTransientNavigationError(error) || attempt === 3) {
+        break;
+      }
+
+      console.info("[analysis] retrying page read after transient navigation", {
+        label,
+        attempt,
+        reason: error instanceof Error ? error.message : "unknown",
+      });
+      await wait(900);
+    }
+  }
+
+  throw lastError;
 }
 
 export async function fetchRenderedHtml(
@@ -111,6 +157,7 @@ export async function fetchRenderedHtml(
       waitUntil: "networkidle2",
       timeout: NAVIGATION_TIMEOUT_MS,
     });
+    await wait(500);
     await dismissCommonConsentOverlays(page);
     try {
       await assertPublicHttpUrl(page.url() || requestedUrl);
@@ -123,7 +170,7 @@ export async function fetchRenderedHtml(
     }
     const loadTimeMs = Date.now() - navigationStartedAt;
 
-    const html = await page.content();
+    const html = await readPageWithNavigationRetry(() => page!.content(), "content");
 
     if (!html.trim()) {
       throw new FetchRenderedHtmlError(
@@ -131,17 +178,17 @@ export async function fetchRenderedHtml(
       );
     }
 
-    const metrics = (await page.evaluate(() => {
+    const metrics = (await readPageWithNavigationRetry(() => page!.evaluate(() => {
       const bodyText = document.body?.innerText?.replace(/\s+/g, " ").trim() ?? "";
 
       return {
         pageTitle: document.title?.trim() ?? "",
         visibleText: bodyText,
       };
-    })) as Pick<PageMetrics, "pageTitle" | "visibleText">;
+    }), "metrics")) as Pick<PageMetrics, "pageTitle" | "visibleText">;
     const [pageSignals, visualMap] = await Promise.all([
-      collectVisualSignals(page),
-      collectVisualMap(page),
+      readPageWithNavigationRetry(() => collectVisualSignals(page!), "visualSignals"),
+      readPageWithNavigationRetry(() => collectVisualMap(page!), "visualMap"),
     ]);
 
     let screenshots: AnalysisScreenshots | undefined;
