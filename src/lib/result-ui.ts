@@ -109,7 +109,7 @@ export function getRecommendationLabel(recommendation: Recommendation) {
   }
 
   if (recommendation.impact === "high" && recommendation.effort !== "low") {
-    return "Größter Impact";
+    return "Größte Wirkung";
   }
 
   return "Langfristige Optimierung";
@@ -163,7 +163,7 @@ export function getAnalysisSummary(result: AnalysisResult) {
 
   if (trustScore < 60) {
     sentences.push(
-      "Besonders beim Vertrauen fehlen offenbar Signale, die Sicherheit und Seriositaet sofort sichtbar machen.",
+      "Besonders beim Vertrauen fehlen offenbar Signale, die Sicherheit und Seriosität sofort sichtbar machen.",
     );
   }
 
@@ -175,7 +175,7 @@ export function getAnalysisSummary(result: AnalysisResult) {
 
   if (uxScore < 60) {
     sentences.push(
-      "Die Nutzerführung wirkt noch nicht durchgaengig klar und könnte Inhalte besser ordnen.",
+      "Die Nutzerführung wirkt noch nicht durchgängig klar und könnte Inhalte besser ordnen.",
     );
   }
 

@@ -1,4 +1,5 @@
 import { Finding, Recommendation } from "@/types/analysis";
+import { normalizeGermanReportText } from "@/lib/report/reportCopy";
 
 interface FreeAuditPreviewProps {
   quickWins: Recommendation[];
@@ -13,9 +14,15 @@ function ImpactBadge({ impact }: { impact: Recommendation["impact"] }) {
     high: "bg-rose-100 text-rose-800",
   };
 
+  const labels: Record<Recommendation["impact"], string> = {
+    low: "gering",
+    medium: "mittel",
+    high: "hoch",
+  };
+
   return (
     <span className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-[0.12em] ${classes[impact]}`}>
-      {impact}
+      {labels[impact]}
     </span>
   );
 }
@@ -56,10 +63,10 @@ export function FreeAuditPreview({
           {visibleQuickWins.map((item) => (
             <article key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="font-bold text-slate-950">{item.title}</h3>
+                <h3 className="font-bold text-slate-950">{normalizeGermanReportText(item.title)}</h3>
                 <ImpactBadge impact={item.impact} />
               </div>
-              <p className="mt-2 text-sm leading-7 text-slate-600">{item.text}</p>
+              <p className="mt-2 text-sm leading-7 text-slate-600">{normalizeGermanReportText(item.text)}</p>
             </article>
           ))}
         </div>
@@ -72,10 +79,10 @@ export function FreeAuditPreview({
           {visibleCritical.map((item) => (
             <article key={item.title} className="rounded-2xl border border-rose-100 bg-rose-50/70 p-4">
               <div className="flex items-start justify-between gap-3">
-                <h3 className="font-bold text-slate-950">{item.title}</h3>
+                <h3 className="font-bold text-slate-950">{normalizeGermanReportText(item.title)}</h3>
                 <ImpactBadge impact={item.impact} />
               </div>
-              <p className="mt-2 text-sm leading-7 text-slate-700">{item.text}</p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">{normalizeGermanReportText(item.text)}</p>
             </article>
           ))}
         </div>

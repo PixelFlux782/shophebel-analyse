@@ -161,7 +161,7 @@ describe("buildPremiumReport", () => {
       nextStep: "Als KI-Modul prüfen.",
       priorityScore: 96,
     });
-    expect(report.opportunityRoadmap?.items[1]?.nextStep).toBe("Als Quick Fix priorisieren.");
+    expect(report.opportunityRoadmap?.items[1]?.nextStep).toBe("Als Sofortmaßnahme priorisieren.");
     expect(report.opportunityRoadmap?.items.map((item) => item.priorityScore)).toEqual([96, 88, 62]);
   });
 

@@ -8,9 +8,11 @@ import type { PremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 import {
   generatePremiumAiReport,
+  normalizePremiumAiReportCopy,
   parsePremiumAiReportResponse,
   PremiumAiReportValidationError,
 } from "@/lib/ai/premiumReportService";
+import { validateReportCopyQuality } from "@/lib/report/reportCopy";
 
 function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReportInput {
   return {
@@ -93,10 +95,11 @@ describe("premiumReportService", () => {
     expect(report.executiveSummary).toContain("https://shop.test/");
     expect(report.topIssues).toHaveLength(2);
     expect(report.topIssues[0]).toMatchObject({
-      title: "CTA im Hero ist nicht eindeutig",
+      title: "Button im Startbereich ist nicht eindeutig",
       impact: "high",
       effort: "low",
     });
+    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
     expect(report.actionPlan[0]).toMatchObject({
       step: 1,
       priority: "now",
@@ -153,6 +156,44 @@ describe("premiumReportService", () => {
 \`\`\``);
 
     expect(report.disclaimer).toBe("Nur auf Basis der Analyse.");
+    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
+  });
+
+  it("normalisiert KI-Berichtskopie nach Schema-Validierung", () => {
+    const report = normalizePremiumAiReportCopy({
+      executiveSummary: "Executive Summary fuer den Shop",
+      mainDiagnosis: "Hero und CTA sind unklar.",
+      scoreExplanation: "Trust und Conversion werden gedrueckt.",
+      topIssues: [
+        {
+          title: "Top Issues im Hero",
+          whyItMatters: "Besucher verstehen den naechsten Schritt nicht.",
+          evidence: ["CTA ist zu schwach."],
+          recommendedAction: "Primaeren CTA schaerfen.",
+          impact: "high",
+          effort: "low",
+        },
+      ],
+      actionPlan: [
+        {
+          step: 1,
+          title: "Quick Fix",
+          description: "Hero klaeren.",
+          priority: "now",
+        },
+      ],
+      exampleImprovements: {
+        heroTextIdeas: ["Hero klarer machen"],
+        ctaIdeas: ["CTA pruefen"],
+        trustElementIdeas: ["Trust frueher zeigen"],
+      },
+      disclaimer: "Keine Garantie fuer Umsatz.",
+    });
+
+    expect(report.mainDiagnosis).toContain("Startbereich und Button");
+    expect(report.scoreExplanation).toContain("Vertrauen");
+    expect(report.topIssues[0]?.title).toContain("Wichtigste Probleme");
+    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
   });
 
   it("liefert einen Disclaimer", async () => {

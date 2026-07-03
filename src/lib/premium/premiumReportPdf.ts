@@ -34,10 +34,13 @@ type VisualPreviewAsset =
 
 const COLORS = {
   slate950: "#0f172a",
+  slate900: "#111827",
   slate800: "#1e293b",
   slate700: "#334155",
+  slate600: "#475569",
   slate500: "#64748b",
   slate200: "#e2e8f0",
+  slate150: "#eef2f7",
   slate100: "#f1f5f9",
   slate50: "#f8fafc",
   cyan700: "#0e7490",
@@ -78,10 +81,11 @@ const LAYOUT = {
 const MIN_SCREENSHOT_BUFFER_LENGTH = 1000;
 const VISUAL_PREVIEW_EMBED_FALLBACK =
   "Die visuelle Vorschau wurde erfasst, konnte aber für diesen PDF-Export nicht eingebettet werden.";
+const MISSING_REPORT_VALUE = "Für diesen Punkt liegt keine separate Kundenangabe vor.";
 
 export function getPremiumReportPdfStaticLabels() {
   return [
-    "Dein Premium-Report",
+    "Dein Premium-Bericht",
     "Management-Zusammenfassung",
     "Top-Umsatzbremsen",
     REPORT_LABELS.measuresPlan,
@@ -100,7 +104,7 @@ export function getPremiumReportPdfStaticLabels() {
   ].map((label) => normalizeGermanText(label));
 }
 
-function textValue(value: unknown, fallback = "Nicht im gespeicherten Report enthalten.") {
+function textValue(value: unknown, fallback = MISSING_REPORT_VALUE) {
   if (typeof value === "string" && value.trim()) {
     return polishPremiumText(value.trim());
   }
@@ -273,7 +277,7 @@ function writeCard(
   ensureSpace(doc, height + 12);
 
   const y = doc.y;
-  doc.rect(x, y, width, height).fillAndStroke(colors.fill, colors.border);
+  doc.roundedRect(x, y, width, height, 4).fillAndStroke(colors.fill, colors.border);
 
   if (input.label) {
     writeLabel(doc, input.label, x + width - labelWidth - LAYOUT.labelMarginRight, y + LAYOUT.labelMarginTop, input.tone ?? "slate");
@@ -285,7 +289,7 @@ function writeCard(
   });
   const titleEndY = doc.y;
 
-  doc.font("Helvetica").fontSize(10.3).fillColor(colors.text).text(bodyText || "Nicht im gespeicherten Report enthalten.", contentX, titleEndY + LAYOUT.cardBodyGap, {
+  doc.font("Helvetica").fontSize(10.3).fillColor(colors.text).text(bodyText || MISSING_REPORT_VALUE, contentX, titleEndY + LAYOUT.cardBodyGap, {
     width: contentWidth,
     lineGap: 3,
   });
@@ -613,11 +617,11 @@ function writeScoreDashboard(doc: PDFKit.PDFDocument, analysis: StoredAnalysisRe
   const height = 176;
 
   ensureSpace(doc, height + 18);
-  doc.rect(x, y, leftWidth, height).fillAndStroke(COLORS.slate950, COLORS.slate950);
+  doc.roundedRect(x, y, leftWidth, height, 4).fillAndStroke(COLORS.slate950, COLORS.slate950);
   doc.font("Helvetica-Bold").fontSize(9).fillColor("#67e8f9").text("ANALYSEWERT", x + 16, y + 18, {
     width: leftWidth - 32,
   });
-  doc.font("Helvetica-Bold").fontSize(42).fillColor(COLORS.white).text(typeof score === "number" ? String(score) : "n/a", x + 16, y + 52, {
+  doc.font("Helvetica-Bold").fontSize(42).fillColor(COLORS.white).text(typeof score === "number" ? String(score) : "offen", x + 16, y + 52, {
     width: leftWidth - 32,
   });
   doc.font("Helvetica").fontSize(10).fillColor(COLORS.slate200).text(status.label, x + 16, y + 108, {
@@ -635,8 +639,8 @@ function writeScoreDashboard(doc: PDFKit.PDFDocument, analysis: StoredAnalysisRe
       height: 14,
       lineBreak: false,
     });
-    doc.rect(rightX + 112, rowY + 5, rightWidth - 130, 8).fill(COLORS.slate100);
-    doc.rect(rightX + 112, rowY + 5, barWidth, 8).fill(numericValue >= 70 ? COLORS.emerald700 : numericValue >= 55 ? COLORS.amber700 : COLORS.rose700);
+    doc.roundedRect(rightX + 112, rowY + 5, rightWidth - 130, 8, 2).fill(COLORS.slate100);
+    doc.roundedRect(rightX + 112, rowY + 5, barWidth, 8, 2).fill(numericValue >= 70 ? COLORS.emerald700 : numericValue >= 55 ? COLORS.amber700 : COLORS.rose700);
     doc.font("Helvetica-Bold").fontSize(9).fillColor(COLORS.slate700).text(`${value}/100`, rightX + rightWidth - 44, rowY + 1, {
       width: 44,
       align: "right",
@@ -673,7 +677,7 @@ function writeVisualPreviewPage(
 
     ensureSpace(doc, 390);
     const y = doc.y;
-    doc.rect(x, y, width, 370).fillAndStroke(COLORS.slate50, COLORS.slate200);
+    doc.roundedRect(x, y, width, 370, 4).fillAndStroke(COLORS.slate50, COLORS.slate200);
 
     if (visualAsset) {
       try {
@@ -714,10 +718,10 @@ function writeVisualPreviewPage(
     label: "Hinweis",
     minHeight: 150,
     body: [
-      "Die visuelle Ansicht war in diesem Lauf nicht verfügbar. Der strategische Report basiert auf strukturellen, semantischen und anfragebezogenen Signalen.",
+      "Die visuelle Ansicht war in diesem Lauf nicht verfügbar. Der strategische Bericht basiert auf strukturellen, semantischen und anfragebezogenen Signalen.",
       "Für eine vollständige visuelle Analyse bitte die Analyse neu ausführen, damit Desktop- und Mobile-Ansichten gespeichert werden.",
       analysis.analysis.metadata?.screenshotError
-        ? `Technischer Hinweis: ${analysis.analysis.metadata.screenshotError}`
+        ? `Hinweis zur Ansicht: ${analysis.analysis.metadata.screenshotError}`
         : "Dieser Hinweis betrifft nur die visuelle Vorschau; Bewertung, Umsatzbremsen und strategische Einordnung bleiben auswertbar.",
     ],
   });
@@ -773,28 +777,28 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
   const score = analysis.analysis.overallScore;
   const status = scoreStatus(score);
 
-  doc.rect(x, y, width, 206).fill(COLORS.slate950);
-  doc.rect(x, y + 170, width, 36).fill(COLORS.cyan600);
+  doc.rect(x, y, width, 214).fill(COLORS.slate950);
+  doc.rect(x, y + 174, width, 40).fill(COLORS.cyan600);
 
   doc.font("Helvetica-Bold").fontSize(11).fillColor("#67e8f9").text("SHOPHEBEL", x + 24, y + 24);
-  doc.font("Helvetica-Bold").fontSize(28).fillColor(COLORS.white).text("Dein Premium-Report", x + 24, y + 58, {
+  doc.font("Helvetica-Bold").fontSize(29).fillColor(COLORS.white).text("Dein Premium-Bericht", x + 24, y + 58, {
     width: width - 48,
     lineGap: 2,
   });
   doc.font("Helvetica").fontSize(11.5).fillColor(COLORS.slate200).text(
-    "Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen.",
+    "Klare Einordnung, priorisierte Umsatzbremsen und nächste Schritte für die Umsetzung.",
     x + 24,
-    y + 104,
+    y + 105,
     { width: width - 48, lineGap: 3 },
   );
   doc.font("Helvetica-Bold").fontSize(9).fillColor(COLORS.slate950).text(
     `Geprüfte URL: ${textValue(analysis.analysis.url, "Unbekannt")}`,
     x + 24,
-    y + 181,
+    y + 185,
     { width: width - 48 },
   );
 
-  doc.y = y + 230;
+  doc.y = y + 238;
 
   const metricWidth = (width - 18) / 3;
   const metricY = doc.y;
@@ -806,7 +810,7 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
     },
     {
       title: REPORT_LABELS.score,
-      value: typeof score === "number" ? `${score}/100` : "n/a",
+    value: typeof score === "number" ? `${score}/100` : "offen",
       tone: status.tone,
     },
     {
@@ -819,7 +823,7 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
   metrics.forEach((metric, index) => {
     const metricX = x + index * (metricWidth + 9);
     const colors = TONE_COLORS[metric.tone];
-    doc.rect(metricX, metricY, metricWidth, 68).fillAndStroke(colors.fill, colors.border);
+    doc.roundedRect(metricX, metricY, metricWidth, 68, 4).fillAndStroke(colors.fill, colors.border);
     doc.font("Helvetica-Bold").fontSize(8).fillColor(COLORS.slate500).text(metric.title.toUpperCase(), metricX + 12, metricY + 13, {
       width: metricWidth - 24,
       lineBreak: false,
@@ -850,7 +854,7 @@ function addFooters(doc: PDFKit.PDFDocument): FooterPageStats {
     const previousY = doc.y;
 
     doc.moveTo(left, y - 10).lineTo(right, y - 10).strokeColor(COLORS.slate200).lineWidth(1).stroke();
-    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.slate500).text("Shophebel Premium-Report", left, y, {
+    doc.font("Helvetica").fontSize(8.5).fillColor(COLORS.slate500).text("Shophebel Premium-Bericht", left, y, {
       width: 220,
       height: 12,
       lineBreak: false,
@@ -882,7 +886,7 @@ async function renderPremiumReportPdfWithFooterStats({
     bufferPages: true,
     compress: false,
     info: {
-      Title: "Shophebel Premium-Report",
+      Title: "Shophebel Premium-Bericht",
       Author: "Shophebel",
       Subject: analysis.analysis.url,
     },
@@ -918,14 +922,14 @@ async function renderPremiumReportPdfWithFooterStats({
   writeCover(doc, analysis);
   writeScoreDashboard(doc, analysis);
 
-  drawSectionHeader(doc, "Management-Zusammenfassung", "Premium Strategie");
+  drawSectionHeader(doc, "Management-Zusammenfassung", "Einordnung");
   writeCard(doc, {
     title: textValue(summary.headline, "Premium Anfrage- und Vertrauens-Audit"),
     tone: "cyan",
     label: "Kurzfazit",
     minHeight: 124,
     body: [
-      textValue(summary.mainReason, "Der Premium-Report fasst die wichtigsten Anfrage- und Kaufhebel dieser Analyse zusammen."),
+      textValue(summary.mainReason, "Der Premium-Bericht fasst die wichtigsten Anfrage- und Kaufhebel dieser Analyse zusammen."),
       textValue(summary.firstFocus, "Starte mit dem Hebel, der Klarheit, Vertrauen und den nächsten Schritt am schnellsten verbessert."),
       textValue(summary.businessRelevance, "Jede reduzierte Reibung kann mehr qualifizierte Anfragen aus bestehendem Traffic holen."),
       `Schnellster Hebel: ${textValue(summary.fastestWin, "Wichtigste Maßnahme zuerst umsetzen.")}`,
@@ -949,9 +953,9 @@ async function renderPremiumReportPdfWithFooterStats({
         tone: blockerTone(blocker),
         label: textValue(blocker.severity, "Priorität"),
         body: [
-          `${textValue(blocker.category, "Kategorie")} | Aufwand: ${textValue(blocker.effort, "n/a")}`,
-          textValue(blocker.whyItMatters, "Warum es zählt: nicht im gespeicherten Report enthalten."),
-          textValue(blocker.likelyBusinessImpact, "Business-Impact: nicht im gespeicherten Report enthalten."),
+          `${textValue(blocker.category, "Kategorie")} | Aufwand: ${textValue(blocker.effort, "offen")}`,
+          textValue(blocker.whyItMatters, "Warum es zählt: Dieser Punkt kann die Entscheidung unnötig erschweren."),
+          textValue(blocker.likelyBusinessImpact, "Geschäftliche Wirkung: Weniger Reibung kann mehr qualifizierte Anfragen unterstützen."),
           `Empfehlung: ${textValue(blocker.recommendedFix, "Konkrete Maßnahme priorisieren.")}`,
         ],
       });
@@ -960,7 +964,7 @@ async function renderPremiumReportPdfWithFooterStats({
     writeCard(doc, {
       title: "Keine separaten Umsatzblocker gespeichert",
       tone: "slate",
-      body: ["Der Export bleibt nutzbar; für diese Analyse liegen keine Top-Umsatzbremsen im gespeicherten Premium-Report vor."],
+      body: ["Der Export bleibt nutzbar; für diese Analyse wurden keine separaten Top-Umsatzbremsen ermittelt."],
     });
   }
 
@@ -984,11 +988,11 @@ async function renderPremiumReportPdfWithFooterStats({
         tone: index === 0 ? "emerald" : index <= 2 ? "amber" : "slate",
         label: `${REPORT_LABELS.priorityScore} ${textValue(item.priorityScore, String(index + 1))}`,
         body: [
-          `Geschäftliche Wirkung: ${textValue(item.businessImpact, "Nicht im gespeicherten Report enthalten.")}`,
-          `Empfohlener Umsetzungspfad: ${textValue(item.suggestedModule, "Nicht im gespeicherten Report enthalten.")}`,
-          `Service-Paket: ${textValue(item.suggestedService, "Nicht im gespeicherten Report enthalten.")}`,
+          `Geschäftliche Wirkung: ${textValue(item.businessImpact)}`,
+          `Empfohlener Umsetzungspfad: ${textValue(item.suggestedModule)}`,
+          `Begleitung: ${textValue(item.suggestedService)}`,
           `Aufwand: ${textValue(item.implementationEffort, "mittel")}`,
-          `Erwarteter Effekt: ${textValue(item.expectedEffect, "Nicht im gespeicherten Report enthalten.")}`,
+          `Erwarteter Effekt: ${textValue(item.expectedEffect)}`,
           `Nächster Schritt: ${textValue(item.nextStep, "In den priorisierten Maßnahmenplan aufnehmen.")}`,
         ],
       });
@@ -1016,14 +1020,14 @@ async function renderPremiumReportPdfWithFooterStats({
         label: timelineLabel(index),
         body: stringList(step.actions).length > 0
           ? stringList(step.actions)
-          : ["Keine separaten Aktionen im gespeicherten Report vorhanden."],
+          : ["Die wichtigsten nächsten Schritte werden aus den priorisierten Maßnahmen abgeleitet."],
       });
     });
   } else {
     writeCard(doc, {
       title: "Kein 7-Tage-Fahrplan gespeichert",
       tone: "slate",
-      body: ["Der Report enthält aktuell keinen separaten Umsetzungsfahrplan."],
+      body: ["Der Bericht enthält aktuell keinen separaten Umsetzungsfahrplan."],
     });
   }
 
@@ -1043,7 +1047,7 @@ async function renderPremiumReportPdfWithFooterStats({
     writeCard(doc, {
       title: "Keine priorisierten Maßnahmen gespeichert",
       tone: "slate",
-      body: ["Der Export bleibt stabil; priorisierte Maßnahmen können später aus dem Report ergänzt werden."],
+      body: ["Der Export bleibt stabil; priorisierte Maßnahmen können später aus dem Bericht ergänzt werden."],
     });
   }
 
@@ -1054,14 +1058,14 @@ async function renderPremiumReportPdfWithFooterStats({
         title: textValue(note.area, "Bereich"),
         tone: "slate",
         minHeight: 62,
-        body: [textValue(note.note, "Keine Notiz im gespeicherten Report enthalten.")],
+        body: [textValue(note.note)],
       });
     });
   } else {
     writeCard(doc, {
-      title: "Keine Notizen zur visuellen Prüfung gespeichert",
+      title: "Visuelle Prüfung ergänzen",
       tone: "slate",
-      body: ["Für diesen Export wurden bewusst keine Screenshots eingebettet. Die textlichen Hinweise zur visuellen Prüfung fehlen im gespeicherten Report."],
+      body: ["Für diese Auswertung liegt keine separate visuelle Detailnotiz vor. Die übrigen Kapitel bleiben als Kundenreport nutzbar."],
     });
   }
 

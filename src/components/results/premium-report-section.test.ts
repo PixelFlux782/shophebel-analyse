@@ -55,7 +55,7 @@ describe("PremiumReportSection", () => {
     );
 
     expect(markup).toContain("Premium freigeschaltet");
-    expect(markup).toContain("Dein Premium-Report");
+    expect(markup).toContain("Dein Premium-Bericht");
     expect(markup).toContain("Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen");
     expect(markup).toContain("Premium-PDF herunterladen");
     expect(markup).toContain('href="/api/premium-report/analysis-123/pdf"');
@@ -64,8 +64,8 @@ describe("PremiumReportSection", () => {
     expect(markup).toContain("Top-Umsatzbremsen");
     expect(markup).toContain("Visuelle Prüfung");
     expect(markup).toContain("sichtbarer Startbereich");
-    expect(markup).toContain("Primären Button im sichtbaren Startbereich schärfen");
-    expect(markup).toContain("Premium Anfrage- und Vertrauens-Audit");
+    expect(markup).toContain("Primären Button oberhalb der Falz schärfen");
+    expect(markup).toContain("Premium Anfrage-/Kaufwahrscheinlichkeit- und Vertrauen-Audit");
     expect(markup).not.toContain("Executive Summary");
     expect(markup).not.toContain("Visual Audit Notes");
     expect(markup).not.toContain("Above the fold");
@@ -102,12 +102,12 @@ describe("PremiumReportSection", () => {
     expect(markup).toContain("Priorisierter Maßnahmenplan");
     expect(markup).toContain("Geschäftliche Wirkung");
     expect(markup).toContain("Empfohlener Umsetzungspfad");
-    expect(markup).toContain("Service-Paket");
+    expect(markup).toContain("Begleitung");
     expect(markup).toContain("Erwarteter Effekt");
     expect(markup).toContain("Nächster Schritt");
     expect(markup).toContain("Sofortmaßnahmen für mehr Anfragen");
-    expect(markup).toContain("Quick Fix Sprint");
-    expect(markup).toContain("Als Quick Fix priorisieren");
+    expect(markup).toContain("Sofort-Umsetzung");
+    expect(markup).toContain("Als Sofortmaßnahme priorisieren");
     expect(markup).toContain("Umsetzung besprechen");
     expect(markup).toContain("https://shophebel.vercel.app/?opportunity=Hero-Botschaft+als+Anfrage-Hebel+sch%C3%A4rfen");
     expect(markup).toContain("opportunitySource=premium");

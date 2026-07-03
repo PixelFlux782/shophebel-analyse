@@ -22,115 +22,170 @@ export const REPORT_LABELS = {
   measuresPlan: "Priorisierter Maßnahmenplan",
 };
 
-export const CUSTOMER_FORBIDDEN_REPORT_LABELS = [
-  "Executive Snapshot",
-  "Executive Summary",
-  "Website Intelligence Score",
-  "Visual Audit",
-  "Screenshot Intelligence Console",
-  "Full Page Screenshot",
-  "Visual Capture",
-  "Intelligence Score",
-  "Screenshot Intelligence",
-  "Visual Intelligence",
-  "Full Visual Audit",
-  "Premium Strategy Layer",
-  "Executive Recommendations",
-  "Business Priorities",
-  "7-Day Action Plan",
-  "Top Issues",
-  "Report Snapshot",
-];
+export const CUSTOMER_FORBIDDEN_REPLACEMENTS = {
+  "Executive Snapshot": REPORT_LABELS.executiveSnapshot,
+  "Executive Summary": REPORT_LABELS.managementSummary,
+  "Website Intelligence Score": REPORT_LABELS.websiteIntelligenceScore,
+  "Visual Audit": REPORT_LABELS.visualAudit,
+  "Screenshot Intelligence Console": REPORT_LABELS.screenshotIntelligenceConsole,
+  "Full Page Screenshot": REPORT_LABELS.fullPageScreenshot,
+  "Desktop Screenshot": REPORT_LABELS.desktopScreenshot,
+  "Mobile Screenshot": REPORT_LABELS.mobileScreenshot,
+  "Hero Screenshot": REPORT_LABELS.heroScreenshot,
+  "Visual Capture": "Visuelle Ansicht",
+  "Intelligence Score": REPORT_LABELS.websiteIntelligenceScore,
+  "Screenshot Intelligence": REPORT_LABELS.screenshotIntelligenceConsole,
+  "Visual Intelligence": REPORT_LABELS.visualAudit,
+  "Full Visual Audit": "Vollständige visuelle Analyse",
+  "Premium Strategy Layer": "Strategische Premium-Ebene",
+  "Executive Recommendations": "priorisierte Empfehlungen",
+  "Business Priorities": "geschäftliche Prioritäten",
+  "7-Day Action Plan": REPORT_LABELS.sevenDayPlan,
+  "Report Snapshot": "Report-Auszug",
+  "Premium-Report": "Premium-Bericht",
+  "KI-Premiumreport": "KI-Premiumbericht",
+  Report: "Bericht",
+  "Top Issues": "Wichtigste Probleme",
+  "Revenue Blockers": "Umsatzbremsen",
+  "Quick Wins": "schnelle Verbesserungen",
+  "Quick Fix Sprint": "Sofort-Umsetzung",
+  "Quick Fix": "Sofortmaßnahme",
+  Sprint: "Umsetzung",
+  "Conversion Quick Wins": "Sofortmaßnahmen für mehr Anfragen",
+  "Opportunity Roadmap": REPORT_LABELS.measuresPlan,
+  Opportunities: "Potenziale",
+  Opportunity: "Potenzial",
+  "Shophebel-Modul": "Empfohlener Umsetzungspfad",
+  "Suggested Service": "Empfohlene Begleitung",
+  "Expected Effect": "Erwarteter Effekt",
+  "Business Impact": "Geschäftliche Wirkung",
+  "Call-to-Action": "Handlungsaufforderung",
+  "Above the fold": "sichtbarer Startbereich",
+  Dashboard: "Übersicht",
+  Insights: "Erkenntnisse",
+  Summary: "Zusammenfassung",
+  Recommendation: "Empfehlung",
+  Recommendations: "Empfehlungen",
+  "AI Visibility": "KI-Sichtbarkeit",
+  "AI-Sichtbarkeit": "KI-Sichtbarkeit",
+  "Form drag": "Formular-Reibung",
+  "Trust gap": "Vertrauenslücke",
+  "Intent match": "Passung zur Suchabsicht",
+  Hero: "Startbereich",
+  Free: "Kostenlos",
+  Full: "Vollanalyse",
+  Trust: "Vertrauen",
+  Conversion: "Anfrage-/Kaufwahrscheinlichkeit",
+  Capture: REPORT_LABELS.capture,
+  CTA: "Button",
+} as const;
+
+export const CUSTOMER_FORBIDDEN_REPORT_LABELS = Object.keys(CUSTOMER_FORBIDDEN_REPLACEMENTS);
 
 export const CUSTOMER_FORBIDDEN_ASCII_UMLAUTS = [
+  "Abschluesse",
+  "Abschluessen",
+  "Abbrueche",
+  "Abstaende",
+  "Aenderung",
+  "Aenderungen",
   "Bildverstaendnis",
-  "Kontaktmoeglichkeiten",
-  "verschluesselte",
-  "Schriftgroessen",
-  "groesser",
-  "zuruecknehmen",
-  "Massnahmen",
-  "Massnahme",
-  "verfuegbar",
-  "vollstaendige",
-  "ausfuehren",
+  "Einfuehrung",
+  "Einschaetzung",
+  "Erklaerung",
   "fuer",
   "Fuehrung",
   "fuehren",
   "fuehrt",
-  "Einfuehrung",
-  "Uebersicht",
-  "Pruefung",
-  "pruefen",
-  "Spaeter",
+  "frueher",
+  "Formularnaehe",
+  "Geraeten",
+  "geoeffnet",
+  "gedrueckt",
+  "geprueft",
+  "groesser",
+  "groessere",
+  "groesste",
+  "Groesse",
+  "hoeherer",
+  "koennen",
+  "koennte",
+  "kuerzer",
+  "laenger",
+  "Massnahmen",
+  "Massnahme",
+  "moeglich",
+  "Kontaktmoeglichkeiten",
   "naechste",
   "naechsten",
   "naechster",
+  "naechstem",
   "Nutzerfuehrung",
-  "Erklaerung",
+  "Pruefung",
+  "Pruefe",
+  "pruefen",
+  "Rueckgabe",
+  "schaerfen",
+  "Schriftgroessen",
+  "Spaeter",
+  "stoert",
+  "staerker",
+  "staerken",
+  "Staerken",
+  "Uebersicht",
+  "Ueberschriften",
+  "uebersetzen",
+  "verschluesselte",
+  "Verstaendlichkeit",
+  "Verstaendnis",
+  "verfuegbar",
+  "vollstaendig",
+  "vollstaendige",
+  "ausfuehren",
   "zusaetzliche",
-  "Prioritaet",
-  "Prioritaeten",
+  "zuruecknehmen",
+  "zoegern",
 ];
 
-const COPY_REPLACEMENTS: Array<[RegExp, string]> = [
-  [/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¼|ÃƒÆ’Ã‚Â¼|ÃƒÂ¼/g, "ü"],
+export const CUSTOMER_FORBIDDEN_FALLBACK_TEXTS = [
+  "n/a",
+  "N/A",
+  "unknown",
+  "Unknown",
+  "undefined",
+  "null",
+  "error",
+  "Error",
+  "fallback",
+  "Fallback",
+  "Nicht im gespeicherten Report enthalten.",
+  "Keine separaten Aktionen im gespeicherten Report vorhanden.",
+  "Keine Notiz im gespeicherten Report enthalten.",
+];
+
+const COPY_REPLACEMENTS: Array<[RegExp, string]> = Object.entries(CUSTOMER_FORBIDDEN_REPLACEMENTS)
+  .sort(([left], [right]) => right.length - left.length)
+  .map(([term, replacement]) => [new RegExp(`\\b${escapeRegExp(term)}\\b`, "gi"), replacement]);
+
+const MOJIBAKE_REPLACEMENTS: Array<[RegExp, string]> = [
+  [/ÃƒÂ¼|ÃƒÆ’Ã‚Â¼/g, "ü"],
+  [/ÃƒÅ“|ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ|ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¸/g, "Ü"],
+  [/ÃƒÂ¶|ÃƒÆ’Ã‚Â¶/g, "ö"],
+  [/Ãƒâ€“|ÃƒÆ’Ã¢â‚¬â€œ/g, "Ö"],
+  [/ÃƒÂ¤|ÃƒÆ’Ã‚Â¤/g, "ä"],
+  [/Ãƒâ€ž|ÃƒÆ’Ã¢â‚¬Å¾/g, "Ä"],
+  [/ÃƒÅ¸|ÃƒÆ’Ã…Â¸/g, "ß"],
   [/Ã¼/g, "ü"],
-  [/ÃƒÆ’Ã†â€™Ãƒâ€¦Ã¢â‚¬Å“|ÃƒÆ’Ã…â€œ|ÃƒÅ“/g, "Ü"],
   [/Ãœ/g, "Ü"],
-  [/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¶|ÃƒÆ’Ã‚Â¶|ÃƒÂ¶/g, "ö"],
   [/Ã¶/g, "ö"],
-  [/ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“|ÃƒÆ’Ã¢â‚¬â€œ|Ãƒâ€“/g, "Ö"],
   [/Ã–/g, "Ö"],
-  [/ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¤|ÃƒÆ’Ã‚Â¤|ÃƒÂ¤/g, "ä"],
   [/Ã¤/g, "ä"],
-  [/ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾|ÃƒÆ’Ã¢â‚¬Å¾|Ãƒâ€ž/g, "Ä"],
   [/Ã„/g, "Ä"],
-  [/ÃƒÆ’Ã†â€™Ãƒâ€¦Ã‚Â¸|ÃƒÆ’Ã†â€™Ãƒâ€šÃ…Â¸|ÃƒÆ’Ã…Â¸|ÃƒÅ¸/g, "ß"],
   [/ÃŸ/g, "ß"],
-  [/Ãƒâ€šÃ‚Â·|Ã‚Â·/g, "·"],
-  [/Executive Snapshot/gi, REPORT_LABELS.executiveSnapshot],
-  [/Executive Summary/gi, REPORT_LABELS.managementSummary],
-  [/Website Intelligence Score/gi, REPORT_LABELS.websiteIntelligenceScore],
-  [/Screenshot Intelligence Console/gi, REPORT_LABELS.screenshotIntelligenceConsole],
-  [/Full Page Screenshot/gi, REPORT_LABELS.fullPageScreenshot],
-  [/Desktop Screenshot/gi, REPORT_LABELS.desktopScreenshot],
-  [/Mobile Screenshot/gi, REPORT_LABELS.mobileScreenshot],
-  [/Hero Screenshot/gi, REPORT_LABELS.heroScreenshot],
-  [/Visual Capture/gi, "Visuelle Ansicht"],
-  [/\bCapture\b/gi, REPORT_LABELS.capture],
-  [/Visual Audit Notes/gi, REPORT_LABELS.visualCheck],
-  [/Visual Audit/gi, REPORT_LABELS.visualAudit],
-  [/Intelligence Score/gi, REPORT_LABELS.websiteIntelligenceScore],
-  [/Screenshot Intelligence/gi, REPORT_LABELS.screenshotIntelligenceConsole],
-  [/Visual Intelligence/gi, REPORT_LABELS.visualAudit],
-  [/Full Visual Audit/gi, "Vollständige visuelle Analyse"],
-  [/Premium Strategy Layer/gi, "Strategische Premium-Ebene"],
-  [/Executive Recommendations/gi, "priorisierte Empfehlungen"],
-  [/Business Priorities/gi, "geschäftliche Prioritäten"],
-  [/7-Day Action Plan/gi, REPORT_LABELS.sevenDayPlan],
-  [/Report Snapshot/gi, "Report-Auszug"],
-  [/Top Issues/gi, "Wichtigste Probleme"],
-  [/Premium Conversion- und Trust-Audit/gi, "Premium Anfrage- und Vertrauens-Audit"],
-  [/Conversion-Hebel/gi, "Anfrage- und Kaufhebel"],
-  [/Conversion Hypothese/gi, "Conversion-Hypothese"],
-  [/Above the fold/gi, "sichtbarer Startbereich"],
-  [/oberhalb der Falz/gi, "im sichtbaren Startbereich"],
-  [/Revenue Blockers/gi, "Umsatzbremsen"],
-  [/Top Umsatzblocker/gi, "Top-Umsatzbremsen"],
-  [/Conversion Quick Wins/gi, "Sofortmaßnahmen für mehr Anfragen"],
-  [/Quick Wins/gi, "schnelle Verbesserungen"],
-  [/Opportunity Roadmap/gi, REPORT_LABELS.measuresPlan],
-  [/Opportunities/gi, "Potenziale"],
-  [/Opportunity/gi, "Potenzial"],
-  [/Shophebel-Modul/gi, "Empfohlener Umsetzungspfad"],
-  [/\bSuggested Service\b/gi, "Empfohlene Begleitung"],
-  [/\bExpected Effect\b/gi, "Erwarteter Effekt"],
-  [/\bBusiness Impact\b/gi, "Geschäftliche Wirkung"],
-  [/\bCall-to-Action\b/gi, "Handlungsaufforderung"],
-  [/\bCTA\b/g, "Button"],
-  [/\bTrust\b/g, "Vertrauen"],
-  [/\bConversion\b/gi, "Anfrage-/Kaufwahrscheinlichkeit"],
+  [/Â·/g, "·"],
+  [/â€“|â€”/g, "-"],
+  [/â€ž|â€œ|â€/g, "\""],
+  [/â€™/g, "'"],
 ];
 
 const UMLAUT_WORD_REPLACEMENTS: Array<[RegExp, string]> = [
@@ -211,6 +266,10 @@ const UMLAUT_WORD_REPLACEMENTS: Array<[RegExp, string]> = [
   [/\bzoegern\b/gi, "zögern"],
 ];
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function protectAllowedLabels(text: string) {
   return text.replace(/Conversion-Hypothese/gi, HYPOTHESIS_TOKEN);
 }
@@ -225,7 +284,7 @@ export function normalizeGermanReportText(value: unknown, fallback = "") {
   }
 
   const protectedText = protectAllowedLabels(value.trim());
-  const normalized = [...COPY_REPLACEMENTS, ...UMLAUT_WORD_REPLACEMENTS].reduce(
+  const normalized = [...MOJIBAKE_REPLACEMENTS, ...COPY_REPLACEMENTS, ...UMLAUT_WORD_REPLACEMENTS].reduce(
     (text, [pattern, replacement]) => text.replace(pattern, replacement),
     protectedText,
   )
@@ -238,9 +297,59 @@ export function normalizeGermanReportText(value: unknown, fallback = "") {
   return restoreAllowedLabels(normalized);
 }
 
-export function hasForbiddenCustomerReportText(text: string) {
+function unique(values: string[]) {
+  return Array.from(new Set(values));
+}
+
+export function findReportCopyQualityIssues(text: string) {
+  const source = typeof text === "string" ? text : "";
+  const sourceForScan = protectAllowedLabels(source);
   const normalized = normalizeGermanReportText(text);
-  return [...CUSTOMER_FORBIDDEN_REPORT_LABELS, ...CUSTOMER_FORBIDDEN_ASCII_UMLAUTS].some((term) =>
-    normalized.includes(term),
-  );
+  const forbiddenTerms = [
+    ...CUSTOMER_FORBIDDEN_REPORT_LABELS.filter((term) =>
+      new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(sourceForScan),
+    ),
+    ...CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.filter((term) =>
+      new RegExp(`\\b${escapeRegExp(term)}\\b`).test(sourceForScan),
+    ),
+    ...CUSTOMER_FORBIDDEN_FALLBACK_TEXTS.filter((term) =>
+      new RegExp(`\\b${escapeRegExp(term)}\\b`, term === term.toLowerCase() ? "" : "i").test(sourceForScan),
+    ),
+  ];
+  const mojibakeMatches = sourceForScan.match(/[ÃÂ�]|â€|â€“|â€™/g) ?? [];
+
+  return {
+    normalizedText: normalized,
+    forbiddenTerms: unique(forbiddenTerms),
+    mojibakeMatches: unique(mojibakeMatches),
+  };
+}
+
+export function validateReportCopyQuality(text: string) {
+  const issues = findReportCopyQualityIssues(text);
+  const isValid = issues.forbiddenTerms.length === 0 && issues.mojibakeMatches.length === 0;
+
+  return {
+    isValid,
+    ...issues,
+  };
+}
+
+export function assertReportCopyQuality(text: string, context = "Report-Ausgabe") {
+  const result = validateReportCopyQuality(text);
+
+  if (!result.isValid) {
+    throw new Error(
+      `${context} enthält unzulässige Report-Copy: ${[
+        ...result.forbiddenTerms,
+        ...result.mojibakeMatches,
+      ].join(", ")}`,
+    );
+  }
+
+  return result;
+}
+
+export function hasForbiddenCustomerReportText(text: string) {
+  return !validateReportCopyQuality(text).isValid;
 }

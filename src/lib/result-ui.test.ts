@@ -146,7 +146,7 @@ describe("result-ui helpers", () => {
       "Schnellster Hebel",
     );
     expect(getRecommendationLabel(createRecommendation("B", "high", "medium", 1))).toBe(
-      "Größter Impact",
+      "Größte Wirkung",
     );
     expect(getRecommendationLabel(createRecommendation("C", "medium", "high", 12))).toBe(
       "Langfristige Optimierung",

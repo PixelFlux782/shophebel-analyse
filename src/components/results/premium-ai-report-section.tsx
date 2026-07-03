@@ -175,9 +175,9 @@ function ReportView({
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
         <h3 className="text-xl font-bold text-slate-950">Beispiel-Verbesserungen</h3>
         <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <ImprovementList title="Hero" items={report.exampleImprovements.heroTextIdeas} />
-          <ImprovementList title="CTA" items={report.exampleImprovements.ctaIdeas} />
-          <ImprovementList title="Trust" items={report.exampleImprovements.trustElementIdeas} />
+          <ImprovementList title="Startbereich" items={report.exampleImprovements.heroTextIdeas} />
+          <ImprovementList title="Button" items={report.exampleImprovements.ctaIdeas} />
+          <ImprovementList title="Vertrauen" items={report.exampleImprovements.trustElementIdeas} />
         </div>
       </article>
 
@@ -261,7 +261,7 @@ export function PremiumAiReportSection({
               KI-Beratung
             </p>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-              KI-Premiumreport
+          KI-Premiumbericht
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-200">
               Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und konkreten Textideen.
@@ -275,7 +275,7 @@ export function PremiumAiReportSection({
               disabled={state === "loading"}
               className="inline-flex w-full items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 text-base font-extrabold text-slate-950 shadow-[0_20px_60px_-28px_rgba(34,211,238,0.9)] transition hover:-translate-y-0.5 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto"
             >
-              {state === "loading" ? "KI-Bericht wird erstellt ..." : "KI-Premiumreport erzeugen"}
+              {state === "loading" ? "KI-Bericht wird erstellt ..." : "KI-Premiumbericht erzeugen"}
             </button>
           ) : null}
         </div>

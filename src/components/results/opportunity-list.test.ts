@@ -59,7 +59,7 @@ describe("OpportunityList", () => {
     expect(markup).toContain("https://shophebel.vercel.app/?opportunity=Erkannter+Hebel+1");
     expect(markup).toContain("opportunitySource=analysis");
     expect(markup).toContain("module=AI+Button+Rewrite");
-    expect(markup).toContain("service=Anfrage-%2FKaufwahrscheinlichkeit+Sprint");
+    expect(markup).toContain("service=Anfrage-%2FKaufwahrscheinlichkeit+Umsetzung");
     expect(markup).toContain("#kontakt");
     expect(markup).not.toContain("Erkannter Hebel 7");
   });

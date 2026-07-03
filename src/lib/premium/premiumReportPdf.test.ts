@@ -10,9 +10,8 @@ import {
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import {
-  CUSTOMER_FORBIDDEN_ASCII_UMLAUTS,
-  CUSTOMER_FORBIDDEN_REPORT_LABELS,
   REPORT_LABELS,
+  validateReportCopyQuality,
 } from "@/lib/report/reportCopy";
 import type { AnalysisResult } from "@/types/analysis";
 
@@ -125,10 +124,11 @@ describe("premiumReportPdf consultant notes", () => {
     });
     const text = JSON.stringify(sections);
 
-    expect(text).toContain("Der Hero braucht mehr Klarheit.");
+    expect(text).toContain("Der Startbereich braucht mehr Klarheit.");
     expect(text).toContain("Button zuerst, Vertrauen danach.");
     expect(text).toContain("Button-Text schärfen");
-    expect(text).toContain("Optional: Landingpage-Sprint.");
+    expect(text).toContain("Optional: Landingpage-Umsetzung.");
+    expect(validateReportCopyQuality(text).isValid).toBe(true);
   });
 
   it("gibt internalNotes niemals als kundenrelevante PDF-Sektion aus", () => {
@@ -154,18 +154,12 @@ describe("premiumReportPdf consultant notes", () => {
     expect(labels).toContain("Nächster Schritt");
     expect(labels).toContain("Nutzerführung");
     expect(labels).toContain("Visuelle Prüfung");
-    expect(labels).toContain(REPORT_LABELS.websiteIntelligenceScore);
-    expect(labels).toContain(REPORT_LABELS.screenshotIntelligenceConsole);
+    expect(labels).toContain("Shophebel-Analysewert");
+    expect(labels).toContain("Visueller Seitenüberblick");
     expect(labels).toContain("sichtbarer Startbereich");
     expect(labels).toContain("Umsatzbremsen");
     expect(labels).toContain("Maßnahmen");
-    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
-      expect(labels).not.toContain(label);
-    });
-    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
-      expect(labels).not.toContain(term);
-    });
-    expect(labels).not.toMatch(/N\u00c3|\u00c3\u0192/);
+    expect(validateReportCopyQuality(labels).isValid).toBe(true);
   });
 
   it("normalisiert alte premium_reports Texte vor dem PDF-Rendern", () => {
@@ -204,13 +198,7 @@ describe("premiumReportPdf consultant notes", () => {
     expect(renderText).toContain("Nächster Schritt");
     expect(renderText).toContain("Nutzerführung");
     expect(renderText).toContain("Maßnahmen");
-    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
-      expect(renderText).not.toContain(label);
-    });
-    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
-      expect(renderText).not.toContain(term);
-    });
-    expect(renderText).not.toMatch(/NÃ|Ãƒ/);
+    expect(validateReportCopyQuality(renderText).isValid).toBe(true);
   });
 
   it("bereitet PDF-Textdaten ohne bekannte englische Reportlabels und ASCII-Umlaute auf", () => {
@@ -238,12 +226,7 @@ describe("premiumReportPdf consultant notes", () => {
 
     expect(text).toContain(REPORT_LABELS.websiteIntelligenceScore);
     expect(text).toContain("Bildverständnis");
-    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
-      expect(text).not.toContain(label);
-    });
-    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
-      expect(text).not.toContain(term);
-    });
+    expect(validateReportCopyQuality(text).isValid).toBe(true);
   });
 
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {

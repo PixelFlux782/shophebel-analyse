@@ -8,7 +8,7 @@ type PremiumReportSectionReport = Partial<PremiumReport> & {
   premiumSummary?: Partial<PremiumReport["premiumSummary"]>;
 };
 
-function text(value: unknown, fallback = "Noch nicht im Premium-Report enthalten.") {
+function text(value: unknown, fallback = "Für diesen Punkt liegt noch keine separate Kundenangabe vor.") {
   return polishPremiumText(value, fallback);
 }
 
@@ -55,7 +55,7 @@ export function PremiumReportSection({
               Premium freigeschaltet
             </p>
             <h2 className="mt-4 text-4xl font-bold tracking-tight sm:text-5xl">
-              Dein Premium-Report
+              Dein Premium-Bericht
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-200">
               Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen.
@@ -82,7 +82,7 @@ export function PremiumReportSection({
               {text(premiumSummary.headline, "Premium Anfrage- und Vertrauens-Audit")}
             </h3>
             <div className="mt-4 space-y-3 text-sm leading-7 text-slate-700">
-              <p>{text(premiumSummary.mainReason, "Der Premium-Report fasst die wichtigsten Anfrage- und Kaufhebel dieser Analyse zusammen.")}</p>
+              <p>{text(premiumSummary.mainReason, "Der Premium-Bericht fasst die wichtigsten Anfrage- und Kaufhebel dieser Analyse zusammen.")}</p>
               {premiumSummary.firstFocus ? <p>{text(premiumSummary.firstFocus)}</p> : null}
               {premiumSummary.businessRelevance ? <p>{text(premiumSummary.businessRelevance)}</p> : null}
             </div>
@@ -137,7 +137,7 @@ export function PremiumReportSection({
                       <dd>{text(item.suggestedModule)}</dd>
                     </div>
                     <div>
-                      <dt className="font-bold text-slate-950">Service-Paket</dt>
+                      <dt className="font-bold text-slate-950">Begleitung</dt>
                       <dd>{text(item.suggestedService)}</dd>
                     </div>
                     <div>
@@ -186,7 +186,7 @@ export function PremiumReportSection({
             ))}
             {topRevenueBlockers.length === 0 ? (
               <p className="rounded-2xl border border-slate-200 bg-white p-5 text-sm leading-7 text-slate-700">
-                Für diesen Report wurden keine separaten Umsatzbremsen gespeichert.
+                Für diesen Bericht wurden keine separaten Umsatzbremsen ermittelt.
               </p>
             ) : null}
           </div>
@@ -206,7 +206,7 @@ export function PremiumReportSection({
               ))}
               {quickImplementationPlan.length === 0 ? (
                 <p className="text-sm leading-7 text-slate-700">
-                  Kein Umsetzungsplan im gespeicherten Report vorhanden.
+                  Der Umsetzungsplan wird aus den wichtigsten Maßnahmen abgeleitet.
                 </p>
               ) : null}
             </div>
@@ -222,7 +222,7 @@ export function PremiumReportSection({
               ))}
               {visualAuditNotes.length === 0 ? (
                 <p className="text-sm leading-7 text-slate-700">
-                  Keine Hinweise zur visuellen Prüfung im gespeicherten Report vorhanden.
+                  Für diese Auswertung liegt keine separate visuelle Detailnotiz vor.
                 </p>
               ) : null}
             </div>
@@ -236,7 +236,7 @@ export function PremiumReportSection({
           </ol>
           {priorityRoadmap.length === 0 ? (
             <p className="mt-4 text-sm leading-7 text-slate-700">
-              Keine priorisierten Maßnahmen im gespeicherten Report vorhanden.
+              Für diese Auswertung liegt noch keine separate Maßnahmenliste vor.
             </p>
           ) : null}
         </article>
