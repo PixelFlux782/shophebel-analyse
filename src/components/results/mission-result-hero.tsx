@@ -75,7 +75,7 @@ function getDomain(value: string) {
 }
 
 function modeLabel(mode: AnalysisResult["analysisMode"]) {
-  return mode === "rendered" ? "Live-Ansicht geprueft" : "Statische Ansicht geprueft";
+  return mode === "rendered" ? "Live-Ansicht geprüft" : "Statische Ansicht geprüft";
 }
 
 function reportLevel(plan: AnalysisPlan) {
@@ -226,73 +226,86 @@ export function MissionResultHero({
   const locked = lockedLayerCopy(plan);
 
   return (
-    <section className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/90 text-white shadow-[0_28px_90px_-56px_rgba(15,23,42,0.95)]">
-      <div className="border-b border-white/10 bg-white/[0.03] px-4 py-3 sm:px-6">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-medium text-slate-300">
-            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-emerald-200">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+    <section className="overflow-hidden rounded-[1.15rem] border border-slate-200 bg-white text-slate-950 shadow-[0_34px_110px_-70px_rgba(15,23,42,0.45)]">
+      <div className="border-b border-slate-200 bg-[#fbfaf7] px-4 py-3 sm:px-6">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-medium text-slate-600">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-800">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
               Analyse abgeschlossen
             </span>
-            <span className="break-all rounded-full border border-white/10 bg-slate-900 px-3 py-1.5">
+            <span className="break-all rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700">
               {getDomain(result.finalUrl ?? result.url)}
             </span>
-            <span className="rounded-full border border-white/10 bg-slate-900 px-3 py-1.5">
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-slate-700">
               {modeLabel(result.analysisMode)}
             </span>
           </div>
-          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
             <span>{formatDate(result.scannedAt ?? result.createdAt)}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:block" />
+            <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
             <span>{reportLevel(plan)}</span>
-            <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:block" />
-            <span>Visuelle Pruefung, Nutzerfuehrung, Auffindbarkeit und KI-Sichtbarkeit eingeordnet</span>
+            <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
+            <span>Visuelle Prüfung, Nutzerführung, Auffindbarkeit und KI-Sichtbarkeit eingeordnet</span>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-0 xl:grid-cols-[minmax(0,0.92fr)_minmax(28rem,1.08fr)]">
-        <div className="border-b border-white/10 p-5 sm:p-7 xl:border-b-0 xl:border-r">
-          <div className="flex items-start justify-between gap-4">
+      <div className="grid gap-0 xl:grid-cols-[minmax(0,0.95fr)_minmax(28rem,1.05fr)]">
+        <div className="border-b border-slate-200 p-5 sm:p-7 xl:border-b-0 xl:border-r">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+            Shophebel-Analysebericht
+          </p>
+          <div className="mt-4 grid gap-5 sm:grid-cols-[12rem_minmax(0,1fr)] sm:items-center">
+            <div className="rounded-[1rem] border border-slate-200 bg-[#f9f6ef] p-4 shadow-inner">
+              <div className="flex items-end gap-2">
+                <div className="font-mono text-6xl font-semibold leading-none tracking-normal text-slate-950">
+                  <ScoreCountUp value={overall} />
+                </div>
+                <div className="pb-1 font-mono text-xl font-semibold text-slate-400">/100</div>
+              </div>
+              <div className="mt-4 h-2 rounded-full bg-slate-200">
+                <div
+                  className={`h-2 rounded-full ${tone.progress}`}
+                  style={{ width: `${Math.max(8, overall)}%` }}
+                />
+              </div>
+              <span className={`mt-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${tone.badge}`}>
+                {getOverallStatusLabel(overall)}
+              </span>
+            </div>
+
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                Shophebel-Analysebericht
-              </p>
-              <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
+              <h1 className="text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">
                 Shophebel-Analysewert
               </h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
+                {scoreInterpretation(result, subscores)}
+              </p>
             </div>
-            <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${tone.badge}`}>
-              {getOverallStatusLabel(overall)}
-            </span>
           </div>
 
-          <div className="mt-8 flex items-end gap-3">
-            <div className="font-mono text-7xl font-semibold leading-none tracking-normal text-white sm:text-8xl">
-              <ScoreCountUp value={overall} />
+          <div className="mt-6 rounded-[1rem] border border-slate-200 bg-white p-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+                Wichtigste 3 Signale
+              </h2>
+              <span className="text-xs font-medium text-slate-500">{signals.length} priorisiert</span>
             </div>
-            <div className="pb-2 font-mono text-2xl font-semibold text-slate-500">/100</div>
-          </div>
-          <div className="mt-5 h-2 rounded-full bg-white/8">
-            <div
-              className={`h-2 rounded-full ${tone.progress}`}
-              style={{ width: `${Math.max(8, overall)}%` }}
-            />
-          </div>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-slate-300">
-            {scoreInterpretation(result, subscores)}
-          </p>
-
-          <div className="mt-7 grid gap-3 sm:grid-cols-2">
-            {impacts.map((item) => (
-              <div key={item} className="border-l border-white/15 bg-white/[0.03] px-4 py-3 text-sm text-slate-300">
-                {item}
-              </div>
-            ))}
+            <ol className="mt-4 grid gap-3">
+              {signals.map((signal, index) => (
+                <li key={signal} className="grid grid-cols-[2rem_minmax(0,1fr)] gap-3 text-sm leading-6 text-slate-700">
+                  <span className="grid h-8 w-8 place-items-center rounded-full border border-slate-200 bg-[#f9f6ef] font-mono text-xs font-semibold text-slate-900">
+                    {index + 1}
+                  </span>
+                  <span>{signal}</span>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
 
-        <div className="grid gap-5 p-5 sm:p-7">
+        <div className="grid gap-5 bg-[#fbfaf7] p-5 sm:p-7">
           <div className="grid gap-3 sm:grid-cols-2">
             {subscores.map((item) => {
               const itemTone = getScoreTone(item.score);
@@ -300,16 +313,16 @@ export function MissionResultHero({
               return (
                 <article
                   key={item.key}
-                  className={`min-h-[8.5rem] rounded-lg border p-4 ${item.locked ? "border-white/10 bg-slate-900/45 opacity-70" : itemTone.surface}`}
+                  className={`min-h-[7.5rem] rounded-[0.85rem] border bg-white p-4 shadow-[0_16px_60px_-50px_rgba(15,23,42,0.45)] ${item.locked ? "border-slate-200 opacity-70" : "border-slate-200"}`}
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-400">{item.locked ? "Tiefere Ebene gesperrt" : item.hint}</p>
+                      <p className="text-sm font-semibold text-slate-950">{item.label}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-500">{item.locked ? "Tiefere Ebene gesperrt" : item.hint}</p>
                     </div>
-                    <span className="font-mono text-xl font-semibold text-white">{item.score}</span>
+                    <span className="font-mono text-xl font-semibold text-slate-950">{item.score}</span>
                   </div>
-                  <div className="mt-5 h-1.5 rounded-full bg-white/10">
+                  <div className="mt-4 h-1.5 rounded-full bg-slate-200">
                     <div
                       className={`h-1.5 rounded-full ${item.locked ? "bg-slate-500" : itemTone.progress}`}
                       style={{ width: `${Math.max(8, item.score)}%` }}
@@ -321,28 +334,23 @@ export function MissionResultHero({
           </div>
 
           <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(15rem,0.85fr)]">
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
-              <div className="flex items-center justify-between gap-3">
-                <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">
-                  Wichtige Warnsignale
-                </h2>
-                <span className="text-xs text-slate-500">{signals.length} erkannt</span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {signals.map((signal, index) => (
-                  <div key={signal} className="flex gap-3 text-sm leading-6 text-slate-300">
-                    <span className="mt-0.5 font-mono text-xs text-cyan-300">0{index + 1}</span>
-                    <span>{signal}</span>
+            <div className="rounded-[0.9rem] border border-slate-200 bg-white p-4">
+              <p className="text-sm font-semibold text-slate-950">Geschäftliche Lesart</p>
+              <div className="mt-4 space-y-2">
+                {impacts.map((item) => (
+                  <div key={item} className="flex gap-3 text-sm leading-6 text-slate-600">
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                    {item}
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="rounded-lg border border-white/10 bg-slate-900/70 p-4">
-              <p className="text-sm font-semibold text-white">{locked.title}</p>
+            <div className="rounded-[0.9rem] border border-slate-200 bg-slate-950 p-4 text-white">
+              <p className="text-sm font-semibold">{locked.title}</p>
               <div className="mt-4 space-y-2">
                 {locked.items.map((item) => (
-                  <div key={item} className="flex items-center gap-2 text-sm text-slate-400">
+                  <div key={item} className="flex items-center gap-2 text-sm text-slate-300">
                     <span className={`h-1.5 w-1.5 rounded-full ${canViewPremium ? "bg-emerald-300" : "bg-cyan-300/70"}`} />
                     {item}
                   </div>

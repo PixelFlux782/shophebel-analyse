@@ -250,35 +250,35 @@ export function VisualOverlay({
   }
 
   return (
-    <article className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_30px_90px_-62px_rgba(15,23,42,0.38)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
+    <article className="overflow-hidden rounded-[1rem] border border-slate-200 bg-white shadow-[0_30px_90px_-66px_rgba(15,23,42,0.42)]">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-[#fbfaf7] px-4 py-3 text-slate-950">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visuelle Analyse</p>
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Visuelle Analyse</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-bold">{title}</h3>
-            <span className="rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-200">
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
               {planLabel(resolvedPlan, target)}
             </span>
-            <span className="rounded-full border border-cyan-300/20 bg-cyan-300/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-cyan-100">
-              {intelligenceNotes.length} Issues
+            <span className="rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+              {intelligenceNotes.length} Befunde
             </span>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {displayHotspots.length > 0 ? (
-            <button type="button" onClick={() => setShowHotspots((current) => !current)} className="rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-bold text-slate-100 transition hover:border-cyan-300/60">
+            <button type="button" onClick={() => setShowHotspots((current) => !current)} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-slate-400">
               {showHotspots ? "Marker aus" : "Marker ein"}
             </button>
           ) : null}
           {allNotes.length > 0 ? (
-            <button type="button" onClick={() => setShowHintCards((current) => !current)} className="rounded-full border border-white/10 bg-white/8 px-3 py-2 text-xs font-bold text-slate-100 transition hover:border-cyan-300/60">
-              {showHintCards ? "Hinweise aus" : "Hinweise ein"}
+            <button type="button" onClick={() => setShowHintCards((current) => !current)} className="rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 transition hover:border-slate-400">
+              {showHintCards ? "Legende aus" : "Legende ein"}
             </button>
           ) : null}
           {!imageFailed && resolvedPlan !== "free" ? (
-            <button type="button" onClick={() => setIsLightboxOpen(true)} className="rounded-full border border-cyan-300/60 bg-cyan-300 px-3 py-2 text-xs font-bold text-slate-950 transition hover:bg-cyan-200">
-              Fullscreen
+            <button type="button" onClick={() => setIsLightboxOpen(true)} className="rounded-full border border-slate-950 bg-slate-950 px-3 py-2 text-xs font-bold text-white transition hover:bg-slate-800">
+              Vollansicht
             </button>
           ) : null}
         </div>
@@ -304,9 +304,9 @@ export function VisualOverlay({
         ))}
       </div>
 
-      <div className={`grid gap-0 ${showHintCards && allNotes.length > 0 ? "xl:grid-cols-[minmax(0,1fr)_24rem]" : ""}`}>
-        <div className="relative border-b border-slate-200 bg-slate-100 xl:border-b-0 xl:border-r">
-          <div className="max-h-[clamp(34rem,72vh,58rem)] overflow-auto">
+      <div className="grid gap-0">
+        <div className="relative border-b border-slate-200 bg-slate-100">
+          <div className="max-h-[clamp(36rem,78vh,64rem)] overflow-auto">
             {!imageFailed ? (
               <div className="relative min-h-[18rem] w-full">
                 <img
@@ -380,14 +380,14 @@ export function VisualOverlay({
         </div>
 
         {showHintCards && allNotes.length > 0 ? (
-          <aside className="max-h-[42rem] overflow-y-auto bg-white p-4">
+          <aside className="bg-white p-4">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Insight Cards</p>
-              <span className="rounded-full bg-slate-950 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-white">
-                {activeHotspotId ? "Focus" : "Live"}
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">Marker-Legende</p>
+              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-600">
+                {activeHotspotId ? "Fokus" : "Übersicht"}
               </span>
             </div>
-            <div className="mt-3 grid gap-3">
+            <div className="mt-3 grid gap-3 lg:grid-cols-2">
               {filteredNotes.map((note, index) => {
                 const hotspotId = note.hotspotId ?? note.id;
                 const meta = getNoteMeta(note);
@@ -403,7 +403,7 @@ export function VisualOverlay({
                     onClick={() => {
                       if (hotspotId && !note.locked) focusHotspot(hotspotId, "note");
                     }}
-                    className={`rounded-[1.1rem] border p-4 transition ${
+                    className={`rounded-[0.85rem] border p-3 transition ${
                       note.locked
                         ? "border-dashed border-slate-300 bg-slate-50"
                         : isActive
@@ -413,8 +413,8 @@ export function VisualOverlay({
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] ${layerAccentClasses[meta.layer]}`}>
-                          {meta.layer}
+                        <p className={`inline-flex rounded-full border px-2 py-1 text-[10px] font-bold uppercase tracking-[0.12em] ${layerAccentClasses[meta.layer]}`}>
+                          {index + 1}. {meta.layer}
                         </p>
                         <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
                       </div>
@@ -424,11 +424,14 @@ export function VisualOverlay({
                     </div>
                     <p className="mt-3 text-sm leading-6 text-slate-700">{note.text}</p>
                     {!note.locked ? (
-                      <div className="mt-3 grid gap-2 rounded-xl border border-white/70 bg-white/70 p-3 text-xs leading-5 text-slate-700">
-                        {note.problem ? <p><strong className="text-slate-950">Diagnose:</strong> {note.problem}</p> : null}
-                        {(note.businessImpact ?? note.impact) ? <p><strong className="text-slate-950">Business-Relevanz:</strong> {note.businessImpact ?? note.impact}</p> : null}
-                        {(note.action ?? note.recommendation) ? <p><strong className="text-slate-950">Handlung:</strong> {note.action ?? note.recommendation}</p> : null}
-                      </div>
+                      <details className="mt-3 rounded-xl border border-white/70 bg-white/70 px-3 py-2 text-xs leading-5 text-slate-700">
+                        <summary className="cursor-pointer font-bold text-slate-950">Details</summary>
+                        <div className="mt-2 grid gap-2">
+                          {note.problem ? <p><strong>Diagnose:</strong> {note.problem}</p> : null}
+                          {(note.businessImpact ?? note.impact) ? <p><strong>Business-Relevanz:</strong> {note.businessImpact ?? note.impact}</p> : null}
+                          {(note.action ?? note.recommendation) ? <p><strong>Handlung:</strong> {note.action ?? note.recommendation}</p> : null}
+                        </div>
+                      </details>
                     ) : (
                       <p className="mt-3 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700">
                         {note.unlockLabel ?? "Unlock deeper intelligence"}

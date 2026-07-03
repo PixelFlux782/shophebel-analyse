@@ -435,13 +435,13 @@ export function VisualAuditSection({
   const screenshotDiagnostic = buildScreenshotDiagnostic(result, plan, analysisId);
 
   return (
-    <section className="rounded-[2rem] border border-white/70 bg-white/95 p-5 shadow-[0_28px_90px_-58px_rgba(15,23,42,0.35)] sm:p-7">
+    <section className="rounded-[1.15rem] border border-slate-200 bg-white p-5 shadow-[0_30px_100px_-68px_rgba(15,23,42,0.42)] sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
-          <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">
+          <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">
             Visuelle Website-Analyse
           </p>
-          <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
+          <h2 className="mt-2 text-3xl font-semibold tracking-tight text-slate-950">
             {isPremium
               ? "Hier sieht man sofort, wo die Seite Vertrauen und Anfragen verliert."
               : isFree
@@ -456,12 +456,12 @@ export function VisualAuditSection({
                 : "Die Vollanalyse zeigt alle zentralen Marker, Ebenenfilter und eine große Detailansicht. Premium ergänzt die strategische Priorisierung."}
           </p>
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700">
+        <div className="rounded-full border border-slate-200 bg-[#fbfaf7] px-4 py-2 text-sm font-semibold text-slate-700">
           Bewertung: Kritisch / Wichtig / Chance
         </div>
       </div>
 
-      <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,0.9fr)]">
+      <div className="mt-7 grid gap-5 xl:grid-cols-[minmax(0,1.75fr)_minmax(20rem,0.85fr)]">
         <div className="space-y-5">
           {desktopImage && result.visualMap ? (
             <VisualOverlay
@@ -489,35 +489,52 @@ export function VisualAuditSection({
           ) : null}
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
+        <div className="rounded-[1rem] border border-slate-200 bg-[#fbfaf7] p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                Befundübersicht
+              </p>
+              <h3 className="mt-1 text-lg font-semibold text-slate-950">
+                Wichtigste Marker
+              </h3>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-600">
+              {visibleProblems.length} sichtbar
+            </span>
+          </div>
+          <div className="mt-4 grid gap-2">
           {visibleProblems.map((problem, index) => (
             <article
               key={`${problem.category}-${problem.title}`}
-              className={`rounded-2xl border p-4 ${toneClasses[problem.tone]}`}
+              className={`rounded-[0.85rem] border p-3 ${toneClasses[problem.tone]}`}
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] opacity-70">
                     {problem.category}
                   </p>
-                  <h3 className="mt-2 text-lg font-bold">{index + 1}. {problem.title}</h3>
+                  <h3 className="mt-1 text-base font-bold">{index + 1}. {problem.title}</h3>
                 </div>
                 <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${toneBadgeClasses[problem.tone]}`}>
                   {problem.tone}
                 </span>
               </div>
-              <p className="mt-3 text-sm leading-7 opacity-90">{problem.text}</p>
+              <p className="mt-3 text-sm leading-6 opacity-90">{problem.text}</p>
               {isPremium ? (
-                <div className="mt-3 grid gap-2 rounded-xl border border-white/50 bg-white/45 p-3 text-sm leading-6">
+                <details className="mt-3 rounded-xl border border-white/50 bg-white/45 px-3 py-2 text-sm leading-6">
+                  <summary className="cursor-pointer font-bold">Beratungshinweis</summary>
+                  <div className="mt-2 grid gap-2">
                   <p><strong>Was bedeutet das konkret?</strong> {problem.text}</p>
                   <p><strong>Warum kostet das Anfragen/Käufe?</strong> {problemImpact(problem)}</p>
                   <p><strong>Empfohlene Änderung:</strong> {problemRecommendation(problem)}</p>
-                </div>
+                  </div>
+                </details>
               ) : null}
             </article>
           ))}
           {!isPremium ? (
-            <article className="rounded-2xl border border-cyan-200 bg-cyan-50 p-4 text-cyan-950">
+            <article className="mt-3 rounded-[0.85rem] border border-slate-200 bg-white p-4 text-slate-950">
               <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
                 {isFree ? "Vollständige visuelle Analyse" : "Strategische Premium-Ebene"}
               </p>
@@ -532,13 +549,13 @@ export function VisualAuditSection({
             </article>
           ) : null}
           {hiddenProblems.length ? (
-            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-950 md:col-span-2 xl:col-span-1">
+            <details className="mt-3 rounded-[0.85rem] border border-slate-200 bg-white p-4 text-slate-950">
               <summary className="cursor-pointer text-sm font-bold">
                 Weitere Befunde anzeigen
               </summary>
               <div className="mt-4 grid gap-3">
                 {hiddenProblems.map((problem) => (
-                  <article key={`${problem.category}-${problem.title}`} className="rounded-xl border border-slate-200 bg-white p-4">
+                  <article key={`${problem.category}-${problem.title}`} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
@@ -556,6 +573,7 @@ export function VisualAuditSection({
               </div>
             </details>
           ) : null}
+          </div>
         </div>
       </div>
 

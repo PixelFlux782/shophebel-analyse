@@ -46,7 +46,7 @@ function createReport(): PremiumReport {
 }
 
 describe("PremiumReportSection", () => {
-  it("rendert den schlanken Premium-Bericht mit KI-Beratung und PDF-Link", () => {
+  it("rendert den Premium-Bericht als eigene Produktbuehne mit KI-Beratung und PDF-Link", () => {
     const markup = renderToStaticMarkup(
       React.createElement(PremiumReportSection, {
         report: createReport(),
@@ -56,15 +56,15 @@ describe("PremiumReportSection", () => {
 
     expect(markup).toContain("Premium freigeschaltet");
     expect(markup).toContain("Premium-Bericht inkl. KI-Beratung");
-    expect(markup).toContain("Vollstaendige visuelle Analyse");
-    expect(markup).toContain("KI-Premiumbericht");
-    expect(markup).toContain("PDF herunterladen");
+    expect(markup).toContain("wichtigste 3 Hebel");
+    expect(markup).toContain("PDF-Bericht");
+    expect(markup).toContain("PDF-Bericht herunterladen");
     expect(markup).toContain('href="/api/premium-report/analysis-123/pdf"');
-    expect(markup).toContain("Kurzueberblick");
+    expect(markup).toContain("Kurz");
     expect(markup).toContain("Conversion-Hypothese");
     expect(markup).toContain("KI-Einordnung");
-    expect(markup).toContain("Was bedeutet das konkret?");
-    expect(markup).toContain("Nächste sinnvolle Schritte");
+    expect(markup).toContain("Wichtigste 3 Hebel");
+    expect(markup).toContain("7-Tage-Fahrplan und PDF");
     expect(markup).not.toContain("Top-Umsatzbremsen");
     expect(markup).not.toContain("Priorisierter Massnahmenplan");
     expect(markup).not.toContain("Executive Summary");

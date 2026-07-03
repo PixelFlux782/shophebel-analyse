@@ -1,6 +1,5 @@
-import { AnalysisResult } from "@/types/analysis";
-
 import { ScoreCard } from "@/components/results/score-card";
+import { AnalysisResult } from "@/types/analysis";
 
 interface ScoreGridProps {
   result: AnalysisResult;
@@ -12,46 +11,57 @@ export function ScoreGrid({ result }: ScoreGridProps) {
   const mobileUxScore = Math.round((categories.performance.score + categories.design.score) / 2);
 
   return (
-    <div className="relative w-full">
-      {/* Subtiler Hintergrund-Glow für das gesamte Grid */}
-      <div className="absolute inset-0 bg-cyan-500/5 blur-[100px] rounded-full -z-10 pointer-events-none" />
-      
-      <section className="grid w-full items-stretch gap-4 sm:gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 relative z-10">
+    <div className="w-full">
+      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+            Kategorieprofil
+          </p>
+          <h3 className="mt-1 text-xl font-semibold tracking-tight text-slate-950">
+            Score-Ebenen im Überblick
+          </h3>
+        </div>
+        <p className="max-w-xl text-sm leading-6 text-slate-500">
+          Die Karten zeigen die Analysebereiche kompakt, damit Detailbefunde nicht mit der Hauptdiagnose konkurrieren.
+        </p>
+      </div>
+
+      <section className="grid w-full items-stretch gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <ScoreCard
-        title="Vertrauen"
-        score={categories.trust.score}
-        description={categories.trust.summary}
-      />
-      <ScoreCard
-        title="Klarheit"
-        score={clarityScore}
-        description="Wie schnell Angebot, Nutzen und nächster Schritt verstanden werden."
-      />
-      <ScoreCard
-        title="Mobile UX"
-        score={mobileUxScore}
-        description="Wie gut die Seite auf kleinen Screens wirkt und führt."
-      />
-      <ScoreCard
-        title="Button"
-        score={categories.conversion.score}
-        description="Wie klar Besucher zur nächsten Handlung geführt werden."
-      />
-      <ScoreCard
-        title="Design"
-        score={categories.design.score}
-        description={categories.design.summary}
-      />
-      <ScoreCard
-        title="Ladegefühl"
-        score={categories.performance.score}
-        description="Wie schnell und stabil sich die Seite im Check anfühlt."
-      />
-      <ScoreCard
-        title="AI-Sichtbarkeit"
-        score={categories.aiVisibility.score}
-        description={categories.aiVisibility.summary}
-      />
+          title="Vertrauen"
+          score={categories.trust.score}
+          description={categories.trust.summary}
+        />
+        <ScoreCard
+          title="Klarheit"
+          score={clarityScore}
+          description="Wie schnell Angebot, Nutzen und nächster Schritt verstanden werden."
+        />
+        <ScoreCard
+          title="Mobile UX"
+          score={mobileUxScore}
+          description="Wie gut die Seite auf kleinen Screens wirkt und führt."
+        />
+        <ScoreCard
+          title="Button"
+          score={categories.conversion.score}
+          description="Wie klar Besucher zur nächsten Handlung geführt werden."
+        />
+        <ScoreCard
+          title="Design"
+          score={categories.design.score}
+          description={categories.design.summary}
+        />
+        <ScoreCard
+          title="Ladegefühl"
+          score={categories.performance.score}
+          description="Wie schnell und stabil sich die Seite im Check anfühlt."
+        />
+        <ScoreCard
+          title="KI-Sichtbarkeit"
+          score={categories.aiVisibility.score}
+          description={categories.aiVisibility.summary}
+        />
       </section>
     </div>
   );

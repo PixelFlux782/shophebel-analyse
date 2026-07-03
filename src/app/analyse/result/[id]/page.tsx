@@ -143,10 +143,12 @@ export default async function AnalyseResultPage({
       : fallbackOpportunities(analysis);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 text-slate-300">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950" />
+    <div className="relative min-h-screen overflow-hidden bg-[#f5f2ec] text-slate-800">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[linear-gradient(180deg,_#fdfbf7_0%,_#f5f2ec_70%,_rgba(245,242,236,0)_100%)]" />
+      <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-slate-200/70 sm:left-8" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-slate-200/70 sm:right-8" />
 
-      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <MissionResultHero
           analysisId={result.id}
           result={analysis}
@@ -158,8 +160,8 @@ export default async function AnalyseResultPage({
 
         {!canViewFull ? (
           <>
-            <section className="mt-8">
-              <div className="rounded-[1.9rem] border border-white/70 bg-white/90 p-7 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
+            <section className="mt-7">
+              <div className="rounded-[1.2rem] border border-slate-200 bg-white p-6 shadow-[0_22px_80px_-58px_rgba(15,23,42,0.35)] sm:p-7">
                 <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                   Kurzueberblick
                 </p>
@@ -184,11 +186,11 @@ export default async function AnalyseResultPage({
               </div>
             </section>
 
-            <section className="mt-8">
+            <section className="mt-7">
               <VisualAuditSection result={analysis} plan="free" analysisId={result.id} />
             </section>
 
-            <section className="mt-8 rounded-[1.9rem] border border-white/70 bg-white/90 p-7 shadow-[0_24px_80px_-48px_rgba(15,23,42,0.28)]">
+            <section className="mt-7 rounded-[1.2rem] border border-slate-200 bg-white p-6 shadow-[0_22px_80px_-58px_rgba(15,23,42,0.35)] sm:p-7">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Vollanalyse-Vorschau
               </p>
@@ -218,7 +220,7 @@ export default async function AnalyseResultPage({
                 <CheckoutButton
                   analysisId={result.id}
                   label="Vollanalyse fuer 5 EUR freischalten"
-                  className="justify-center bg-slate-950 text-white hover:bg-slate-800"
+                    className="justify-center bg-slate-950 text-white hover:bg-slate-800"
                 />
                 <PremiumReportRequestButton
                   analysisId={result.id}
@@ -257,9 +259,12 @@ export default async function AnalyseResultPage({
               />
             </section>
 
-            <details className="mt-10 rounded-[2rem] border border-white/10 bg-white/95 p-5 text-slate-950 shadow-[0_28px_90px_-58px_rgba(15,23,42,0.35)] sm:p-7">
-              <summary className="cursor-pointer text-xl font-bold tracking-tight">
-                Detailanalyse und weitere Befunde anzeigen
+            <details className="mt-10 rounded-[1.2rem] border border-slate-200 bg-white/88 p-5 text-slate-950 shadow-[0_24px_90px_-66px_rgba(15,23,42,0.4)] backdrop-blur sm:p-6">
+              <summary className="cursor-pointer list-none text-lg font-semibold tracking-tight marker:hidden">
+                <span className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <span>Detailanalyse und weitere Befunde anzeigen</span>
+                  <span className="text-sm font-medium text-slate-500">Kategorie-Score, Befunde, Empfehlungen und technische Hinweise</span>
+                </span>
               </summary>
               <div className="mt-7 space-y-8">
                 <ScoreGrid result={analysis} />
@@ -288,7 +293,7 @@ export default async function AnalyseResultPage({
         <section className="mb-16 mt-10 flex justify-end">
           <Link
             href="/analyse"
-            className="rounded-2xl border border-white/10 bg-slate-900 px-6 py-4 text-sm font-semibold text-white shadow-lg backdrop-blur-md transition-all hover:border-cyan-500/50 hover:bg-slate-800"
+            className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-950 shadow-[0_18px_60px_-44px_rgba(15,23,42,0.45)] transition hover:border-slate-300 hover:bg-slate-50"
           >
             Neue Analyse starten
           </Link>

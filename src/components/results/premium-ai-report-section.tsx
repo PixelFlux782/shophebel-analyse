@@ -253,17 +253,17 @@ export function PremiumAiReportSection({
   }
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-cyan-200/70 bg-[linear-gradient(135deg,_#f0fdfa_0%,_#ffffff_45%,_#eef2ff_100%)] text-slate-950 shadow-[0_36px_140px_-70px_rgba(15,23,42,0.55)]">
-      <div className="border-b border-cyan-200/70 bg-slate-950 px-5 py-6 text-white sm:px-7 lg:px-8">
+    <section className="overflow-hidden rounded-[1rem] border border-slate-200 bg-white text-slate-950 shadow-[0_20px_80px_-62px_rgba(15,23,42,0.45)]">
+      <div className="border-b border-slate-200 bg-white px-5 py-5 sm:px-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-3xl">
-            <p className="inline-flex rounded-full border border-cyan-300/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.18em] text-cyan-100">
+            <p className="inline-flex rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-slate-600">
               KI-Beratung
             </p>
-            <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
+            <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
               KI-Einordnung
             </h2>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-slate-200">
+            <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
               Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und konkreten Textideen.
             </p>
           </div>
@@ -273,7 +273,7 @@ export function PremiumAiReportSection({
               type="button"
               onClick={generateReport}
               disabled={state === "loading"}
-              className="inline-flex w-full items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 text-base font-extrabold text-slate-950 shadow-[0_20px_60px_-28px_rgba(34,211,238,0.9)] transition hover:-translate-y-0.5 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto"
+              className="inline-flex w-full items-center justify-center rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               {state === "loading" ? "KI-Beratung wird erstellt ..." : "KI-Einordnung erzeugen"}
             </button>
@@ -281,7 +281,7 @@ export function PremiumAiReportSection({
         </div>
       </div>
 
-      <div className="p-5 sm:p-7 lg:p-8">
+      <div className="bg-slate-50/70 p-5 sm:p-6">
         {state === "idle" && !report ? (
           <div className="rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
             <h3 className="text-xl font-bold text-slate-950">Bereit zur Erstellung</h3>
