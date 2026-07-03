@@ -77,9 +77,9 @@ function buildHotspotNotes(
       priority: priorityFromSeverity(severity),
       problem: hotspot.description,
       businessImpact: isCritical
-        ? "Diese Zone liegt im Entscheidungsfluss und kann Vertrauen, Orientierung oder den naechsten Klick abbremsen."
-        : "Der Bereich kann klarer fuehren und die Aufmerksamkeit staerker auf den naechsten sinnvollen Schritt lenken.",
-      action: suggestion?.actionSteps?.[0] ?? "Elemente in diesem Bereich klarer priorisieren, visuelle Konkurrenz reduzieren und den naechsten Schritt eindeutiger machen.",
+        ? "Diese Zone liegt im Entscheidungsfluss und kann Vertrauen, Orientierung oder den nächsten Klick abbremsen."
+        : "Der Bereich kann klarer führen und die Aufmerksamkeit stärker auf den nächsten sinnvollen Schritt lenken.",
+      action: suggestion?.actionSteps?.[0] ?? "Elemente in diesem Bereich klarer priorisieren, visuelle Konkurrenz reduzieren und den nächsten Schritt eindeutiger machen.",
       unlockLabel: index > 1 ? "Weitere Detailtiefe in der Vollanalyse" : undefined,
     };
   });
@@ -103,8 +103,8 @@ function lockedNotes(plan: VisualPlan): ScreenshotLightboxNote[] {
 
   return [
     {
-      title: "Full Visual Audit",
-      text: "Alle erkannten visuellen Reibungspunkte mit vollstaendiger Diagnose und konkreter Priorisierung.",
+      title: "Vollständige visuelle Analyse",
+      text: "Alle erkannten visuellen Reibungspunkte mit vollständiger Diagnose und konkreter Priorisierung.",
       layer: "UX",
       severity: "important",
       locked: true,
@@ -112,7 +112,7 @@ function lockedNotes(plan: VisualPlan): ScreenshotLightboxNote[] {
     },
     {
       title: "Attention Flow",
-      text: "Wie der Blick vom ersten Eindruck zum naechsten Klick gefuehrt wird und wo Aufmerksamkeit verloren geht.",
+      text: "Wie der Blick vom ersten Eindruck zum nächsten Klick geführt wird und wo Aufmerksamkeit verloren geht.",
       layer: "Conversion",
       severity: "important",
       locked: true,
@@ -139,8 +139,8 @@ function lockedNotes(plan: VisualPlan): ScreenshotLightboxNote[] {
 
 function planLabel(plan: VisualPlan, target: VisualHotspotTarget) {
   if (plan === "free") return "Free Preview";
-  if (plan === "full") return target === "viewport" ? "Desktop / Full" : "Full Page / Full";
-  return target === "viewport" ? "Desktop / Premium" : "Full Page / Premium";
+  if (plan === "full") return target === "viewport" ? "Desktop / Vollanalyse" : "Gesamtansicht / Vollanalyse";
+  return target === "viewport" ? "Desktop / Premium" : "Gesamtansicht / Premium";
 }
 
 export function VisualOverlay({
@@ -253,7 +253,7 @@ export function VisualOverlay({
     <article className="overflow-hidden rounded-[1.35rem] border border-slate-200 bg-white shadow-[0_30px_90px_-62px_rgba(15,23,42,0.38)]">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-950 px-4 py-3 text-white">
         <div className="min-w-0">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visual Intelligence</p>
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visuelle Analyse</p>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <h3 className="text-sm font-bold">{title}</h3>
             <span className="rounded-full border border-white/10 bg-white/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-200">

@@ -72,15 +72,15 @@ export const mockPremiumReportProvider: PremiumReportProvider = {
     const url = payload.analysis?.url ?? "die analysierte Seite";
 
     return JSON.stringify({
-      executiveSummary: `Die Analyse zeigt fuer ${url} klare Ansatzpunkte, um Orientierung, Vertrauen und Kaufbereitschaft zu verbessern.`,
+      executiveSummary: `Die Analyse zeigt für ${url} klare Ansatzpunkte, um Orientierung, Vertrauen und Kaufbereitschaft zu verbessern.`,
       mainDiagnosis: "Die Seite braucht vor allem klarere Priorisierung: Besucher sollen schneller verstehen, warum sie bleiben und was sie als Naechstes tun sollen.",
       scoreExplanation: `Der Gesamtscore von ${overallScore} zeigt, dass bereits Grundlagen vorhanden sind, aber zentrale Conversion- und Vertrauenselemente noch nicht stark genug arbeiten.`,
       topIssues: [
         {
-          title: fallbackText(firstBlocker?.title, "Unklarer naechster Schritt"),
+          title: fallbackText(firstBlocker?.title, "Unklarer nächster Schritt"),
           whyItMatters: fallbackText(
             firstBlocker?.description,
-            "Wenn der naechste Schritt nicht sofort erkennbar ist, verlieren Besucher leichter die Orientierung.",
+            "Wenn der nächste Schritt nicht sofort erkennbar ist, verlieren Besucher leichter die Orientierung.",
           ),
           evidence: firstBlocker?.evidence?.length
             ? firstBlocker.evidence
@@ -144,7 +144,7 @@ export const mockPremiumReportProvider: PremiumReportProvider = {
           : ["Kundenbewertungen im sichtbaren Bereich", "Klare Kontaktmoeglichkeit", "Sichere Zahlungs- und Versandhinweise"],
       },
       disclaimer:
-        "Diese Premiumanalyse basiert ausschliesslich auf den bereitgestellten Shophebel-Analyse-Fakten und ist keine Garantie fuer Umsatzsteigerungen.",
+        "Diese Premiumanalyse basiert ausschließlich auf den bereitgestellten Shophebel-Analyse-Fakten und ist keine Garantie für Umsatzsteigerungen.",
     });
   },
 };

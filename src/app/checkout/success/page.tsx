@@ -64,8 +64,8 @@ export default async function CheckoutSuccessPage({
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-slate-600">
           {isFull
-            ? "Die Vollanalyse wird freigeschaltet. Du kannst direkt zur Analyse zurueckkehren und alle Detailbereiche ansehen."
-            : "Der Premium-Report wird freigeschaltet. Du kannst direkt zur Analyse zurueckkehren und den Report ansehen."}
+            ? "Die Vollanalyse wird freigeschaltet. Du kannst direkt zur Analyse zurückkehren und alle Detailbereiche ansehen."
+            : "Der Premium-Report wird freigeschaltet. Du kannst direkt zur Analyse zurückkehren und den Report ansehen."}
         </p>
 
         {resultHref ? (
@@ -74,8 +74,8 @@ export default async function CheckoutSuccessPage({
           <div className="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-left text-sm leading-7 text-amber-900">
             <p className="font-semibold">Analyse-ID fehlt</p>
             <p className="mt-1">
-              Die Zahlung war erfolgreich, aber der Link enthaelt keine
-              Analyse-ID. Oeffne deine Analyse erneut oder kontaktiere uns,
+              Die Zahlung war erfolgreich, aber der Link enthält keine
+              Analyse-ID. Öffne deine Analyse erneut oder kontaktiere uns,
               falls die Freischaltung nicht sichtbar ist.
             </p>
             <Link

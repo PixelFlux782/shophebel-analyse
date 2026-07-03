@@ -44,7 +44,7 @@ export function runTrustChecks(html: string, context: CheckContext): CheckResult
       category: "trust",
       status: "success",
       title: "Die Seite wird sicher geladen",
-      description: "Besucher sehen eine verschluesselte Verbindung. Das wirkt vertrauter und professioneller.",
+      description: "Besucher sehen eine verschlüsselte Verbindung. Das wirkt vertrauter und professioneller.",
       priority: "low",
     });
   } else {

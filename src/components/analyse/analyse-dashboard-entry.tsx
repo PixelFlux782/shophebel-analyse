@@ -56,7 +56,7 @@ const analysisStages = [
 
 const intelligencePanels = [
   {
-    title: "Visual Audit",
+    title: "Visuelle Analyse",
     metric: "Hierarchy map",
     finding: "Hero, CTA density and first-screen clarity are being mapped.",
     accent: "bg-sky-300",
@@ -277,7 +277,7 @@ export function AnalyseDashboardEntry({
               Website Analysis Operating System
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400 sm:text-base">
-              Live-Erfassung fuer visuelle Hierarchie, Conversion-Reibung, Trust, Mobile UX und AI Visibility.
+              Live-Erfassung für visuelle Hierarchie, Anfrage-Reibung, Vertrauen, Mobile UX und KI-Sichtbarkeit.
             </p>
           </div>
 

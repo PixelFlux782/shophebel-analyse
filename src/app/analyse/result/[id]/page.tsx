@@ -126,7 +126,7 @@ export default async function AnalyseResultPage({
                 {[
                   "Vollstaendige Findings",
                   "Kategorie-Breakdowns",
-                  "Visual Audit",
+                  "Visuelle Analyse",
                   "Konkrete KI- und Umsatzhebel",
                   "Maßnahmen",
                   "AI Visibility",

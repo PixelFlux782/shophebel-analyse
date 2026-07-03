@@ -271,7 +271,7 @@ function buildQuickImplementationPlan(result: AnalysisResult, blockers: PremiumB
       days: "Tag 7",
       focus: "Kontrolle und Nachmessung",
       actions: [
-        "Analyse erneut ausführen und Score, Button-Sichtbarkeit sowie neue Reibungspunkte vergleichen.",
+        "Analyse erneut ausführen und Bewertung, Button-Sichtbarkeit sowie neue Reibungspunkte vergleichen.",
         "Die nächsten zwei Maßnahmen nach Wirkung und Aufwand priorisieren.",
       ],
     },
@@ -340,7 +340,7 @@ function buildPremiumVisualAuditNotes(result: AnalysisResult) {
   if (!result.screenshots?.viewport && !result.screenshots?.fullPage && !result.screenshots?.mobile) {
     return [{
       area: "Visuelle Vorschau",
-      note: "Fuer diese Analyse war keine visuelle Vorschau verfuegbar. Der Premium-Report nutzt deshalb Struktur, Inhalte, Checks und erkannte Signale.",
+      note: "Für diese Analyse war keine visuelle Vorschau verfügbar. Der Premium-Report nutzt deshalb Struktur, Inhalte, Checks und erkannte Signale.",
     }];
   }
 
@@ -350,13 +350,13 @@ function buildPremiumVisualAuditNotes(result: AnalysisResult) {
       "Screenshot-/Hero-Eindruck",
       /(hero|startbereich|klarheit|botschaft|angebot|h1|ueberschrift|überschrift)/i,
       "Der erste sichtbare Eindruck muss Nutzen, Zielgruppe und Angebot schneller zusammenbringen.",
-      "Hero-Botschaft, Hauptnutzen und primaeren Button als klare erste Blickachse ordnen.",
+      "Hero-Botschaft, Hauptnutzen und primären Button als klare erste Blickachse ordnen.",
     ),
     visualNoteFromFinding(
       result,
-      "Above-the-fold Klarheit",
+      "Klarheit im sichtbaren Startbereich",
       /(above|fold|cta|button|naechster|nächster|anfrage|kauf|conversion)/i,
-      "Der naechste Schritt ist im sichtbaren Startbereich noch nicht stark genug priorisiert.",
+      "Der nächste Schritt ist im sichtbaren Startbereich noch nicht stark genug priorisiert.",
       "Den wichtigsten CTA ohne Scrollen sichtbar machen und sprachlich eindeutig formulieren.",
     ),
     visualNoteFromFinding(
@@ -364,30 +364,30 @@ function buildPremiumVisualAuditNotes(result: AnalysisResult) {
       "CTA-Sichtbarkeit",
       /(cta|button|handlungsaufforderung|kontakt|formular|anfrage|checkout|kaufen)/i,
       "Die Handlungsaufforderung muss sich visuell klarer gegen Navigation, Text und Bilder behaupten.",
-      "Nur einen primaeren CTA visuell fuehren und nach zentralen Nutzenargumenten wiederholen.",
+      "Nur einen primären Button visuell führen und nach zentralen Nutzenargumenten wiederholen.",
     ),
     visualNoteFromFinding(
       result,
       "Vertrauenssignale",
       /(trust|vertrauen|bewertung|referenz|siegel|impressum|datenschutz|kontakt|zahlung)/i,
-      "Vor der Entscheidung fehlen frueh sichtbare Signale, die Sicherheit und Seriositaet geben.",
-      "Bewertungen, Referenzen, Kontaktmoeglichkeiten oder Sicherheitshinweise frueher sichtbar platzieren.",
+      "Vor der Entscheidung fehlen früh sichtbare Signale, die Sicherheit und Seriosität geben.",
+      "Bewertungen, Referenzen, Kontaktmöglichkeiten oder Sicherheitshinweise früher sichtbar platzieren.",
     ),
     visualNoteFromFinding(
       result,
       "Mobile Lesbarkeit",
       /(mobile|viewport|lesbarkeit|performance|lade|ux)/i,
       result.screenshots.mobile
-        ? "Die mobile Ansicht sollte besonders auf Lesbarkeit, Reihenfolge und Button-Erreichbarkeit geprueft werden."
-        : "Es lag keine mobile Vorschau vor; die mobile Darstellung sollte als eigenes Risiko manuell gegengeprueft werden.",
-      "Mobile Schriftgroessen, Abstaende und CTA-Positionen mit dem ersten Smartphone-Viewport priorisieren.",
+        ? "Die mobile Ansicht sollte besonders auf Lesbarkeit, Reihenfolge und Button-Erreichbarkeit geprüft werden."
+        : "Es lag keine mobile Vorschau vor; die mobile Darstellung sollte als eigenes Risiko manuell gegengeprüft werden.",
+      "Mobile Schriftgrößen, Abstände und Button-Positionen mit dem ersten Smartphone-Viewport priorisieren.",
     ),
     visualNoteFromFinding(
       result,
-      "Visuelle Fuehrung",
+      "Visuelle Führung",
       /(design|layout|blick|struktur|bild|abstand|hierarchie|content)/i,
-      "Bilder, Ueberschriften und Abstaende sollten den Blick konsequenter zum naechsten sinnvollen Schritt fuehren.",
-      "Wichtige Inhalte groesser und frueher zeigen, Nebeninformationen optisch zuruecknehmen.",
+      "Bilder, Überschriften und Abstände sollten den Blick konsequenter zum nächsten sinnvollen Schritt führen.",
+      "Wichtige Inhalte größer und früher zeigen, Nebeninformationen optisch zurücknehmen.",
     ),
   ];
 
@@ -459,7 +459,7 @@ function buildOpportunityRoadmap(opportunities?: AnalysisOpportunity[]): Premium
 
   return {
     title: "Priorisierter Maßnahmenplan",
-    summary: "Dieser Plan übersetzt die stärksten Analyse-Potenziale in empfohlene Umsetzungspfade, Service-Pakete und nächste Umsetzungsschritte.",
+    summary: "Dieser Fahrplan übersetzt die stärksten Analyse-Potenziale in empfohlene Umsetzungspfade, Service-Pakete und nächste Umsetzungsschritte.",
     items,
   };
 }

@@ -114,7 +114,7 @@ export default async function AdminPremiumReportPage({
                 </p>
               </div>
               <span className="rounded-full border border-cyan-300/30 bg-cyan-400/10 px-4 py-2 text-sm font-bold text-cyan-100">
-                Status: {statusLabel}
+                Einschätzung: {statusLabel}
               </span>
             </div>
             <div className="mt-5 flex flex-wrap gap-3">
@@ -151,7 +151,7 @@ export default async function AdminPremiumReportPage({
             </p>
 
             <label className="mt-5 block text-sm font-bold" htmlFor="executiveComment">
-              Executive Comment
+              Management-Kommentar
             </label>
             <textarea
               id="executiveComment"

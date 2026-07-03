@@ -32,7 +32,7 @@ describe("buildAnalysisOpportunities", () => {
 
     expect(opportunities[0]).toMatchObject({
       sourceType: "revenueBlocker",
-      suggestedModule: "AI Lead Capture",
+      suggestedModule: "Anfrage-Erfassung",
       suggestedService: "Conversion Sprint",
       ctaLabel: "KI-Modul anfragen",
       ctaHref: "/#kontakt",
@@ -102,7 +102,7 @@ describe("buildAnalysisOpportunities", () => {
       ],
     })[0];
 
-    expect(["AI Lead Capture", "Conversion Quick Wins"]).toContain(leadOpportunity.suggestedModule);
+    expect(["Anfrage-Erfassung", "Conversion Quick Wins"]).toContain(leadOpportunity.suggestedModule);
     expect(["Conversion Sprint", "Quick Fix Sprint"]).toContain(leadOpportunity.suggestedService);
     expect(quickWinOpportunity).toMatchObject({
       suggestedModule: "Conversion Quick Wins",

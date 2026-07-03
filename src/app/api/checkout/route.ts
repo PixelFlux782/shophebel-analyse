@@ -37,7 +37,7 @@ const checkoutProducts: Record<CheckoutPlan, {
     legacyEnvPriceId: "STRIPE_PRICE_ID",
     amount: 4900,
     name: "Shophebel Premium Analyse",
-    description: "Strategischer Premium-Report mit Priorisierung, Visual Audit Notes und 7-Tage-Plan.",
+    description: "Strategischer Premium-Report mit Priorisierung, visueller Prüfung und 7-Tage-Fahrplan.",
   },
 };
 
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
 
     if (!plan) {
       return NextResponse.json(
-        { error: "Unbekannter Analyse-Plan fuer den Checkout." },
+        { error: "Unbekannter Analyseumfang für den Checkout." },
         { status: 400 },
       );
     }
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     if (!analysis) {
       return NextResponse.json(
-        { error: "Analyse fuer den Checkout nicht gefunden." },
+        { error: "Analyse für den Checkout nicht gefunden." },
         { status: 404 },
       );
     }

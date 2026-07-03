@@ -56,7 +56,7 @@ describe("PremiumReportSection", () => {
 
     expect(markup).toContain("Premium freigeschaltet");
     expect(markup).toContain("Dein Premium-Report");
-    expect(markup).toContain("Priorisierte Umsatzbremsen, 7-Tage-Plan und konkrete Maßnahmen");
+    expect(markup).toContain("Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen");
     expect(markup).toContain("Premium-PDF herunterladen");
     expect(markup).toContain('href="/api/premium-report/analysis-123/pdf"');
     expect(markup).toContain("Management-Zusammenfassung");

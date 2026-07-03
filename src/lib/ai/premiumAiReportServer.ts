@@ -45,7 +45,7 @@ export async function getOrGeneratePremiumAiReport(input: {
   if (!analysisId) {
     throw new PremiumAiReportRequestError(
       "missing_analysis_id",
-      "Keine Analyse-ID fuer die KI-Premiumanalyse uebergeben.",
+      "Keine Analyse-ID für die KI-Premiumanalyse übergeben.",
       400,
     );
   }
@@ -55,7 +55,7 @@ export async function getOrGeneratePremiumAiReport(input: {
   if (!analysis) {
     throw new PremiumAiReportRequestError(
       "analysis_not_found",
-      "Analyse fuer die KI-Premiumanalyse nicht gefunden.",
+      "Analyse für die KI-Premiumanalyse nicht gefunden.",
       404,
     );
   }
@@ -63,7 +63,7 @@ export async function getOrGeneratePremiumAiReport(input: {
   if (!canViewPremiumReport(analysis)) {
     throw new PremiumAiReportRequestError(
       "premium_access_required",
-      "KI-Premiumanalyse ist nur fuer bezahlte Premium-Analysen verfuegbar.",
+      "KI-Premiumanalyse ist nur für bezahlte Premium-Analysen verfügbar.",
       403,
     );
   }

@@ -9,6 +9,11 @@ import {
 } from "@/lib/premium/premiumReportPdf";
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
+import {
+  CUSTOMER_FORBIDDEN_ASCII_UMLAUTS,
+  CUSTOMER_FORBIDDEN_REPORT_LABELS,
+  REPORT_LABELS,
+} from "@/lib/report/reportCopy";
 import type { AnalysisResult } from "@/types/analysis";
 
 function createAnalysis(): StoredAnalysisResult {
@@ -149,13 +154,18 @@ describe("premiumReportPdf consultant notes", () => {
     expect(labels).toContain("Nächster Schritt");
     expect(labels).toContain("Nutzerführung");
     expect(labels).toContain("Visuelle Prüfung");
+    expect(labels).toContain(REPORT_LABELS.websiteIntelligenceScore);
+    expect(labels).toContain(REPORT_LABELS.screenshotIntelligenceConsole);
     expect(labels).toContain("sichtbarer Startbereich");
     expect(labels).toContain("Umsatzbremsen");
     expect(labels).toContain("Maßnahmen");
-    expect(labels).not.toContain("Executive Summary");
-    expect(labels).not.toContain("Visual Audit Notes");
-    expect(labels).not.toContain("Above the fold");
-    expect(labels).not.toMatch(/N\u00c3|\u00c3\u0192|fuer|naech|Massnahmen|Nutzerfuehrung/);
+    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
+      expect(labels).not.toContain(label);
+    });
+    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
+      expect(labels).not.toContain(term);
+    });
+    expect(labels).not.toMatch(/N\u00c3|\u00c3\u0192/);
   });
 
   it("normalisiert alte premium_reports Texte vor dem PDF-Rendern", () => {
@@ -173,6 +183,10 @@ describe("premiumReportPdf consultant notes", () => {
           {
             title: "Hero-Botschaft schÃƒÂ¤rfen",
             businessImpact: "NÃ¤chster Klick wird klarer.",
+            suggestedModule: "Conversion Quick Wins",
+            suggestedService: "Quick Fix Sprint",
+            implementationEffort: "niedrig",
+            expectedEffect: "Mehr qualifizierte Anfragen.",
             nextStep: "Massnahmen fuer naechste Woche ableiten.",
             priorityScore: 92,
           },
@@ -190,7 +204,46 @@ describe("premiumReportPdf consultant notes", () => {
     expect(renderText).toContain("Nächster Schritt");
     expect(renderText).toContain("Nutzerführung");
     expect(renderText).toContain("Maßnahmen");
-    expect(renderText).not.toMatch(/NÃ|Ãƒ|Nutzerfuehrung|naech|fuer|Massnahmen/);
+    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
+      expect(renderText).not.toContain(label);
+    });
+    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
+      expect(renderText).not.toContain(term);
+    });
+    expect(renderText).not.toMatch(/NÃ|Ãƒ/);
+  });
+
+  it("bereitet PDF-Textdaten ohne bekannte englische Reportlabels und ASCII-Umlaute auf", () => {
+    const report: PremiumReport = {
+      ...createReport(),
+      premiumSummary: {
+        ...createReport().premiumSummary,
+        headline: "Executive Snapshot mit Website Intelligence Score",
+        firstFocus: "Bildverstaendnis und Kontaktmoeglichkeiten pruefen.",
+      },
+      visualAuditNotes: [
+        {
+          area: "Visual Audit",
+          note: "Full Page Screenshot Capture fuer naechste Massnahmen.",
+        },
+      ],
+    };
+    const text = getPremiumReportPdfRenderTextData({
+      analysis: createAnalysis(),
+      report,
+      consultantNotes: {
+        executiveComment: "Screenshot Intelligence Console nicht als Rohlabel zeigen.",
+      },
+    }).join(" ");
+
+    expect(text).toContain(REPORT_LABELS.websiteIntelligenceScore);
+    expect(text).toContain("Bildverständnis");
+    CUSTOMER_FORBIDDEN_REPORT_LABELS.forEach((label) => {
+      expect(text).not.toContain(label);
+    });
+    CUSTOMER_FORBIDDEN_ASCII_UMLAUTS.forEach((term) => {
+      expect(text).not.toContain(term);
+    });
   });
 
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {

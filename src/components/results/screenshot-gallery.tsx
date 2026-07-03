@@ -104,7 +104,7 @@ function ScreenshotImage({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-700">
-                        {note.category ?? "Visual Audit"}
+                        {note.category ?? "Visuelle Analyse"}
                       </p>
                       <h3 className="mt-2 text-sm font-bold text-slate-950">{note.title}</h3>
                     </div>

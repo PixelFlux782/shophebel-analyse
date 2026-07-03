@@ -64,18 +64,18 @@ const FORBIDDEN_PROMPT_TERMS = [
 ];
 
 const SYSTEM_PROMPT = [
-  "Du erstellst eine Premiumanalyse fuer Shophebel.",
+  "Du erstellst eine Premiumanalyse für Shophebel.",
   "Sprache: Deutsch.",
   "Zielgruppe: Shop-Betreiber ohne technisches Spezialwissen.",
   "Ton: klar, hilfreich, professionell, konkret.",
   "Die bestehende Shophebel-Analyse ist die einzige Faktenbasis.",
-  "Bewerte keine Webseite frei und fuehre keine eigene Recherche durch.",
+  "Bewerte keine Webseite frei und führe keine eigene Recherche durch.",
   "Erfinde keine Fakten, Kennzahlen, Beobachtungen, Ursachen oder Belege.",
-  "Behaupte nichts ueber Dinge, die nicht im Input stehen.",
-  "Gib keine Garantien fuer Umsatzsteigerung oder wirtschaftliche Ergebnisse.",
+  "Behaupte nichts über Dinge, die nicht im Input stehen.",
+  "Gib keine Garantien für Umsatzsteigerung oder wirtschaftliche Ergebnisse.",
   "Nutze keine Screenshots, Rohdaten, Markup, Zahlungsdaten oder interne Zusatzdaten.",
-  "Deine Aufgabe: erklaeren, priorisieren und die Analyse in konkrete naechste Schritte uebersetzen.",
-  "Antworte ausschliesslich als valides JSON im geforderten Schema.",
+  "Deine Aufgabe: erklären, priorisieren und die Analyse in konkrete nächste Schritte übersetzen.",
+  "Antworte ausschließlich als valides JSON im geforderten Schema.",
 ].join("\n");
 
 function limitText(value: unknown, maxLength = MAX_PROMPT_TEXT_LENGTH): string | undefined {
@@ -144,7 +144,7 @@ function mapScores(scores: PremiumReportInput["scores"]): PremiumReportInput["sc
     compactObject({
       category: limitText(score.category, 80) ?? "Kategorie",
       score: limitNumber(score.score),
-      label: limitText(score.label, 100) ?? "Score",
+      label: limitText(score.label, 100) ?? "Bewertung",
       summary: limitText(score.summary),
       evidence: mapEvidence(score.evidence),
     }),

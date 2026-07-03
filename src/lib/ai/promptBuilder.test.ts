@@ -133,8 +133,8 @@ describe("promptBuilder", () => {
     expect(prompt).toContain("einzige Faktenbasis");
     expect(prompt).toContain("Bewerte keine Webseite frei");
     expect(prompt).toContain("Erfinde keine Fakten");
-    expect(prompt).toContain("Behaupte nichts ueber Dinge, die nicht im Input stehen");
-    expect(prompt).toContain("keine Garantien fuer Umsatzsteigerung");
+    expect(prompt).toContain("Behaupte nichts über Dinge, die nicht im Input stehen");
+    expect(prompt).toContain("keine Garantien für Umsatzsteigerung");
     expect(prompt).toContain("Sprache: Deutsch");
     expect(prompt).toContain("Shop-Betreiber ohne technisches Spezialwissen");
   });

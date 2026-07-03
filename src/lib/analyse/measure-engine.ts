@@ -136,7 +136,7 @@ const templatesByProblem: Record<string, MeasureTemplate> = {
     effort: "niedrig",
     impact: "mittel",
   },
-  Bildverstaendnis: {
+  Bildverständnis: {
     category: "Klarheit",
     title: "Bilder beschreibbar machen",
     description:

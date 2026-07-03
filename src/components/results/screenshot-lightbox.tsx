@@ -204,13 +204,13 @@ export function ScreenshotLightbox({
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={`${currentImage.title} Intelligence View`}
+      aria-label={`${currentImage.title} Detailansicht`}
       className="fixed inset-0 z-50 bg-slate-950 text-white"
     >
       <div className="flex h-full min-h-0 flex-col">
         <header className="z-50 flex min-h-16 flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-slate-950/96 px-4 py-3 backdrop-blur-xl sm:px-5">
           <div className="min-w-0">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visual Intelligence</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-cyan-200">Visuelle Analyse</p>
             <p className="mt-1 truncate text-sm text-slate-300">{currentImage.title}</p>
           </div>
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">

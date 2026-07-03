@@ -10,6 +10,7 @@ import {
   normalizeConsultantNotes,
 } from "@/lib/premium/consultantNotes";
 import { normalizeGermanText, polishPremiumText } from "@/lib/premium/premiumCopy";
+import { REPORT_LABELS } from "@/lib/report/reportCopy";
 
 type PremiumReportPdfInput = {
   analysis: StoredAnalysisResult;
@@ -76,20 +77,20 @@ const LAYOUT = {
 
 const MIN_SCREENSHOT_BUFFER_LENGTH = 1000;
 const VISUAL_PREVIEW_EMBED_FALLBACK =
-  "Die visuelle Vorschau wurde erfasst, konnte aber fuer diesen PDF-Export nicht eingebettet werden.";
+  "Die visuelle Vorschau wurde erfasst, konnte aber für diesen PDF-Export nicht eingebettet werden.";
 
 export function getPremiumReportPdfStaticLabels() {
   return [
     "Dein Premium-Report",
     "Management-Zusammenfassung",
     "Top-Umsatzbremsen",
-    "Priorisierter Maßnahmenplan",
+    REPORT_LABELS.measuresPlan,
     "Conversion-Hypothese",
-    "7-Tage-Plan",
+    REPORT_LABELS.sevenDayPlan,
     "Priorisierte Maßnahmen",
     "Visuelle Prüfung",
-    "Website Intelligence Score",
-    "Screenshot Intelligence Console",
+    REPORT_LABELS.websiteIntelligenceScore,
+    REPORT_LABELS.screenshotIntelligenceConsole,
     "Strategische Premium-Ebene",
     "sichtbarer Startbereich",
     "Übersicht",
@@ -222,7 +223,6 @@ function drawSectionHeader(doc: PDFKit.PDFDocument, title: string, eyebrow?: str
     doc.font("Helvetica-Bold").fontSize(8).fillColor(COLORS.cyan700).text(normalizeGermanText(eyebrow).toUpperCase(), x, doc.y, {
       width,
       lineGap: 1.5,
-      characterSpacing: 0.7,
     });
     doc.moveDown(0.35);
   }
@@ -295,7 +295,7 @@ function writeCard(
 
 function scoreStatus(score: unknown) {
   if (typeof score !== "number" || !Number.isFinite(score)) {
-    return { label: "Status offen", tone: "slate" as BoxTone };
+    return { label: "Einschätzung offen", tone: "slate" as BoxTone };
   }
 
   if (score >= 80) {
@@ -329,7 +329,7 @@ function subscoreRows(analysis: StoredAnalysisResult) {
     ["Vertrauen", categories.trust.score],
     ["Design", categories.design.score],
     ["Mobile UX", categories.performance.score],
-    ["AI-Sichtbarkeit", categories.aiVisibility.score],
+    ["KI-Sichtbarkeit", categories.aiVisibility.score],
     ["SEO", categories.seo.score],
   ] as const;
 }
@@ -580,10 +580,10 @@ async function fetchPdfImage(src: string, label: string): Promise<PdfImageAsset 
 async function resolveVisualPreviewAsset(analysis: StoredAnalysisResult) {
   const screenshots = analysis.analysis.screenshots;
   const candidates = [
-    { src: screenshots?.viewport, label: "Desktop Screenshot" },
-    { src: screenshots?.fullPage, label: "Full Page Screenshot" },
-    { src: screenshots?.mobile, label: "Mobile Screenshot" },
-    { src: screenshots?.hero, label: "Hero Screenshot" },
+    { src: screenshots?.viewport, label: REPORT_LABELS.desktopScreenshot },
+    { src: screenshots?.fullPage, label: REPORT_LABELS.fullPageScreenshot },
+    { src: screenshots?.mobile, label: REPORT_LABELS.mobileScreenshot },
+    { src: screenshots?.hero, label: REPORT_LABELS.heroScreenshot },
   ];
   let attemptedScreenshot = null as { src: string; label: string } | null;
 
@@ -600,7 +600,7 @@ async function resolveVisualPreviewAsset(analysis: StoredAnalysisResult) {
 }
 
 function writeScoreDashboard(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
-  drawSectionHeader(doc, "Website Intelligence Score", "Executive Snapshot");
+  drawSectionHeader(doc, REPORT_LABELS.websiteIntelligenceScore, REPORT_LABELS.executiveSnapshot);
   const width = pageWidth(doc);
   const x = doc.page.margins.left;
   const y = doc.y;
@@ -614,9 +614,8 @@ function writeScoreDashboard(doc: PDFKit.PDFDocument, analysis: StoredAnalysisRe
 
   ensureSpace(doc, height + 18);
   doc.rect(x, y, leftWidth, height).fillAndStroke(COLORS.slate950, COLORS.slate950);
-  doc.font("Helvetica-Bold").fontSize(9).fillColor("#67e8f9").text("INTELLIGENCE SCORE", x + 16, y + 18, {
+  doc.font("Helvetica-Bold").fontSize(9).fillColor("#67e8f9").text("ANALYSEWERT", x + 16, y + 18, {
     width: leftWidth - 32,
-    characterSpacing: 0.8,
   });
   doc.font("Helvetica-Bold").fontSize(42).fillColor(COLORS.white).text(typeof score === "number" ? String(score) : "n/a", x + 16, y + 52, {
     width: leftWidth - 32,
@@ -654,7 +653,7 @@ function writeVisualPreviewPage(
   visualPreview: VisualPreviewAsset,
 ) {
   doc.addPage();
-  drawSectionHeader(doc, "Screenshot Intelligence Console", "Visual Audit");
+  drawSectionHeader(doc, REPORT_LABELS.screenshotIntelligenceConsole, REPORT_LABELS.visualAudit);
   const width = pageWidth(doc);
   const x = doc.page.margins.left;
 
@@ -665,10 +664,10 @@ function writeVisualPreviewPage(
     writeCard(doc, {
       title: visualLabel,
       tone: "cyan",
-      label: "Capture",
+      label: REPORT_LABELS.capture,
       minHeight: 68,
       body: [
-        "Diese Vorschau dokumentiert den sichtbaren Website-Eindruck des Analyse-Laufs und dient als Grundlage fuer die markierten Umsatzbremsen.",
+        "Diese Vorschau dokumentiert den sichtbaren Website-Eindruck des Analyse-Laufs und dient als Grundlage für die markierten Umsatzbremsen.",
       ],
     });
 
@@ -710,16 +709,16 @@ function writeVisualPreviewPage(
   }
 
   writeCard(doc, {
-    title: "Visual Capture nicht verfuegbar",
+    title: "Visuelle Ansicht nicht verfügbar",
     tone: "amber",
-    label: "Fallback",
+    label: "Hinweis",
     minHeight: 150,
     body: [
-      "Visual Capture war in diesem Lauf nicht verfuegbar. Der strategische Report basiert auf strukturellen, semantischen und conversion-relevanten Signalen.",
-      "Fuer vollstaendige Visual Intelligence bitte die Analyse neu ausfuehren, damit Desktop- und Mobile-Screenshots gespeichert werden.",
+      "Die visuelle Ansicht war in diesem Lauf nicht verfügbar. Der strategische Report basiert auf strukturellen, semantischen und anfragebezogenen Signalen.",
+      "Für eine vollständige visuelle Analyse bitte die Analyse neu ausführen, damit Desktop- und Mobile-Ansichten gespeichert werden.",
       analysis.analysis.metadata?.screenshotError
         ? `Technischer Hinweis: ${analysis.analysis.metadata.screenshotError}`
-        : "Dieser Hinweis betrifft nur die visuelle Vorschau; Score, Umsatzbremsen und Strategie-Layer bleiben auswertbar.",
+        : "Dieser Hinweis betrifft nur die visuelle Vorschau; Bewertung, Umsatzbremsen und strategische Einordnung bleiben auswertbar.",
     ],
   });
 }
@@ -777,15 +776,13 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
   doc.rect(x, y, width, 206).fill(COLORS.slate950);
   doc.rect(x, y + 170, width, 36).fill(COLORS.cyan600);
 
-  doc.font("Helvetica-Bold").fontSize(11).fillColor("#67e8f9").text("SHOPHEBEL", x + 24, y + 24, {
-    characterSpacing: 1.2,
-  });
+  doc.font("Helvetica-Bold").fontSize(11).fillColor("#67e8f9").text("SHOPHEBEL", x + 24, y + 24);
   doc.font("Helvetica-Bold").fontSize(28).fillColor(COLORS.white).text("Dein Premium-Report", x + 24, y + 58, {
     width: width - 48,
     lineGap: 2,
   });
   doc.font("Helvetica").fontSize(11.5).fillColor(COLORS.slate200).text(
-    "Priorisierte Umsatzbremsen, 7-Tage-Plan und konkrete Maßnahmen.",
+    "Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen.",
     x + 24,
     y + 104,
     { width: width - 48, lineGap: 3 },
@@ -808,12 +805,12 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
       tone: "slate" as BoxTone,
     },
     {
-      title: "Score",
+      title: REPORT_LABELS.score,
       value: typeof score === "number" ? `${score}/100` : "n/a",
       tone: status.tone,
     },
     {
-      title: "Status",
+      title: REPORT_LABELS.status,
       value: status.label,
       tone: status.tone,
     },
@@ -823,7 +820,10 @@ function writeCover(doc: PDFKit.PDFDocument, analysis: StoredAnalysisResult) {
     const metricX = x + index * (metricWidth + 9);
     const colors = TONE_COLORS[metric.tone];
     doc.rect(metricX, metricY, metricWidth, 68).fillAndStroke(colors.fill, colors.border);
-    doc.font("Helvetica-Bold").fontSize(8).fillColor(COLORS.slate500).text(metric.title.toUpperCase(), metricX + 12, metricY + 13);
+    doc.font("Helvetica-Bold").fontSize(8).fillColor(COLORS.slate500).text(metric.title.toUpperCase(), metricX + 12, metricY + 13, {
+      width: metricWidth - 24,
+      lineBreak: false,
+    });
     doc.font("Helvetica-Bold").fontSize(15).fillColor(colors.title).text(metric.value, metricX + 12, metricY + 32, {
       width: metricWidth - 24,
     });
@@ -969,7 +969,7 @@ async function renderPremiumReportPdfWithFooterStats({
     writeCard(doc, {
       title: textValue(opportunityRoadmap?.title, "Priorisierter Maßnahmenplan"),
       tone: "cyan",
-      label: "Plan",
+      label: REPORT_LABELS.plan,
       minHeight: 82,
       body: [
         textValue(
@@ -982,7 +982,7 @@ async function renderPremiumReportPdfWithFooterStats({
       writeCard(doc, {
         title: `${index + 1}. ${textValue(item.title, "Potenzial")}`,
         tone: index === 0 ? "emerald" : index <= 2 ? "amber" : "slate",
-        label: `Score ${textValue(item.priorityScore, String(index + 1))}`,
+        label: `${REPORT_LABELS.priorityScore} ${textValue(item.priorityScore, String(index + 1))}`,
         body: [
           `Geschäftliche Wirkung: ${textValue(item.businessImpact, "Nicht im gespeicherten Report enthalten.")}`,
           `Empfohlener Umsetzungspfad: ${textValue(item.suggestedModule, "Nicht im gespeicherten Report enthalten.")}`,
@@ -1007,7 +1007,7 @@ async function renderPremiumReportPdfWithFooterStats({
     ],
   });
 
-  drawSectionHeader(doc, "7-Tage-Plan", "Umsetzung");
+  drawSectionHeader(doc, REPORT_LABELS.sevenDayPlan, "Umsetzung");
   if (quickImplementationPlan.length > 0) {
     quickImplementationPlan.forEach((step, index) => {
       writeCard(doc, {
@@ -1021,13 +1021,13 @@ async function renderPremiumReportPdfWithFooterStats({
     });
   } else {
     writeCard(doc, {
-      title: "Kein 7-Tage-Plan gespeichert",
+      title: "Kein 7-Tage-Fahrplan gespeichert",
       tone: "slate",
-      body: ["Der Report enthält aktuell keinen separaten Umsetzungsplan."],
+      body: ["Der Report enthält aktuell keinen separaten Umsetzungsfahrplan."],
     });
   }
 
-  drawSectionHeader(doc, "Priorisierte Maßnahmen", "Plan");
+  drawSectionHeader(doc, "Priorisierte Maßnahmen", REPORT_LABELS.plan);
   if (priorityRoadmap.length > 0) {
     priorityRoadmap.forEach((item, index) => {
       const label = index === 0 ? "Sofort" : index <= 2 ? "Diese Woche" : "Später";
@@ -1047,7 +1047,7 @@ async function renderPremiumReportPdfWithFooterStats({
     });
   }
 
-  drawSectionHeader(doc, "Strategische Premium-Ebene", "Visual Audit");
+  drawSectionHeader(doc, "Strategische Premium-Ebene", REPORT_LABELS.visualAudit);
   if (visualAuditNotes.length > 0) {
     visualAuditNotes.forEach((note) => {
       writeCard(doc, {

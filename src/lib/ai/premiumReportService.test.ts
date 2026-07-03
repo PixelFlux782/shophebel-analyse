@@ -158,7 +158,7 @@ describe("premiumReportService", () => {
   it("liefert einen Disclaimer", async () => {
     const report = await generatePremiumAiReport(createInput());
 
-    expect(report.disclaimer).toContain("ausschliesslich");
+    expect(report.disclaimer).toContain("ausschließlich");
     expect(report.disclaimer).toContain("keine Garantie");
   });
 

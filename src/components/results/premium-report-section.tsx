@@ -58,7 +58,7 @@ export function PremiumReportSection({
               Dein Premium-Report
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-200">
-              Priorisierte Umsatzbremsen, 7-Tage-Plan und konkrete Maßnahmen.
+              Priorisierte Umsatzbremsen, 7-Tage-Fahrplan und konkrete Maßnahmen.
             </p>
           </div>
           {pdfHref ? (
@@ -119,7 +119,7 @@ export function PremiumReportSection({
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
-                        Potenzial {index + 1} · Score {item.priorityScore}
+                        Potenzial {index + 1} · Prioritätswert {item.priorityScore}
                       </p>
                       <h4 className="mt-2 text-xl font-bold text-slate-950">{text(item.title)}</h4>
                     </div>
@@ -194,7 +194,7 @@ export function PremiumReportSection({
 
         <div className="mt-8 grid gap-5 lg:grid-cols-2">
           <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.5)]">
-            <h3 className="text-xl font-bold text-slate-950">7-Tage-Plan</h3>
+            <h3 className="text-xl font-bold text-slate-950">7-Tage-Fahrplan</h3>
             <div className="mt-4 space-y-4">
               {quickImplementationPlan.map((step) => (
                 <div key={step.days}>

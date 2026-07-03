@@ -31,7 +31,7 @@ export function SuccessRedirect({ resultHref, plan }: SuccessRedirectProps) {
       <div className="inline-flex min-h-12 items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-600">
         <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-cyan-500" />
         {isRedirecting
-          ? "Weiterleitung laeuft..."
+          ? "Weiterleitung läuft..."
           : "Automatische Weiterleitung in wenigen Sekunden"}
       </div>
     </div>

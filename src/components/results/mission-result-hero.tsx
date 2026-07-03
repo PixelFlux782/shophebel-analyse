@@ -93,21 +93,21 @@ function scoreInterpretation(result: AnalysisResult, subscores: Subscore[]) {
 
   if (overall >= 82) {
     return ai < 70
-      ? "Starke Website-Basis, aber AI-readable Struktur limitiert die naechste Sichtbarkeitsebene."
-      : "Starke digitale Basis mit klarer Fuehrung und belastbaren Trust-Signalen.";
+      ? "Starke Website-Basis, aber KI-lesbare Struktur limitiert die nächste Sichtbarkeitsebene."
+      : "Starke digitale Basis mit klarer Führung und belastbaren Vertrauenssignalen.";
   }
 
   if (overall >= 68) {
-    if (conversion < 65) return "Solide Grundlage, aber klare Conversion-Reibung oberhalb des Folds.";
-    if (trust < 65) return "Starke visuelle Basis, aber Trust- und CTA-Klarheit bremsen den ersten Eindruck.";
+    if (conversion < 65) return "Solide Grundlage, aber klare Anfrage-Reibung im sichtbaren Startbereich.";
+    if (trust < 65) return "Starke visuelle Basis, aber Vertrauen und Button-Klarheit bremsen den ersten Eindruck.";
     return `${weakest?.label ?? "Ein Kernbereich"} zieht den Gesamteindruck noch unter Premium-Niveau.`;
   }
 
   if (overall >= 50) {
-    return "Technisch erreichbar, strategisch aber noch nicht vollstaendig verkaufsstark.";
+    return "Technisch erreichbar, strategisch aber noch nicht vollständig verkaufsstark.";
   }
 
-  return "Die Seite sendet noch zu wenige klare Signale fuer Vertrauen, Handlung und maschinenlesbare Relevanz.";
+  return "Die Seite sendet noch zu wenige klare Signale für Vertrauen, Handlung und maschinenlesbare Relevanz.";
 }
 
 function buildSubscores(result: AnalysisResult, canViewFull: boolean): Subscore[] {
@@ -122,12 +122,12 @@ function buildSubscores(result: AnalysisResult, canViewFull: boolean): Subscore[
   const aiVisibility = categoryScore(result, "aiVisibility", Math.round((seo + overall) / 2));
 
   const items: Subscore[] = [
-    { key: "conversion", label: "Conversion", score: conversion, hint: scoreHint(conversion, "CTA path") },
-    { key: "trust", label: "Trust", score: trust, hint: scoreHint(trust, "Trust layer") },
-    { key: "ux", label: "UX Clarity", score: ux, hint: scoreHint(ux, "Hierarchy") },
+    { key: "conversion", label: "Anfrageklarheit", score: conversion, hint: scoreHint(conversion, "Button-Weg") },
+    { key: "trust", label: "Vertrauen", score: trust, hint: scoreHint(trust, "Vertrauensebene") },
+    { key: "ux", label: "UX-Klarheit", score: ux, hint: scoreHint(ux, "Hierarchie") },
     { key: "mobile", label: "Mobile", score: mobile, hint: scoreHint(mobile, "Mobile scan") },
-    { key: "seo", label: "SEO", score: seo, hint: scoreHint(seo, "Search signals") },
-    { key: "aiVisibility", label: "AI Visibility", score: aiVisibility, hint: scoreHint(aiVisibility, "Entity signals") },
+    { key: "seo", label: "SEO", score: seo, hint: scoreHint(seo, "Suchsignale") },
+    { key: "aiVisibility", label: "KI-Sichtbarkeit", score: aiVisibility, hint: scoreHint(aiVisibility, "Entitätssignale") },
   ];
 
   return canViewFull ? items : items.slice(0, 3).map((item, index) => ({ ...item, locked: index > 1 }));
@@ -147,12 +147,12 @@ function normalizeSignal(text: string) {
 function fallbackSignals(subscores: Subscore[]) {
   const weakest = [...subscores].sort((left, right) => left.score - right.score);
   const templates: Record<SubscoreKey, string> = {
-    conversion: "CTA focus competes with visual noise",
-    trust: "Trust signals appear too late",
-    ux: "Hero message lacks immediate business clarity",
-    mobile: "Mobile hierarchy needs compression",
-    seo: "Search intent signals are not fully aligned",
-    aiVisibility: "AI-readable entity structure incomplete",
+    conversion: "Der Button-Fokus konkurriert mit visueller Unruhe",
+    trust: "Vertrauenssignale erscheinen zu spät",
+    ux: "Die Startbotschaft zeigt den Geschäftsnutzen nicht sofort",
+    mobile: "Mobile Hierarchie braucht mehr Verdichtung",
+    seo: "Suchintentionen sind noch nicht vollständig getroffen",
+    aiVisibility: "KI-lesbare Entitätsstruktur ist unvollständig",
   };
 
   return weakest.slice(0, 3).map((item) => templates[item.key]);
@@ -180,10 +180,10 @@ function criticalSignals(result: AnalysisResult, subscores: Subscore[], canViewF
 function businessImpact(subscores: Subscore[]) {
   const low = new Set(subscores.filter((item) => item.score < 70).map((item) => item.key));
   const items = [
-    low.has("conversion") ? "Conversion clarity below optimal range" : "Primary action path readable",
-    low.has("trust") ? "Trust friction detected" : "Trust foundation visible",
-    low.has("mobile") || low.has("ux") ? "Likely attention loss in first viewport" : "Interface hierarchy mostly stable",
-    low.has("aiVisibility") || low.has("seo") ? "AI visibility partially limited" : "Search and AI signals aligned",
+    low.has("conversion") ? "Anfrageklarheit unter dem optimalen Bereich" : "Primärer Handlungsweg lesbar",
+    low.has("trust") ? "Vertrauensreibung erkannt" : "Vertrauensbasis sichtbar",
+    low.has("mobile") || low.has("ux") ? "Wahrscheinlicher Aufmerksamkeitsverlust im ersten Sichtbereich" : "Oberflächenhierarchie weitgehend stabil",
+    low.has("aiVisibility") || low.has("seo") ? "KI-Sichtbarkeit teilweise limitiert" : "Such- und KI-Signale abgestimmt",
   ];
 
   return items.slice(0, 4);
@@ -192,21 +192,21 @@ function businessImpact(subscores: Subscore[]) {
 function lockedLayerCopy(plan: AnalysisPlan) {
   if (plan === "premium") {
     return {
-      title: "Strategic Report unlocked",
-      items: ["Executive Recommendations active", "Consultant report active", "7-day action plan active"],
+      title: "Strategischer Report freigeschaltet",
+      items: ["Priorisierte Empfehlungen aktiv", "Consultant-Report aktiv", "7-Tage-Fahrplan aktiv"],
     };
   }
 
   if (plan === "full") {
     return {
-      title: "Strategic Consultant Layer locked",
-      items: ["Premium Report available", "Executive recommendations", "7-day action plan"],
+      title: "Strategische Beratungsebene gesperrt",
+      items: ["Premium-Report verfügbar", "Priorisierte Empfehlungen", "7-Tage-Fahrplan"],
     };
   }
 
   return {
-    title: "3 deeper intelligence layers locked",
-    items: ["Full Visual Audit available", "Revenue Impact Layer available", "Category breakdowns available"],
+    title: "3 tiefere Analyseebenen gesperrt",
+    items: ["Vollständige visuelle Analyse verfügbar", "Umsatzwirkung verfügbar", "Kategorieauswertung verfügbar"],
   };
 }
 
@@ -256,10 +256,10 @@ export function MissionResultHero({
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cyan-300">
-                Website Intelligence Report
+                Shophebel-Analysebericht
               </p>
               <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-5xl">
-                Website Intelligence Score
+                Shophebel-Analysewert
               </h1>
             </div>
             <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] ${tone.badge}`}>

@@ -12,9 +12,9 @@ describe("CheckoutSuccessPage", () => {
     const markup = renderToStaticMarkup(page);
 
     expect(markup).toContain("Zahlung erfolgreich");
-    expect(markup).toContain("Premium wird freigeschaltet");
-    expect(markup).toContain("Zur Premium-Analyse");
-    expect(markup).toContain('href="/analyse/result/analysis-456"');
+    expect(markup).toContain("Premium-Report wird freigeschaltet");
+    expect(markup).toContain("Zum Premium-Report");
+    expect(markup).toContain('href="/analyse/result/analysis-456?upgrade=premium&amp;success=true"');
     expect(markup).toContain("Automatische Weiterleitung");
   });
 
@@ -25,7 +25,7 @@ describe("CheckoutSuccessPage", () => {
 
     const markup = renderToStaticMarkup(page);
 
-    expect(markup).toContain('href="/analyse/result/legacy-analysis"');
+    expect(markup).toContain('href="/analyse/result/legacy-analysis?upgrade=premium&amp;success=true"');
   });
 
   it("behandelt eine fehlende analysisId sauber", async () => {
@@ -37,6 +37,6 @@ describe("CheckoutSuccessPage", () => {
 
     expect(markup).toContain("Analyse-ID fehlt");
     expect(markup).toContain('href="/analyse"');
-    expect(markup).not.toContain("Zur Premium-Analyse");
+    expect(markup).not.toContain("Zum Premium-Report");
   });
 });

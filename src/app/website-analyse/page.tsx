@@ -223,7 +223,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
           <div>
             <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-300 shadow-2xl backdrop-blur-xl">
               <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.9)]" />
-              Website Intelligence für Wachstumsteams
+              Website-Analyse für Wachstumsteams
             </div>
 
             <h1 className="mt-7 max-w-5xl text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl lg:leading-[0.98]">
@@ -329,7 +329,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
       <section className="px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="mx-auto max-w-7xl">
           <SectionIntro
-            eyebrow="Visual Audit"
+            eyebrow="Visuelle Analyse"
             title="Screenshots machen sichtbar, wo Vertrauen bricht."
             copy="Shophebel betrachtet Seiten nicht als Checkliste, sondern als Entscheidungsoberflaeche. Der visuelle Audit zeigt, welche Elemente den ersten Eindruck tragen - und welche ihn verwischen."
           />
@@ -389,7 +389,7 @@ export default async function WebsiteAnalysePage({ searchParams }: WebsiteAnalys
 
           <div className="border-t border-white/10 bg-slate-950/35 p-6 sm:p-10 lg:border-l lg:border-t-0 lg:p-12">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <p className="text-sm font-semibold text-white">Report Snapshot</p>
+              <p className="text-sm font-semibold text-white">Report-Auszug</p>
               <div className="mt-5 space-y-4">
                 <div>
                   <div className="flex justify-between text-xs font-bold uppercase tracking-[0.18em] text-slate-500">

@@ -87,14 +87,17 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Executive Summary");
+    expect(markup).toContain("Kurzüberblick");
     expect(markup).toContain("Hauptdiagnose");
-    expect(markup).toContain("Score-Erklaerung");
-    expect(markup).toContain("Top Issues");
-    expect(markup).toContain("Massnahmenplan");
+    expect(markup).toContain("Bewertung erklärt");
+    expect(markup).toContain("Wichtigste Probleme");
+    expect(markup).toContain("Maßnahmenplan");
     expect(markup).toContain("Beispiel-Verbesserungen");
     expect(markup).toContain("Gespeicherter KI-Bericht");
-    expect(markup).toContain("Der Hero erklaert Nutzen");
+    expect(markup).toContain("Der Hero erklärt Nutzen");
+    expect(markup).not.toContain("Executive Summary");
+    expect(markup).not.toContain("Top Issues");
+    expect(markup).not.toContain("Massnahmenplan");
     expect(markup).not.toContain("KI-Premiumreport erzeugen");
   });
 
@@ -108,8 +111,9 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("KI-Bericht nicht verfuegbar");
+    expect(markup).toContain("KI-Bericht nicht verfügbar");
     expect(markup).toContain("Der KI-Bericht konnte nicht sicher ausgewertet werden");
+    expect(markup).toContain("später erneut");
     expect(markup).toContain("Erneut versuchen");
   });
 });

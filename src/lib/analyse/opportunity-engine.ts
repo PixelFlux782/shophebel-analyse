@@ -47,8 +47,8 @@ const moduleByCategory: Record<string, string> = {
   sichtbarkeit: "AI Visibility Check",
   cta: "Conversion Quick Wins",
   conversion: "Conversion Quick Wins",
-  lead: "AI Lead Capture",
-  kontakt: "AI Lead Capture",
+  lead: "Anfrage-Erfassung",
+  kontakt: "Anfrage-Erfassung",
   "mobile ux": "Performance & UX Sprint",
   ux: "Performance & UX Sprint",
   design: "Conversion Quick Wins",
@@ -62,7 +62,7 @@ const moduleByCategory: Record<string, string> = {
 };
 
 const serviceByModule: Record<string, string> = {
-  "AI Lead Capture": "Conversion Sprint",
+  "Anfrage-Erfassung": "Conversion Sprint",
   "Trust Booster Modul": "Trust & Proof Sprint",
   "Conversion Quick Wins": "Quick Fix Sprint",
   "AI Visibility Check": "AI Visibility Sprint",
@@ -193,7 +193,7 @@ function moduleFor(category: string, title: string): string {
   }
 
   if (hasKeyword(combined, /lead|kontakt|formular|anfrage|termin|rueckruf|angebot|erstgespraech/)) {
-    return "AI Lead Capture";
+    return "Anfrage-Erfassung";
   }
 
   if (hasKeyword(combined, /vertrauen|trust|proof|sicherheit|garantie|zertifikat|beleg|vertrauensbruch/)) {
@@ -217,11 +217,11 @@ function moduleFor(category: string, title: string): string {
 
 function ctaFor(sourceType: OpportunitySourceType, severity: OpportunitySeverity, suggestedModule: string) {
   if (sourceType === "fallback") {
-    return { ctaLabel: severity === "medium" ? "Roadmap freischalten" : "Diesen Hebel pruefen", ctaHref: "/analyse" };
+    return { ctaLabel: severity === "medium" ? "Roadmap freischalten" : "Diesen Hebel prüfen", ctaHref: "/analyse" };
   }
 
   if (
-    suggestedModule === "AI Lead Capture" ||
+    suggestedModule === "Anfrage-Erfassung" ||
     suggestedModule === "Smart FAQ Assistant" ||
     suggestedModule === "AI Visibility Check" ||
     suggestedModule === "Content Automation"
@@ -231,7 +231,7 @@ function ctaFor(sourceType: OpportunitySourceType, severity: OpportunitySeverity
 
   if (suggestedModule === "Conversion Quick Wins" || suggestedModule === "Performance & UX Sprint") {
     return {
-      ctaLabel: severity === "critical" || severity === "high" ? "Quick Fix starten" : "Diesen Hebel pruefen",
+      ctaLabel: severity === "critical" || severity === "high" ? "Quick Fix starten" : "Diesen Hebel prüfen",
       ctaHref: severity === "critical" || severity === "high" ? "/#kontakt" : "/leistungen",
     };
   }
@@ -244,7 +244,7 @@ function ctaFor(sourceType: OpportunitySourceType, severity: OpportunitySeverity
     return { ctaLabel: "Roadmap freischalten", ctaHref: "/preise" };
   }
 
-  return { ctaLabel: "Diesen Hebel pruefen", ctaHref: "/leistungen" };
+  return { ctaLabel: "Diesen Hebel prüfen", ctaHref: "/leistungen" };
 }
 
 function candidateId(sourceType: OpportunitySourceType, index: number, title: string): string {
@@ -273,20 +273,20 @@ function revenueBlockerCandidates(items: unknown[] = []): SourceCandidate[] {
       title,
       description:
         text(record.action) ??
-        "Diese Stelle sollte in einen klaren naechsten Schritt uebersetzt werden, damit interessierte Besucher nicht kurz vor der Anfrage abbrechen.",
+        "Diese Stelle sollte in einen klaren nächsten Schritt übersetzt werden, damit interessierte Besucher nicht kurz vor der Anfrage abbrechen.",
       category,
       severity,
       businessImpact:
         text(record.whyItCostsCustomers) ??
-        "Unklare Nutzerfuehrung erzeugt verlorene Anfragen, weil die Kaufentscheidung nicht genug Sicherheit bekommt.",
+        "Unklare Nutzerführung erzeugt verlorene Anfragen, weil die Kaufentscheidung nicht genug Sicherheit bekommt.",
       lostRevenueHypothesis:
         "Wenn dieser Hebel greift, finden mehr qualifizierte Besucher den Weg zur Anfrage oder zum Kauf.",
       aiOpportunity:
-        "Ein kleines KI-Modul statt grossem Relaunch kann Botschaft, Trust-Elemente und CTA-Varianten schneller testbar machen.",
+        "Ein kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.",
       suggestedModule,
       suggestedService: serviceByModule[suggestedModule] ?? "Conversion Sprint",
       implementationEffort: effort,
-      expectedEffect: "Mehr Vertrauen, klarere Nutzerfuehrung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
+      expectedEffect: "Mehr Vertrauen, klarere Nutzerführung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
       recurringPotential:
         suggestedModule === "Review & Reputation Flow" ||
         suggestedModule === "AI Visibility Check" ||
@@ -320,7 +320,7 @@ function measureCandidates(items: unknown[] = []): SourceCandidate[] {
         "Aus der Analyse ergibt sich ein kompakter Hebel, der die Kaufentscheidung sichtbarer und leichter macht.",
       category,
       severity,
-      businessImpact: `Dieser Hebel verbessert ${category} genau dort, wo Besucher Vertrauen aufbauen, vergleichen oder den naechsten Schritt suchen.`,
+      businessImpact: `Dieser Hebel verbessert ${category} genau dort, wo Besucher Vertrauen aufbauen, vergleichen oder den nächsten Schritt suchen.`,
       aiOpportunity:
         "KI kann Texte, Reihenfolge und Varianten vorbereiten, sodass aus einer Empfehlung schneller ein wiederkehrender Hebel wird.",
       suggestedModule,
@@ -343,7 +343,7 @@ function measureCandidates(items: unknown[] = []): SourceCandidate[] {
 function findingCandidates(items: unknown[] = []): SourceCandidate[] {
   return items.map((item, index) => {
     const record = asRecord(item);
-    const title = text(record.title) ?? "Analyse-Finding in Business-Hebel uebersetzen";
+    const title = text(record.title) ?? "Analyse-Finding in Business-Hebel übersetzen";
     const category = text(record.category) ?? "Analyse";
     const severity = toSeverity(record.priority ?? record.status, "medium");
     const suggestedModule = moduleFor(category, title);
@@ -353,17 +353,17 @@ function findingCandidates(items: unknown[] = []): SourceCandidate[] {
       title,
       description:
         text(record.description) ??
-        "Dieses Signal sollte als Geschaeftschance behandelt werden, nicht als reine Audit-Notiz.",
+        "Dieses Signal sollte als Geschäftschance behandelt werden, nicht als reine Audit-Notiz.",
       category,
       severity,
       businessImpact:
-        "Das Signal kann verlorene Anfragen verursachen, einen Vertrauensbruch ausloesen oder die Sichtbarkeit in Google und KI-Antwortsystemen begrenzen.",
+        "Das Signal kann verlorene Anfragen verursachen, einen Vertrauensbruch auslösen oder die Sichtbarkeit in Google und KI-Antwortsystemen begrenzen.",
       aiOpportunity:
-        "KI kann daraus konkrete Text-, Struktur- oder FAQ-Varianten ableiten und nach Wirkung auf Kaufentscheidung und Nutzerfuehrung priorisieren.",
+        "KI kann daraus konkrete Text-, Struktur- oder FAQ-Varianten ableiten und nach Wirkung auf Kaufentscheidung und Nutzerführung priorisieren.",
       suggestedModule,
       suggestedService: serviceByModule[suggestedModule] ?? "Quick Fix Sprint",
       implementationEffort: severity === "high" ? "medium" : "low",
-      expectedEffect: "Mehr Verstaendlichkeit und weniger Reibung auf dem Weg zur Anfrage oder zum Kauf.",
+      expectedEffect: "Mehr Verständlichkeit und weniger Reibung auf dem Weg zur Anfrage oder zum Kauf.",
       recurringPotential: suggestedModule === "AI Visibility Check" || suggestedModule === "Content Automation",
       ctaLabel: cta.ctaLabel,
       ctaHref: cta.ctaHref,
@@ -386,7 +386,7 @@ function aiSuggestionCandidates(items: unknown[] = []): SourceCandidate[] {
       title,
       description:
         text(record.summary) ??
-        "Der KI-Vorschlag kann als kleiner Modulbaustein starten und eine groessere Relaunch-Diskussion ersetzen.",
+        "Der KI-Vorschlag kann als kleiner Modulbaustein starten und eine größere Relaunch-Diskussion ersetzen.",
       category,
       severity,
       businessImpact:
@@ -408,42 +408,42 @@ function aiSuggestionCandidates(items: unknown[] = []): SourceCandidate[] {
 
 function fallbackCandidates(overallScore?: number, url?: string): SourceCandidate[] {
   const score = typeof overallScore === "number" ? overallScore : undefined;
-  const target = url ? ` fuer ${url}` : "";
+  const target = url ? ` für ${url}` : "";
 
   return [
     {
-      title: "Top-Hebel fuer mehr Anfragen priorisieren",
+      title: "Top-Hebel für mehr Anfragen priorisieren",
       description: `Die Analyse liefert noch keine eindeutigen Einzelprobleme${target}. Ein strukturierter Opportunity-Check kann die wichtigsten Umsatzhebel sichtbar machen.`,
       category: "Conversion",
       severity: score !== undefined && score < 70 ? "medium" : "low",
       businessImpact:
-        "Ohne klare Priorisierung werden oft kleine Website-Aufgaben erledigt, waehrend echte Anfrage-Hebel liegen bleiben.",
+        "Ohne klare Priorisierung werden oft kleine Website-Aufgaben erledigt, während echte Anfrage-Hebel liegen bleiben.",
       aiOpportunity:
         "KI kann Seitenbotschaft, CTA, Trust-Signale und Kundenfragen zu einem kompakten Chancenbild verdichten.",
       suggestedModule: "Conversion Quick Wins",
       suggestedService: "Premium Roadmap",
       implementationEffort: "low",
-      expectedEffect: "Ein klarer erster Fahrplan fuer Verbesserungen mit geringem Risiko.",
+      expectedEffect: "Ein klarer erster Fahrplan für Verbesserungen mit geringem Risiko.",
       recurringPotential: false,
-      ctaLabel: "Diesen Hebel pruefen",
+      ctaLabel: "Diesen Hebel prüfen",
       ctaHref: "/analyse",
       sourceType: "fallback",
       priorityScore: 58,
     },
     {
-      title: "KI-Sichtbarkeit und Antwortfaehigkeit ausbauen",
+      title: "KI-Sichtbarkeit und Antwortfähigkeit ausbauen",
       description:
-        "Viele Websites beantworten Kundenfragen noch nicht so klar, dass Suchmaschinen und KI-Systeme sie verlaesslich aufgreifen.",
+        "Viele Websites beantworten Kundenfragen noch nicht so klar, dass Suchmaschinen und KI-Systeme sie verlässlich aufgreifen.",
       category: "AI-Sichtbarkeit",
       severity: "medium",
       businessImpact:
         "Wer in Google, lokalen Suchen und KI-Antwortsystemen nicht eindeutig verstanden wird, verliert Nachfrage bevor sie die Website erreicht.",
       aiOpportunity:
-        "KI kann echte Kundenfragen, Leistungsbeschreibungen und lokale Signale in wiederverwendbare Inhaltsmodule uebersetzen.",
+        "KI kann echte Kundenfragen, Leistungsbeschreibungen und lokale Signale in wiederverwendbare Inhaltsmodule übersetzen.",
       suggestedModule: "AI Visibility Check",
       suggestedService: "AI Visibility Sprint",
       implementationEffort: "medium",
-      expectedEffect: "Bessere Auffindbarkeit und klarere Antworten fuer kaufnahe Suchsituationen.",
+      expectedEffect: "Bessere Auffindbarkeit und klarere Antworten für kaufnahe Suchsituationen.",
       recurringPotential: true,
       ctaLabel: "Roadmap freischalten",
       ctaHref: "/preise",

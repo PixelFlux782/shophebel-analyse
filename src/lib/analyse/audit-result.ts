@@ -34,7 +34,7 @@ const STATUS_POINTS: Record<AuditCheckStatus, number | null> = {
 function businessMessage(title: string, status: AuditCheckStatus, message: string) {
   const messages: Partial<Record<string, Partial<Record<AuditCheckStatus, string>>>> = {
     "Suchergebnis-Klarheit": {
-      good: "Seitenname und Kurzbeschreibung wirken für Besucher, Google und KI-Systeme grundsaetzlich klar.",
+      good: "Seitenname und Kurzbeschreibung wirken für Besucher, Google und KI-Systeme grundsätzlich klar.",
       warning:
         "Seitenname oder Kurzbeschreibung könnten klarer zeigen, was du anbietest und warum jemand klicken sollte.",
       critical:
@@ -45,7 +45,7 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       warning: "Die Seite führt Besucher noch nicht klar genug durch die wichtigsten Botschaften.",
       critical: "Die Seite hat keine eindeutige Hauptbotschaft. Besucher verstehen den Kernnutzen dadurch später.",
     },
-    Bildverstaendnis: {
+    Bildverständnis: {
       good: "Die erkannten Bilder sind für Google, KI und Screenreader ausreichend beschrieben.",
       warning: "Einige Bilder erklären sich für Google, KI und Screenreader nicht gut genug.",
       critical: "Viele Bilder bleiben für Google, KI und Screenreader unklar. Dadurch geht Kontext verloren.",
@@ -57,20 +57,20 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       critical: "Die Seite sendet ein Signal, dass sie nicht in Suchergebnissen erscheinen soll.",
     },
     "Mobile Darstellung": {
-      good: "Die Seite ist grundsaetzlich für mobile Darstellung vorbereitet.",
+      good: "Die Seite ist grundsätzlich für mobile Darstellung vorbereitet.",
       critical:
         "Auf kleinen Bildschirmen kann die Seite falsch oder unbequem wirken, weil die mobile Darstellung nicht sauber markiert ist.",
     },
     "Sicheres Laden": {
-      good: "Die Seite wird sicher verschluesselt geladen.",
-      critical: "Die Seite wird nicht sicher verschluesselt geladen. Das kann Vertrauen kosten.",
+      good: "Die Seite wird sicher verschlüsselt geladen.",
+      critical: "Die Seite wird nicht sicher verschlüsselt geladen. Das kann Vertrauen kosten.",
     },
     Ladegefühl: {
       good: "Die Seite reagiert beim ersten Abruf schnell genug.",
-      warning: "Die Seite braucht spuerbar Zeit, bis sie geladen ist. Das kann ungeduldige Besucher kosten.",
+      warning: "Die Seite braucht spürbar Zeit, bis sie geladen ist. Das kann ungeduldige Besucher kosten.",
       critical:
-        "Die Seite laedt sehr langsam. Besucher können abspringen, bevor sie Angebot oder Vertrauen sehen.",
-      not_checked: "Für diesen Lauf liegt keine verlaessliche Messung zum Ladegefühl vor.",
+        "Die Seite lädt sehr langsam. Besucher können abspringen, bevor sie Angebot oder Vertrauen sehen.",
+      not_checked: "Für diesen Lauf liegt keine verlässliche Messung zum Ladegefühl vor.",
     },
     "Stabilitaet beim Laden": {
       not_checked: "Ob sich Elemente beim Laden verschieben, wurde in diesem Lauf nicht als Felddaten gemessen.",
@@ -82,7 +82,7 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
     },
     "Nächster Schritt": {
       good: "Besucher erkennen gut, was sie als Nächstes tun sollen.",
-      warning: "Der nächste Schritt ist sichtbar, könnte aber klarer und oefter geführt werden.",
+      warning: "Der nächste Schritt ist sichtbar, könnte aber klarer und öfter geführt werden.",
       critical: "Besucher erkennen nicht schnell genug, was sie als Nächstes tun sollen.",
     },
     "Einfacher Anfrageweg": {
@@ -91,12 +91,12 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
     },
     "Visuelle Seitenprüfung": {
       good: "Eine echte Seitenansicht wurde erfasst und kann für visuelle Hinweise genutzt werden.",
-      not_checked: "Es gibt in diesem Lauf keine verlaessliche Seitenansicht für visuelle Hinweise.",
+      not_checked: "Es gibt in diesem Lauf keine verlässliche Seitenansicht für visuelle Hinweise.",
     },
     Blickführung: {
-      good: "Überschriften, Buttons und Bilder geben Besuchern grundsaetzlich Orientierung.",
+      good: "Überschriften, Buttons und Bilder geben Besuchern grundsätzlich Orientierung.",
       warning: "Die Seite führt den Blick noch nicht klar genug zu Angebot, Vertrauen und nächstem Schritt.",
-      not_checked: "Die visuelle Blickführung konnte in diesem Lauf nicht verlaesslich geprüft werden.",
+      not_checked: "Die visuelle Blickführung konnte in diesem Lauf nicht verlässlich geprüft werden.",
     },
     "Lesbarkeit und Inhaltstiefe": {
       good: "Die Seite liefert genug Inhalt, um wichtige Fragen zu beantworten.",
@@ -104,7 +104,7 @@ function businessMessage(title: string, status: AuditCheckStatus, message: strin
       critical: "Die Seite wirkt inhaltlich zu dünn. Wichtige Kauf- und Vertrauensfragen bleiben offen.",
     },
     "Verständliche Daten für Google und KI": {
-      good: "Die Website liefert zusaetzliche maschinenlesbare Hinweise. Das hilft bei der Einordnung.",
+      good: "Die Website liefert zusätzliche maschinenlesbare Hinweise. Das hilft bei der Einordnung.",
       warning:
         "Google und KI-Systeme bekommen noch zu wenig klar ausgezeichnete Informationen zu Angebot, Unternehmen oder Fragen.",
     },
@@ -363,7 +363,7 @@ export function buildAuditCategories(input: BuildAuditCategoriesInput): Analysis
       `Gefunden: ${h1Count} H1 und ${h2Count} H2.`,
     ),
     createCheck(
-      "Bildverstaendnis",
+      "Bildverständnis",
       imageCount === 0 ? "unknown" : imagesWithoutAlt === 0 ? "good" : imagesWithoutAlt >= 3 ? "critical" : "warning",
       imageCount === 0
         ? "Es wurden keine Bilder gefunden; Alt-Texte konnten deshalb nicht bewertet werden."
