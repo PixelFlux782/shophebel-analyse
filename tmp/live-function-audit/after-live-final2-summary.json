@@ -1,0 +1,59 @@
+{
+  "id": "dc3161c1-b837-4b44-8ac6-8b0cf2329678",
+  "resultUrl": "https://shophebel-analyse.vercel.app/analyse/result/dc3161c1-b837-4b44-8ac6-8b0cf2329678",
+  "row": {
+    "id": "dc3161c1-b837-4b44-8ac6-8b0cf2329678",
+    "analysis_mode": "rendered",
+    "screenshots": {
+      "mobile": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-cf6ce2b2-9a8e-47f2-9f59-c09e06af5f0f/mobile-1783118449323-f6d854e2-b505-4874-a490-89320533e55e.png",
+      "fullPage": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-cf6ce2b2-9a8e-47f2-9f59-c09e06af5f0f/full-1783118419401-db21074c-625a-4a80-b6fa-e49db82a92f9.png",
+      "viewport": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-cf6ce2b2-9a8e-47f2-9f59-c09e06af5f0f/viewport-1783118413618-ad7d5ff7-e09c-4069-83de-1c8f911ac532.png"
+    },
+    "metadata": {
+      "runtime": "vercel",
+      "renderedModeRequested": true,
+      "screenshotVariantsStored": [
+        "viewport",
+        "fullPage",
+        "mobile"
+      ],
+      "screenshotVariantsAttempted": [
+        "viewport",
+        "fullPage",
+        "mobile"
+      ]
+    },
+    "access_level": "free",
+    "payment_status": "free"
+  },
+  "imgs": [
+    {
+      "src": "https://shophebel-analyse.vercel.app/_next/image?url=%2Fbranding%2Flogo_only_letter.jpeg&w=32&q=75",
+      "alt": "Logo",
+      "w": 32,
+      "h": 21,
+      "complete": true
+    },
+    {
+      "src": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/sign/screenshots/analysis-results/analysis-cf6ce2b2-9a8e-47f2-9f59-c09e06af5f0f/viewport-1783118413618-ad7d5ff7-e09c-4069-83de-1c8f911ac532.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jYjk4MmM2Yi04NGE2LTQ0YjktYmMzYS1lMDdhOWVhOTkyNTAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzY3JlZW5zaG90cy9hbmFseXNpcy1yZXN1bHRzL2FuYWx5c2lzLWNmNmNlMmIyLTlhOGUtNDdmMi05ZjU5LWMwOWUwNmFmNWYwZi92aWV3cG9ydC0xNzgzMTE4NDEzNjE4LWFkN2Q1ZmY3LWUwOWMtNDA2OS04M2RlLTFjOGY5MTFhYzUzMi5wbmciLCJzY29wZSI6ImRvd25sb2FkIiwiaWF0IjoxNzgzMTE4NDU2LCJleHAiOjE3ODMxMjIwNTZ9.i851JIk7fqKHsdk24E1LGiN_vHQ_n97oT_Sy3-MbOgA",
+      "alt": "Desktop-Vorschau der analysierten Seite mit Markierungen",
+      "w": 1365,
+      "h": 900,
+      "complete": true
+    },
+    {
+      "src": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/sign/screenshots/analysis-results/analysis-cf6ce2b2-9a8e-47f2-9f59-c09e06af5f0f/mobile-1783118449323-f6d854e2-b505-4874-a490-89320533e55e.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jYjk4MmM2Yi04NGE2LTQ0YjktYmMzYS1lMDdhOWVhOTkyNTAiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJzY3JlZW5zaG90cy9hbmFseXNpcy1yZXN1bHRzL2FuYWx5c2lzLWNmNmNlMmIyLTlhOGUtNDdmMi05ZjU5LWMwOWUwNmFmNWYwZi9tb2JpbGUtMTc4MzExODQ0OTMyMy1mNmQ4NTRlMi1iNTA1LTQ4NzQtYTQ5MC04OTMyMDUzM2U1NWUucG5nIiwic2NvcGUiOiJkb3dubG9hZCIsImlhdCI6MTc4MzExODQ1NiwiZXhwIjoxNzgzMTIyMDU2fQ.h1Qx4w-Xj5gaAp-bUPUXR1iMde_2Pm7CIsLX9fne3us",
+      "alt": "Mobile Vorschau der analysierten Seite",
+      "w": 0,
+      "h": 0,
+      "complete": false
+    }
+  ],
+  "pdf": {
+    "status": 200,
+    "contentType": "application/pdf",
+    "startsWithPdf": true,
+    "pages": 11,
+    "forbidden": []
+  }
+}

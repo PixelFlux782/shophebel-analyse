@@ -1,0 +1,64 @@
+{
+  "id": "be098c86-11a1-4fe4-b9f6-8fc5cb892f71",
+  "resultUrl": "https://shophebel-analyse.vercel.app/analyse/result/be098c86-11a1-4fe4-b9f6-8fc5cb892f71",
+  "beforePremium": {
+    "id": "be098c86-11a1-4fe4-b9f6-8fc5cb892f71",
+    "analysis_mode": "rendered",
+    "screenshots": {
+      "mobile": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-5c99f6e9-372e-4924-a7b9-f4ce594d4a04/mobile-1783117891876-9a99380c-1058-43f9-8198-2d2a56e45f4f.png",
+      "fullPage": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-5c99f6e9-372e-4924-a7b9-f4ce594d4a04/full-1783117844534-8c07dd9e-7d60-473a-8949-0ae5c635602f.png",
+      "viewport": "https://imlqliuwxxgpkskppydn.supabase.co/storage/v1/object/public/screenshots/analysis-results/analysis-5c99f6e9-372e-4924-a7b9-f4ce594d4a04/viewport-1783117843550-b6badd16-5140-4591-af76-bf22b6d3c407.png"
+    },
+    "metadata": {
+      "runtime": "vercel",
+      "renderedModeRequested": true,
+      "screenshotVariantsStored": [
+        "viewport",
+        "fullPage",
+        "mobile"
+      ],
+      "screenshotVariantsAttempted": [
+        "viewport",
+        "fullPage",
+        "mobile"
+      ]
+    },
+    "access_level": "free",
+    "payment_status": "free",
+    "plan": "free",
+    "product_type": "analysis_teaser",
+    "is_premium": false
+  },
+  "events": [
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/?_rsc=1g8ln",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/?_rsc=18cdf",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/analyse/result/be098c86-11a1-4fe4-b9f6-8fc5cb892f71?_rsc=11ykg",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/?_rsc=lm00v",
+      "text": "net::ERR_ABORTED"
+    }
+  ],
+  "visualText": true,
+  "premiumVisible": true,
+  "mobileOverflow": false,
+  "pdf": {
+    "status": 200,
+    "contentType": "application/pdf",
+    "startsWithPdf": true,
+    "pageCount": 11,
+    "forbiddenLabels": []
+  }
+}

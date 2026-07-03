@@ -1,0 +1,1164 @@
+{
+  "base": "https://shophebel-analyse.vercel.app",
+  "target": "https://www.snocks.com",
+  "events": [
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/?_rsc=1g8ln",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/?_rsc=18cdf",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/analyse/result/133c26b1-ef46-48b2-bf83-ae9d9806ce18?_rsc=11ykg",
+      "text": "net::ERR_ABORTED"
+    },
+    {
+      "type": "requestfailed",
+      "url": "https://shophebel-analyse.vercel.app/analyse?_rsc=8meu6",
+      "text": "net::ERR_ABORTED"
+    }
+  ],
+  "id": "133c26b1-ef46-48b2-bf83-ae9d9806ce18",
+  "resultUrl": "https://shophebel-analyse.vercel.app/analyse/result/133c26b1-ef46-48b2-bf83-ae9d9806ce18",
+  "freeDom": {
+    "text": "SHOPHEBEL\nAnalyse\nLeistungen\nPlattform\nPreise\nWebsite analysieren\nAnalyse abgeschlossensnocks.comKostenlos\n\nANALYSEWERT\n\n96\n/100\nSTARK\n\n03.07.26, 22:22\n\nSTATISCHE ANSICHT GEPRUEFT\n\nSHOPHEBEL REPORT\n\nDiagnose und Top-Hebel fuer diese Seite\n\nStarke digitale Basis mit klarer Fuehrung und belastbaren Vertrauenssignalen.\n\n01\nDie Seite sendet mehrere Hauptbotschaften\n02\nBilder erklären sich nicht gut genug\n\nGeschaeftliche Lesart\n\nPrimaerer Handlungsweg lesbar\nVertrauensbasis sichtbar\nOberflaechenhierarchie weitgehend stabil\nSuch- und KI-Signale abgestimmt\n\n3 tiefere Analyseebenen gesperrt\n\nVollstaendige visuelle Analyse verfuegbar\nUmsatzwirkung verfuegbar\nKategorieauswertung verfuegbar\n5 EUR Vollanalyse\nAnfrageklarheit\n100\nVertrauen\n100\nUX-Klarheit\n100\n\nKURZUEBERBLICK\n\nDas Wichtigste aus dem kostenlosen Teaser\n\nDeine Startseite zeigt bereits eine starke Gesamtbasis und wirkt in mehreren Bereichen überzeugend. Die Seite ist für Auffindbarkeit bereits gut vorbereitet und gibt Besuchern eine solide Orientierung.\n\nHINWEIS\n\nDer Seitenname ist klar genug\n\nDer Seitenname ist vorhanden und wirkt für Suchergebnisse gut nutzbar.\n\nHINWEIS\n\nDie Kurzbeschreibung ist gut vorbereitet\n\nDie Seite hat eine klare Kurzbeschreibung für Suchergebnisse und KI-Systeme.\n\nVISUELLE WEBSITE-ANALYSE\n\nErste visuelle Signale zeigen, wo Aufmerksamkeit und Vertrauen kippen können.\n\nDie kostenlose Vorschau zeigt wenige echte Marker und sperrt tiefere Ebenen bewusst an. Die Vollanalyse öffnet alle visuellen Hinweise.\n\nBewertung: Kritisch / Wichtig / Chance\n\nVISUELLER SEITENÜBERBLICK\n\nVisuelle Ansicht nicht verfügbar\n\nDie Analyse bleibt nutzbar, aber der visuelle Seitenüberblick braucht eine gespeicherte Desktop- oder Mobile-Ansicht.\n\nDiagnose\n\nScreenshot-Erstellung wurde beim Analyse-Lauf nicht abgeschlossen.\n\nFür eine vollständige visuelle Analyse bitte die Analyse neu ausführen.\n\nAnalyse neu ausführen\n\nBEFUNDÜBERSICHT\n\nWichtigste Marker\n2 sichtbar\n\nVERTRAUEN\n\n1. Vertrauen weiter stärken\nChance\n\nVertrauen: die geprüften Signale wirken stabil.\n\nKLARHEIT\n\n2. Klarheit weiter stärken\nChance\n\nAnfragen: die geprüften Signale wirken stabil.\n\nVOLLSTÄNDIGE VISUELLE ANALYSE\n\nAlle Marker und Ebenen für 5 EUR freischalten\n\nDie Vollanalyse zeigt die komplette Screenshot-Auswertung, Blickführung, geschäftliche Wirkung und mobile Reibung.\n\nWeitere Befunde anzeigen\n\nVOLLANALYSE-VORSCHAU\n\nVollanalyse fuer 5 EUR freischalten\n\nVollstaendige Befunde\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nKategorie-Auswertung\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nVisuelle Analyse\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nKonkrete KI- und Umsatzhebel\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nMassnahmen\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nKI-Sichtbarkeit\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nPDF-Export\n\nDieser Bereich ist in der kostenlosen Vorschau gesperrt.\n\nVollanalyse fuer 5 EUR freischalten\nPremium Analyse ansehen\nNeue Analyse starten",
+    "overflow": false,
+    "images": [
+      {
+        "src": "https://shophebel-analyse.vercel.app/_next/image?url=%2Fbranding%2Flogo_only_letter.jpeg&w=32&q=75",
+        "naturalWidth": 32,
+        "naturalHeight": 21,
+        "alt": "Logo"
+      }
+    ]
+  },
+  "rowBeforePremium": {
+    "id": "133c26b1-ef46-48b2-bf83-ae9d9806ce18",
+    "created_at": "2026-07-03T22:22:43.425+00:00",
+    "updated_at": "2026-07-03T22:22:43.425+00:00",
+    "requested_url": "https://www.snocks.com/",
+    "final_url": "https://snocks.com/",
+    "overall_score": 96,
+    "analysis_mode": "static",
+    "is_demo": false,
+    "result": {
+      "url": "https://snocks.com/",
+      "finalUrl": "https://snocks.com/",
+      "findings": [
+        {
+          "title": "Der Seitenname ist klar genug",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Der Seitenname ist vorhanden und wirkt für Suchergebnisse gut nutzbar."
+        },
+        {
+          "title": "Die Kurzbeschreibung ist gut vorbereitet",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Die Seite hat eine klare Kurzbeschreibung für Suchergebnisse und KI-Systeme."
+        },
+        {
+          "title": "Die Seite sendet mehrere Hauptbotschaften",
+          "status": "warning",
+          "category": "seo",
+          "priority": "medium",
+          "description": "Es wurden 2 Hauptüberschriften gefunden. Das kann Angebot und Priorität unklar wirken lassen."
+        },
+        {
+          "title": "Die Inhalte sind in Abschnitte gegliedert",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Die Seite nutzt 15 erkennbare Abschnittsüberschriften."
+        },
+        {
+          "title": "Die Seitensprache ist klar markiert",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Die Sprache der Seite ist für Browser und Systeme markiert (de)."
+        },
+        {
+          "title": "Google erkennt die Hauptversion der Seite",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Die Seite gibt Suchsystemen ein klares Signal, welche Version als Hauptseite gelten soll."
+        },
+        {
+          "title": "Geteilte Links haben einen klaren Titel",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Wenn die Seite geteilt wird, kann ein passender Linktitel angezeigt werden."
+        },
+        {
+          "title": "Geteilte Links haben eine Kurzbeschreibung",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Wenn die Seite geteilt wird, kann eine passende Kurzbeschreibung erscheinen."
+        },
+        {
+          "title": "Bilder vorhanden",
+          "status": "success",
+          "category": "seo",
+          "priority": "low",
+          "description": "Es wurden 325 Bilder auf der Startseite erkannt."
+        },
+        {
+          "title": "Bilder erklären sich nicht gut genug",
+          "status": "warning",
+          "category": "seo",
+          "priority": "medium",
+          "description": "2 Bilder werden für Google, KI und Screenreader nicht ausreichend beschrieben."
+        },
+        {
+          "title": "Die Seite wird sicher geladen",
+          "status": "success",
+          "category": "trust",
+          "priority": "low",
+          "description": "Besucher sehen eine verschlüsselte Verbindung. Das wirkt vertrauter und professioneller."
+        },
+        {
+          "title": "Impressum erkennbar",
+          "status": "success",
+          "category": "trust",
+          "priority": "low",
+          "description": "Besucher finden einen rechtlichen Ansprechpartner. Das staerkt Seriositaet."
+        },
+        {
+          "title": "Datenschutzseite erkennbar",
+          "status": "success",
+          "category": "trust",
+          "priority": "low",
+          "description": "Besucher finden Informationen zum Umgang mit ihren Daten."
+        },
+        {
+          "title": "Kontakt ist erkennbar",
+          "status": "success",
+          "category": "trust",
+          "priority": "low",
+          "description": "Besucher finden einen Weg, Rückfragen zu stellen oder Kontakt aufzunehmen."
+        },
+        {
+          "title": "Direkte Kontaktangabe vorhanden",
+          "status": "success",
+          "category": "trust",
+          "priority": "low",
+          "description": "E-Mail oder Telefon sind direkt erkennbar. Das senkt die Hemmschwelle für Rückfragen."
+        },
+        {
+          "title": "Es gibt nur wenige Vertrauenssignale",
+          "status": "warning",
+          "category": "trust",
+          "priority": "medium",
+          "description": "Einige Hinweise sind sichtbar (versand), aber Besucher bekommen noch zu wenig Sicherheit."
+        },
+        {
+          "title": "CTA-Woerter im Text vorhanden",
+          "status": "success",
+          "category": "conversion",
+          "priority": "low",
+          "description": "Es wurden 4 CTA-Signale im Text erkannt."
+        },
+        {
+          "title": "Mehrere CTA-Elemente vorhanden",
+          "status": "success",
+          "category": "conversion",
+          "priority": "low",
+          "description": "Es wurden 5 klickbare Elemente mit CTA-Charakter gefunden."
+        },
+        {
+          "title": "Wenig Nutzenkommunikation",
+          "status": "warning",
+          "category": "conversion",
+          "priority": "medium",
+          "description": "Die Startseite zeigt kaum klare Nutzen- oder USP-Woerter wie schnell, einfach oder professionell."
+        },
+        {
+          "title": "Social Proof ist sichtbar",
+          "status": "success",
+          "category": "conversion",
+          "priority": "low",
+          "description": "Es wurden Hinweise auf Kunden, Bewertungen oder Erfahrungen erkannt."
+        },
+        {
+          "title": "Preis- oder Angebotsbezug vorhanden",
+          "status": "success",
+          "category": "conversion",
+          "priority": "low",
+          "description": "Die Seite enthält Hinweise auf Preise, Angebote oder kostenlose Leistungen."
+        },
+        {
+          "title": "Ausreichend Textinhalt vorhanden",
+          "status": "success",
+          "category": "ux",
+          "priority": "low",
+          "description": "Die Startseite enthält rund 18719 Woerter und wirkt nicht zu dünn."
+        },
+        {
+          "title": "Headings sind strukturiert",
+          "status": "success",
+          "category": "ux",
+          "priority": "low",
+          "description": "Die Seite nutzt mehrere Überschriftenebenen für Orientierung."
+        },
+        {
+          "title": "Visuelle Elemente vorhanden",
+          "status": "success",
+          "category": "ux",
+          "priority": "low",
+          "description": "Es wurden 325 Bilder erkannt."
+        },
+        {
+          "title": "Interne Navigation ist vorhanden",
+          "status": "success",
+          "category": "ux",
+          "priority": "low",
+          "description": "Es wurden 444 interne Links erkannt."
+        },
+        {
+          "title": "Seite wirkt ausreichend gefuellt",
+          "status": "success",
+          "category": "ux",
+          "priority": "low",
+          "description": "Text, Struktur und visuelle Elemente ergeben zusammen eine solide Basis."
+        }
+      ],
+      "measures": [
+        {
+          "title": "Seitenbotschaft klarer ordnen",
+          "effort": "niedrig",
+          "impact": "mittel",
+          "category": "Klarheit",
+          "priority": 1,
+          "description": "Setze eine klare Hauptbotschaft und ordne die wichtigsten Entscheidungsfragen in gut lesbare Abschnitte.",
+          "sourceProblem": "Klarheit der Seitenbotschaft"
+        },
+        {
+          "title": "Bilder beschreibbar machen",
+          "effort": "mittel",
+          "impact": "mittel",
+          "category": "Klarheit",
+          "priority": 2,
+          "description": "Beschreibe relevante Bilder kurz und konkret, damit Menschen, Google und KI den Bildkontext verstehen.",
+          "sourceProblem": "Bildverständnis"
+        },
+        {
+          "title": "About-Seite sichtbar verlinken",
+          "effort": "mittel",
+          "impact": "mittel",
+          "category": "AI-Sichtbarkeit",
+          "priority": 3,
+          "description": "Erstelle oder verlinke eine Unternehmensseite mit Team, Erfahrung, Standort und Leistungsprofil.",
+          "sourceProblem": "About-Seite"
+        },
+        {
+          "title": "Themenstruktur klarer machen",
+          "effort": "mittel",
+          "impact": "mittel",
+          "category": "AI-Sichtbarkeit",
+          "priority": 4,
+          "description": "Ordne Inhalte in klare Themenabschnitte und benenne Marke, Leistung, Ort und Zielgruppe deutlicher.",
+          "sourceProblem": "Klare Themenstruktur"
+        }
+      ],
+      "metadata": {
+        "runtime": "vercel",
+        "screenshotError": "Die Seite konnte nicht als echte Browseransicht geladen werden: Execution context was destroyed, most likely because of a navigation.",
+        "renderedModeRequested": true,
+        "screenshotErrorSource": "rendered_fallback"
+      },
+      "createdAt": "2026-07-03T22:22:43.404Z",
+      "isPremium": false,
+      "quickWins": [
+        {
+          "text": "Die Seite führt Besucher noch nicht klar genug durch die wichtigsten Botschaften.",
+          "title": "Klarheit der Seitenbotschaft",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Die Seite führt Besucher noch nicht klar genug durch die wichtigsten Botschaften."
+        },
+        {
+          "text": "Einige Bilder erklären sich für Google, KI und Screenreader nicht gut genug.",
+          "title": "Bildverständnis",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Einige Bilder erklären sich für Google, KI und Screenreader nicht gut genug."
+        },
+        {
+          "text": "Keine klare About-/Unternehmensseite erkannt. Das kann Marken- und Expertise-Signale abschwächen.",
+          "title": "About-Seite",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Keine klare About-/Unternehmensseite erkannt. Das kann Marken- und Expertise-Signale abschwächen."
+        },
+        {
+          "text": "Die Themenstruktur ist noch nicht klar genug. KI-Systeme können dein Angebot schwerer einordnen.",
+          "title": "Klare Themenstruktur",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Die Themenstruktur ist noch nicht klar genug. KI-Systeme können dein Angebot schwerer einordnen."
+        }
+      ],
+      "scannedAt": "2026-07-03T22:22:43.404Z",
+      "categories": {
+        "seo": {
+          "label": "Auffindbarkeit",
+          "score": 81,
+          "checks": [
+            {
+              "title": "Suchergebnis-Klarheit",
+              "status": "good",
+              "message": "Seitenname und Kurzbeschreibung wirken für Besucher, Google und KI-Systeme grundsätzlich klar."
+            },
+            {
+              "title": "Klarheit der Seitenbotschaft",
+              "status": "warning",
+              "message": "Die Seite führt Besucher noch nicht klar genug durch die wichtigsten Botschaften."
+            },
+            {
+              "title": "Bildverständnis",
+              "status": "warning",
+              "message": "Einige Bilder erklären sich für Google, KI und Screenreader nicht gut genug."
+            },
+            {
+              "title": "Auffindbarkeit der Hauptseite",
+              "status": "good",
+              "message": "Suchsysteme bekommen ein klares Signal zur Hauptversion der Seite."
+            }
+          ],
+          "summary": "Auffindbarkeit: solide Basis mit 2 Warnhinweisen."
+        },
+        "trust": {
+          "label": "Vertrauen",
+          "score": 100,
+          "checks": [
+            {
+              "title": "Impressum",
+              "status": "good",
+              "message": "Impressum ist erkennbar."
+            },
+            {
+              "title": "Datenschutz",
+              "status": "good",
+              "message": "Datenschutz ist erkennbar."
+            },
+            {
+              "title": "Kontaktvertrauen",
+              "status": "good",
+              "message": "Kontakt ist sichtbar."
+            },
+            {
+              "title": "Vertrauensbelege",
+              "status": "good",
+              "message": "Bewertungen, Siegel oder Zahlungsarten geben Besuchern sichtbare Sicherheit."
+            }
+          ],
+          "summary": "Vertrauen: die geprüften Signale wirken stabil."
+        },
+        "design": {
+          "label": "Design",
+          "score": 100,
+          "checks": [
+            {
+              "title": "Visuelle Seitenprüfung",
+              "status": "not_checked",
+              "message": "Es gibt in diesem Lauf keine verlässliche Seitenansicht für visuelle Hinweise."
+            },
+            {
+              "title": "Blickführung",
+              "status": "not_checked",
+              "message": "Die visuelle Blickführung konnte in diesem Lauf nicht verlässlich geprüft werden."
+            },
+            {
+              "title": "Lesbarkeit und Inhaltstiefe",
+              "status": "good",
+              "message": "Die Seite liefert genug Inhalt, um wichtige Fragen zu beantworten."
+            }
+          ],
+          "summary": "Design: die geprüften Signale wirken stabil."
+        },
+        "conversion": {
+          "label": "Anfragen",
+          "score": 100,
+          "checks": [
+            {
+              "title": "Nächster Schritt",
+              "status": "good",
+              "message": "Besucher erkennen gut, was sie als Nächstes tun sollen."
+            },
+            {
+              "title": "Einfacher Anfrageweg",
+              "status": "good",
+              "message": "Ein Anfrage- oder Kontaktweg ist auf der Seite erkennbar."
+            },
+            {
+              "title": "Angebotsklarheit",
+              "status": "good",
+              "message": "Angebots- oder Leistungsbegriffe sind vorhanden."
+            }
+          ],
+          "summary": "Anfragen: die geprüften Signale wirken stabil."
+        },
+        "performance": {
+          "label": "Ladegefühl",
+          "score": 100,
+          "checks": [
+            {
+              "title": "Mobile Darstellung",
+              "status": "good",
+              "message": "Die Seite ist grundsätzlich für mobile Darstellung vorbereitet."
+            },
+            {
+              "title": "Sicheres Laden",
+              "status": "good",
+              "message": "Die Seite wird sicher verschlüsselt geladen."
+            },
+            {
+              "title": "Ladegefühl",
+              "status": "good",
+              "message": "Die Seite reagiert beim ersten Abruf schnell genug."
+            },
+            {
+              "title": "Stabilitaet beim Laden",
+              "status": "not_checked",
+              "message": "Ob sich Elemente beim Laden verschieben, wurde in diesem Lauf nicht als Felddaten gemessen."
+            }
+          ],
+          "summary": "Ladegefühl: die geprüften Signale wirken stabil."
+        },
+        "aiVisibility": {
+          "label": "KI-Sichtbarkeit",
+          "score": 91,
+          "checks": [
+            {
+              "title": "Verständliche Daten für Google und KI",
+              "status": "good",
+              "message": "Die Website liefert zusätzliche maschinenlesbare Hinweise. Das hilft bei der Einordnung."
+            },
+            {
+              "title": "Klare Unternehmensbeschreibung",
+              "status": "good",
+              "message": "Deine Marke oder dein Unternehmen wird ausreichend klar beschrieben."
+            },
+            {
+              "title": "Produkt-/Serviceverständlichkeit",
+              "status": "good",
+              "message": "Angebotssignale sind erkennbar: produkt, produkte, shop, leistung, service."
+            },
+            {
+              "title": "Kundenfragen als Antworten",
+              "status": "good",
+              "message": "Kundenfragen werden als klare Antworten genutzt. Das hilft Menschen und KI-Systemen."
+            },
+            {
+              "title": "About-Seite",
+              "status": "warning",
+              "message": "Keine klare About-/Unternehmensseite erkannt. Das kann Marken- und Expertise-Signale abschwächen."
+            },
+            {
+              "title": "Lokale Signale",
+              "status": "good",
+              "message": "Lokale Signale sind erkennbar: PLZ, Standortbezug."
+            },
+            {
+              "title": "Regeln für KI-Systeme",
+              "status": "unknown",
+              "message": "Es wurden keine klaren Regeln für KI-Systeme erkannt. Das ist nicht automatisch schlecht, sollte aber bewusst entschieden werden."
+            },
+            {
+              "title": "Kontakt-/Standortdaten",
+              "status": "good",
+              "message": "Kontakt- oder Standortdaten sind erkennbar. Das hilft Nutzern und Systemen bei Vertrauen und Einordnung."
+            },
+            {
+              "title": "Klare Themenstruktur",
+              "status": "warning",
+              "message": "Die Themenstruktur ist noch nicht klar genug. KI-Systeme können dein Angebot schwerer einordnen."
+            }
+          ],
+          "summary": "KI-Sichtbarkeit: solide Basis mit 2 Warnhinweisen."
+        }
+      },
+      "analysisMode": "static",
+      "overallScore": 96,
+      "requestedUrl": "https://www.snocks.com/",
+      "aiSuggestions": [
+        {
+          "id": "suggestion-conversion:wenig nutzenkommunikation",
+          "title": "Handlungsführung auf Conversion ausrichten",
+          "summary": "Eine klare Nutzerführung macht aus Aufmerksamkeit schneller echte Klicks und Anfragen.",
+          "category": "conversion",
+          "actionSteps": [
+            "Den wichtigsten CTA klar priorisieren.",
+            "Nutzenargumente direkt am CTA oder im Hero verankern.",
+            "Ablenkende Elemente reduzieren, damit der nächste Schritt eindeutig bleibt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "conversion:wenig nutzenkommunikation",
+          "linkedFindingTitle": "Wenig Nutzenkommunikation"
+        },
+        {
+          "id": "suggestion-conversion:preis- oder angebotsbezug vorhanden",
+          "title": "Handlungsführung auf Conversion ausrichten",
+          "summary": "Eine klare Nutzerführung macht aus Aufmerksamkeit schneller echte Klicks und Anfragen.",
+          "category": "conversion",
+          "actionSteps": [
+            "Den wichtigsten CTA klar priorisieren.",
+            "Nutzenargumente direkt am CTA oder im Hero verankern.",
+            "Ablenkende Elemente reduzieren, damit der nächste Schritt eindeutig bleibt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "conversion:preis- oder angebotsbezug vorhanden",
+          "linkedFindingTitle": "Preis- oder Angebotsbezug vorhanden"
+        },
+        {
+          "id": "suggestion-seo:die kurzbeschreibung ist gut vorbereitet",
+          "title": "Kurzbeschreibung für Google und KI ergänzen",
+          "summary": "Ergaenze eine klare Kurzbeschreibung, damit Suchende und KI-Systeme den Nutzen deiner Seite schneller verstehen.",
+          "category": "seo",
+          "actionSteps": [
+            "Den Hauptnutzen der Startseite in einem klaren Satz formulieren.",
+            "Angebot, Zielgruppe und wichtigsten Klickgrund konkret benennen.",
+            "Den Text kurz halten, damit er in Suchergebnissen gut wirkt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "seo:die kurzbeschreibung ist gut vorbereitet",
+          "linkedFindingTitle": "Die Kurzbeschreibung ist gut vorbereitet"
+        },
+        {
+          "id": "suggestion-seo:geteilte links haben eine kurzbeschreibung",
+          "title": "Kurzbeschreibung für Google und KI ergänzen",
+          "summary": "Ergaenze eine klare Kurzbeschreibung, damit Suchende und KI-Systeme den Nutzen deiner Seite schneller verstehen.",
+          "category": "seo",
+          "actionSteps": [
+            "Den Hauptnutzen der Startseite in einem klaren Satz formulieren.",
+            "Angebot, Zielgruppe und wichtigsten Klickgrund konkret benennen.",
+            "Den Text kurz halten, damit er in Suchergebnissen gut wirkt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "seo:geteilte links haben eine kurzbeschreibung",
+          "linkedFindingTitle": "Geteilte Links haben eine Kurzbeschreibung"
+        },
+        {
+          "id": "suggestion-conversion:cta-woerter im text vorhanden",
+          "title": "Primären CTA im sichtbaren Bereich platzieren",
+          "summary": "Platziere im Hero einen klaren ersten Handlungsimpuls, damit Nutzer sofort wissen, was der nächste Schritt ist.",
+          "category": "conversion",
+          "actionSteps": [
+            "Einen primären CTA oberhalb des Folds platzieren.",
+            "Eine konkrete Formulierung wie 'Jetzt Analyse starten' oder 'Kostenlos testen' verwenden.",
+            "Farbe und Größe so wählen, dass der CTA klar heraussticht."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "conversion:cta-woerter im text vorhanden",
+          "linkedFindingTitle": "CTA-Woerter im Text vorhanden"
+        },
+        {
+          "id": "suggestion-conversion:mehrere cta-elemente vorhanden",
+          "title": "Primären CTA im sichtbaren Bereich platzieren",
+          "summary": "Platziere im Hero einen klaren ersten Handlungsimpuls, damit Nutzer sofort wissen, was der nächste Schritt ist.",
+          "category": "conversion",
+          "actionSteps": [
+            "Einen primären CTA oberhalb des Folds platzieren.",
+            "Eine konkrete Formulierung wie 'Jetzt Analyse starten' oder 'Kostenlos testen' verwenden.",
+            "Farbe und Größe so wählen, dass der CTA klar heraussticht."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "conversion:mehrere cta-elemente vorhanden",
+          "linkedFindingTitle": "Mehrere CTA-Elemente vorhanden"
+        },
+        {
+          "id": "suggestion-seo:der seitenname ist klar genug",
+          "title": "Seitennamen schärfen",
+          "summary": "Ein klarer Seitenname macht dein Angebot in Suchergebnissen sofort verständlich.",
+          "category": "seo",
+          "actionSteps": [
+            "Zentrale Leistung oder Produktkategorie an den Anfang setzen.",
+            "Markenname nur ergänzen, wenn noch Platz bleibt.",
+            "Kurz, konkret und gut lesbar formulieren."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "seo:der seitenname ist klar genug",
+          "linkedFindingTitle": "Der Seitenname ist klar genug"
+        },
+        {
+          "id": "suggestion-seo:die seite sendet mehrere hauptbotschaften",
+          "title": "Seitenstruktur mit klaren Überschriften ordnen",
+          "summary": "Klare Botschaften und Abschnitte machen die Seite für Besucher, Google und KI leichter erfassbar.",
+          "category": "seo",
+          "actionSteps": [
+            "Eine eindeutige Hauptbotschaft für das wichtigste Versprechen setzen.",
+            "Inhalte in logische, gut benannte Abschnitte gliedern.",
+            "Jede Überschrift so formulieren, dass sie Nutzen oder Thema direkt vermittelt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "seo:die seite sendet mehrere hauptbotschaften",
+          "linkedFindingTitle": "Die Seite sendet mehrere Hauptbotschaften"
+        },
+        {
+          "id": "suggestion-ux:headings sind strukturiert",
+          "title": "Seitenstruktur mit klaren Überschriften ordnen",
+          "summary": "Klare Botschaften und Abschnitte machen die Seite für Besucher, Google und KI leichter erfassbar.",
+          "category": "ux",
+          "actionSteps": [
+            "Eine eindeutige Hauptbotschaft für das wichtigste Versprechen setzen.",
+            "Inhalte in logische, gut benannte Abschnitte gliedern.",
+            "Jede Überschrift so formulieren, dass sie Nutzen oder Thema direkt vermittelt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "ux:headings sind strukturiert",
+          "linkedFindingTitle": "Headings sind strukturiert"
+        },
+        {
+          "id": "suggestion-ux:seite wirkt ausreichend gefuellt",
+          "title": "Seitenstruktur mit klaren Überschriften ordnen",
+          "summary": "Klare Botschaften und Abschnitte machen die Seite für Besucher, Google und KI leichter erfassbar.",
+          "category": "ux",
+          "actionSteps": [
+            "Eine eindeutige Hauptbotschaft für das wichtigste Versprechen setzen.",
+            "Inhalte in logische, gut benannte Abschnitte gliedern.",
+            "Jede Überschrift so formulieren, dass sie Nutzen oder Thema direkt vermittelt."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "ux:seite wirkt ausreichend gefuellt",
+          "linkedFindingTitle": "Seite wirkt ausreichend gefuellt"
+        },
+        {
+          "id": "suggestion-trust:die seite wird sicher geladen",
+          "title": "Vertrauen schneller aufbauen",
+          "summary": "Sichtbare Sicherheitssignale reduzieren Zweifel und helfen Nutzern, schneller zur Interaktion zu kommen.",
+          "category": "trust",
+          "actionSteps": [
+            "Kontakt, Rechtliches und Service gut sichtbar platzieren.",
+            "Sichere Zahlung, Versand und Rueckgabe kompakt kommunizieren.",
+            "Mit Bewertungen oder echten Kundenstimmen soziale Sicherheit erhoehen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:die seite wird sicher geladen",
+          "linkedFindingTitle": "Die Seite wird sicher geladen"
+        },
+        {
+          "id": "suggestion-trust:impressum erkennbar",
+          "title": "Vertrauenslinks sichtbarer machen",
+          "summary": "Rechtliche und kontaktbezogene Links sollten ohne Suchen auffindbar sein, damit die Seite sofort serioeser wirkt.",
+          "category": "trust",
+          "actionSteps": [
+            "Impressum, Datenschutz und Kontakt im Header oder Footer klar verlinken.",
+            "Kontaktmöglichkeiten mit E-Mail oder Telefonnummer sichtbar ergänzen.",
+            "Die Links auf allen wichtigen Seiten konsistent verfügbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:impressum erkennbar",
+          "linkedFindingTitle": "Impressum erkennbar"
+        },
+        {
+          "id": "suggestion-trust:datenschutzseite erkennbar",
+          "title": "Vertrauenslinks sichtbarer machen",
+          "summary": "Rechtliche und kontaktbezogene Links sollten ohne Suchen auffindbar sein, damit die Seite sofort serioeser wirkt.",
+          "category": "trust",
+          "actionSteps": [
+            "Impressum, Datenschutz und Kontakt im Header oder Footer klar verlinken.",
+            "Kontaktmöglichkeiten mit E-Mail oder Telefonnummer sichtbar ergänzen.",
+            "Die Links auf allen wichtigen Seiten konsistent verfügbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:datenschutzseite erkennbar",
+          "linkedFindingTitle": "Datenschutzseite erkennbar"
+        },
+        {
+          "id": "suggestion-trust:kontakt ist erkennbar",
+          "title": "Vertrauenslinks sichtbarer machen",
+          "summary": "Rechtliche und kontaktbezogene Links sollten ohne Suchen auffindbar sein, damit die Seite sofort serioeser wirkt.",
+          "category": "trust",
+          "actionSteps": [
+            "Impressum, Datenschutz und Kontakt im Header oder Footer klar verlinken.",
+            "Kontaktmöglichkeiten mit E-Mail oder Telefonnummer sichtbar ergänzen.",
+            "Die Links auf allen wichtigen Seiten konsistent verfügbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:kontakt ist erkennbar",
+          "linkedFindingTitle": "Kontakt ist erkennbar"
+        },
+        {
+          "id": "suggestion-trust:direkte kontaktangabe vorhanden",
+          "title": "Vertrauenslinks sichtbarer machen",
+          "summary": "Rechtliche und kontaktbezogene Links sollten ohne Suchen auffindbar sein, damit die Seite sofort serioeser wirkt.",
+          "category": "trust",
+          "actionSteps": [
+            "Impressum, Datenschutz und Kontakt im Header oder Footer klar verlinken.",
+            "Kontaktmöglichkeiten mit E-Mail oder Telefonnummer sichtbar ergänzen.",
+            "Die Links auf allen wichtigen Seiten konsistent verfügbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:direkte kontaktangabe vorhanden",
+          "linkedFindingTitle": "Direkte Kontaktangabe vorhanden"
+        },
+        {
+          "id": "suggestion-trust:es gibt nur wenige vertrauenssignale",
+          "title": "Vertrauenssignale sichtbar ausbauen",
+          "summary": "Zeige Sicherheit und Service nicht nur implizit, sondern direkt sichtbar in der kaufnahen Zone deiner Startseite.",
+          "category": "trust",
+          "actionSteps": [
+            "Bewertungen, Siegel oder Kundenzitate im sichtbaren Bereich ergänzen.",
+            "Versand, Rueckgabe und sichere Zahlung in kurzen Trust-Bullets hervorheben.",
+            "Kundenservice oder Erreichbarkeit als konkretes Signal sichtbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "trust:es gibt nur wenige vertrauenssignale",
+          "linkedFindingTitle": "Es gibt nur wenige Vertrauenssignale"
+        },
+        {
+          "id": "suggestion-conversion:social proof ist sichtbar",
+          "title": "Vertrauenssignale sichtbar ausbauen",
+          "summary": "Zeige Sicherheit und Service nicht nur implizit, sondern direkt sichtbar in der kaufnahen Zone deiner Startseite.",
+          "category": "conversion",
+          "actionSteps": [
+            "Bewertungen, Siegel oder Kundenzitate im sichtbaren Bereich ergänzen.",
+            "Versand, Rueckgabe und sichere Zahlung in kurzen Trust-Bullets hervorheben.",
+            "Kundenservice oder Erreichbarkeit als konkretes Signal sichtbar machen."
+          ],
+          "expectedImpact": "high",
+          "linkedFindingKey": "conversion:social proof ist sichtbar",
+          "linkedFindingTitle": "Social Proof ist sichtbar"
+        },
+        {
+          "id": "suggestion-seo:die inhalte sind in abschnitte gegliedert",
+          "title": "Bilder sauber beschreiben",
+          "summary": "Gute Bildbeschreibungen helfen Menschen mit Hilfssystemen, Google und KI beim Verstehen deiner Seite.",
+          "category": "seo",
+          "actionSteps": [
+            "Allen relevanten Bildern kurze, konkrete Beschreibungen geben.",
+            "Den Inhalt oder Nutzen des Bildes kurz und konkret benennen.",
+            "Dekorative Bilder leer lassen statt generische Texte zu verwenden."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "seo:die inhalte sind in abschnitte gegliedert",
+          "linkedFindingTitle": "Die Inhalte sind in Abschnitte gegliedert"
+        },
+        {
+          "id": "suggestion-seo:bilder vorhanden",
+          "title": "Bilder sauber beschreiben",
+          "summary": "Gute Bildbeschreibungen helfen Menschen mit Hilfssystemen, Google und KI beim Verstehen deiner Seite.",
+          "category": "seo",
+          "actionSteps": [
+            "Allen relevanten Bildern kurze, konkrete Beschreibungen geben.",
+            "Den Inhalt oder Nutzen des Bildes kurz und konkret benennen.",
+            "Dekorative Bilder leer lassen statt generische Texte zu verwenden."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "seo:bilder vorhanden",
+          "linkedFindingTitle": "Bilder vorhanden"
+        },
+        {
+          "id": "suggestion-seo:bilder erklären sich nicht gut genug",
+          "title": "Bilder sauber beschreiben",
+          "summary": "Gute Bildbeschreibungen helfen Menschen mit Hilfssystemen, Google und KI beim Verstehen deiner Seite.",
+          "category": "seo",
+          "actionSteps": [
+            "Allen relevanten Bildern kurze, konkrete Beschreibungen geben.",
+            "Den Inhalt oder Nutzen des Bildes kurz und konkret benennen.",
+            "Dekorative Bilder leer lassen statt generische Texte zu verwenden."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "seo:bilder erklären sich nicht gut genug",
+          "linkedFindingTitle": "Bilder erklären sich nicht gut genug"
+        },
+        {
+          "id": "suggestion-ux:ausreichend textinhalt vorhanden",
+          "title": "Bilder sauber beschreiben",
+          "summary": "Gute Bildbeschreibungen helfen Menschen mit Hilfssystemen, Google und KI beim Verstehen deiner Seite.",
+          "category": "ux",
+          "actionSteps": [
+            "Allen relevanten Bildern kurze, konkrete Beschreibungen geben.",
+            "Den Inhalt oder Nutzen des Bildes kurz und konkret benennen.",
+            "Dekorative Bilder leer lassen statt generische Texte zu verwenden."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "ux:ausreichend textinhalt vorhanden",
+          "linkedFindingTitle": "Ausreichend Textinhalt vorhanden"
+        },
+        {
+          "id": "suggestion-ux:visuelle elemente vorhanden",
+          "title": "Bilder sauber beschreiben",
+          "summary": "Gute Bildbeschreibungen helfen Menschen mit Hilfssystemen, Google und KI beim Verstehen deiner Seite.",
+          "category": "ux",
+          "actionSteps": [
+            "Allen relevanten Bildern kurze, konkrete Beschreibungen geben.",
+            "Den Inhalt oder Nutzen des Bildes kurz und konkret benennen.",
+            "Dekorative Bilder leer lassen statt generische Texte zu verwenden."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "ux:visuelle elemente vorhanden",
+          "linkedFindingTitle": "Visuelle Elemente vorhanden"
+        },
+        {
+          "id": "suggestion-ux:interne navigation ist vorhanden",
+          "title": "Nutzerführung und Lesbarkeit verbessern",
+          "summary": "Eine klarere Struktur hilft Besuchern, Inhalte schneller zu erfassen und sicherer weiterzugehen.",
+          "category": "ux",
+          "actionSteps": [
+            "Wichtige Inhalte in klar erkennbare Abschnitte gliedern.",
+            "Visuelle Hierarchien mit Überschriften, Abständen und Bildern schärfen.",
+            "Den oberen Bereich so gestalten, dass Nutzen und nächster Schritt sofort sichtbar sind."
+          ],
+          "expectedImpact": "medium",
+          "linkedFindingKey": "ux:interne navigation ist vorhanden",
+          "linkedFindingTitle": "Interne Navigation ist vorhanden"
+        },
+        {
+          "id": "suggestion-seo:die seitensprache ist klar markiert",
+          "title": "Auffindbarkeit und Verständlichkeit staerken",
+          "summary": "Klare Seitensignale helfen Besuchern, Google und KI, dein Angebot schneller richtig einzuordnen.",
+          "category": "seo",
+          "actionSteps": [
+            "Seitenname, Kurzbeschreibung und Hauptbotschaft auf ein klares Kernthema ausrichten.",
+            "Struktur und interne Verlinkung für Besucher und Suchsysteme konsistent halten.",
+            "Linkvorschauen und Hauptseiten-Signale bewusst pflegen."
+          ],
+          "expectedImpact": "low",
+          "linkedFindingKey": "seo:die seitensprache ist klar markiert",
+          "linkedFindingTitle": "Die Seitensprache ist klar markiert"
+        },
+        {
+          "id": "suggestion-seo:google erkennt die hauptversion der seite",
+          "title": "Auffindbarkeit und Verständlichkeit staerken",
+          "summary": "Klare Seitensignale helfen Besuchern, Google und KI, dein Angebot schneller richtig einzuordnen.",
+          "category": "seo",
+          "actionSteps": [
+            "Seitenname, Kurzbeschreibung und Hauptbotschaft auf ein klares Kernthema ausrichten.",
+            "Struktur und interne Verlinkung für Besucher und Suchsysteme konsistent halten.",
+            "Linkvorschauen und Hauptseiten-Signale bewusst pflegen."
+          ],
+          "expectedImpact": "low",
+          "linkedFindingKey": "seo:google erkennt die hauptversion der seite",
+          "linkedFindingTitle": "Google erkennt die Hauptversion der Seite"
+        },
+        {
+          "id": "suggestion-seo:geteilte links haben einen klaren titel",
+          "title": "Auffindbarkeit und Verständlichkeit staerken",
+          "summary": "Klare Seitensignale helfen Besuchern, Google und KI, dein Angebot schneller richtig einzuordnen.",
+          "category": "seo",
+          "actionSteps": [
+            "Seitenname, Kurzbeschreibung und Hauptbotschaft auf ein klares Kernthema ausrichten.",
+            "Struktur und interne Verlinkung für Besucher und Suchsysteme konsistent halten.",
+            "Linkvorschauen und Hauptseiten-Signale bewusst pflegen."
+          ],
+          "expectedImpact": "low",
+          "linkedFindingKey": "seo:geteilte links haben einen klaren titel",
+          "linkedFindingTitle": "Geteilte Links haben einen klaren Titel"
+        }
+      ],
+      "opportunities": [
+        {
+          "id": "revenueBlocker-1-die-seite-erklart-angebot-und-nutzen-nicht-schnell-genug",
+          "title": "Die Seite erklärt Angebot und Nutzen nicht schnell genug.",
+          "ctaHref": "/#kontakt",
+          "category": "Klarheit",
+          "ctaLabel": "KI-Modul anfragen",
+          "severity": "high",
+          "sourceType": "revenueBlocker",
+          "description": "Hauptbotschaft, Nutzen und Seitenstruktur schärfen.",
+          "aiOpportunity": "Ein kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.",
+          "priorityScore": 100,
+          "businessImpact": "Unklare Botschaften führen dazu, dass Besucher nicht weiterdenken oder vergleichen.",
+          "expectedEffect": "Mehr Vertrauen, klarere Nutzerführung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
+          "suggestedModule": "Anfrage-Erfassung",
+          "suggestedService": "Conversion Sprint",
+          "recurringPotential": false,
+          "implementationEffort": "medium",
+          "lostRevenueHypothesis": "Wenn dieser Hebel greift, finden mehr qualifizierte Besucher den Weg zur Anfrage oder zum Kauf."
+        },
+        {
+          "id": "revenueBlocker-2-die-seitenstruktur-fuhrt-besucher-nicht-klar-genug",
+          "title": "Die Seitenstruktur führt Besucher nicht klar genug.",
+          "ctaHref": "/#kontakt",
+          "category": "Klarheit",
+          "ctaLabel": "KI-Modul anfragen",
+          "severity": "medium",
+          "sourceType": "revenueBlocker",
+          "description": "Eine eindeutige Hauptbotschaft setzen und Inhalte mit klaren Abschnittsüberschriften ordnen.",
+          "aiOpportunity": "Ein kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.",
+          "priorityScore": 82,
+          "businessImpact": "Ohne klare Überschriften erkennen Nutzer Angebot, Nutzen und Reihenfolge der Inhalte langsamer.",
+          "expectedEffect": "Mehr Vertrauen, klarere Nutzerführung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
+          "suggestedModule": "Content Automation",
+          "suggestedService": "Content Automation Setup",
+          "recurringPotential": true,
+          "implementationEffort": "low",
+          "lostRevenueHypothesis": "Wenn dieser Hebel greift, finden mehr qualifizierte Besucher den Weg zur Anfrage oder zum Kauf."
+        },
+        {
+          "id": "aiSuggestion-3-handlungsfuhrung-auf-conversion-ausrichten",
+          "title": "Handlungsführung auf Conversion ausrichten",
+          "ctaHref": "/#kontakt",
+          "category": "conversion",
+          "ctaLabel": "Quick Fix starten",
+          "severity": "high",
+          "sourceType": "aiSuggestion",
+          "description": "Eine klare Nutzerführung macht aus Aufmerksamkeit schneller echte Klicks und Anfragen.",
+          "aiOpportunity": "Aus dem Vorschlag lassen sich strukturierte Inhalte, FAQ-Antworten oder CTA-Varianten als wiederkehrender Hebel vorbereiten.",
+          "priorityScore": 78,
+          "businessImpact": "Die Website gewinnt an Klarheit, Antworttiefe und Sichtbarkeit in Google und KI-Antwortsystemen.",
+          "expectedEffect": "Schneller von Analyse zu testbarer Verbesserung kommen, ohne die Website neu zu denken.",
+          "suggestedModule": "Conversion Quick Wins",
+          "suggestedService": "Quick Fix Sprint",
+          "recurringPotential": true,
+          "implementationEffort": "low"
+        },
+        {
+          "id": "measure-4-seitenbotschaft-klarer-ordnen",
+          "title": "Seitenbotschaft klarer ordnen",
+          "ctaHref": "/#kontakt",
+          "category": "Klarheit",
+          "ctaLabel": "KI-Modul anfragen",
+          "severity": "medium",
+          "sourceType": "measure",
+          "description": "Setze eine klare Hauptbotschaft und ordne die wichtigsten Entscheidungsfragen in gut lesbare Abschnitte.",
+          "aiOpportunity": "KI kann Texte, Reihenfolge und Varianten vorbereiten, sodass aus einer Empfehlung schneller ein wiederkehrender Hebel wird.",
+          "priorityScore": 76,
+          "businessImpact": "Dieser Hebel verbessert Klarheit genau dort, wo Besucher Vertrauen aufbauen, vergleichen oder den nächsten Schritt suchen.",
+          "expectedEffect": "Sichtbare Verbesserung der Anfrage- oder Kaufstrecke ohne kompletten Relaunch.",
+          "suggestedModule": "Content Automation",
+          "suggestedService": "Content Automation Setup",
+          "recurringPotential": true,
+          "implementationEffort": "low"
+        },
+        {
+          "id": "revenueBlocker-5-unternehmens-und-expertise-signale-sind-zu-schwach",
+          "title": "Unternehmens- und Expertise-Signale sind zu schwach.",
+          "ctaHref": "/#kontakt",
+          "category": "AI-Sichtbarkeit",
+          "ctaLabel": "KI-Modul anfragen",
+          "severity": "medium",
+          "sourceType": "revenueBlocker",
+          "description": "Eine About-/Unternehmensseite mit Team, Erfahrung, Standort und Leistungsprofil sichtbar verlinken.",
+          "aiOpportunity": "Ein kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.",
+          "priorityScore": 75,
+          "businessImpact": "Ohne klare About-Seite fehlt Kontext zu Marke, Menschen, Erfahrung und Vertrauenswuerdigkeit.",
+          "expectedEffect": "Mehr Vertrauen, klarere Nutzerführung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
+          "suggestedModule": "AI Visibility Check",
+          "suggestedService": "AI Visibility Sprint",
+          "recurringPotential": true,
+          "implementationEffort": "medium",
+          "lostRevenueHypothesis": "Wenn dieser Hebel greift, finden mehr qualifizierte Besucher den Weg zur Anfrage oder zum Kauf."
+        },
+        {
+          "id": "revenueBlocker-6-die-inhalte-sind-thematisch-noch-nicht-klar-genug-aufgebaut",
+          "title": "Die Inhalte sind thematisch noch nicht klar genug aufgebaut.",
+          "ctaHref": "/#kontakt",
+          "category": "AI-Sichtbarkeit",
+          "ctaLabel": "KI-Modul anfragen",
+          "severity": "medium",
+          "sourceType": "revenueBlocker",
+          "description": "Marke, Leistungen, Zielgruppen und Nutzen in klaren Abschnitten benennen.",
+          "aiOpportunity": "Ein kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.",
+          "priorityScore": 74,
+          "businessImpact": "Unklare Themenstruktur erschwert sowohl Nutzern als auch KI-Systemen die Einordnung deines Angebots.",
+          "expectedEffect": "Mehr Vertrauen, klarere Nutzerführung und mehr qualifizierte Anfragen aus bestehendem Traffic.",
+          "suggestedModule": "AI Visibility Check",
+          "suggestedService": "AI Visibility Sprint",
+          "recurringPotential": true,
+          "implementationEffort": "medium",
+          "lostRevenueHypothesis": "Wenn dieser Hebel greift, finden mehr qualifizierte Besucher den Weg zur Anfrage oder zum Kauf."
+        }
+      ],
+      "totalFindings": 26,
+      "categoryScores": {
+        "ux": {
+          "label": "Nutzerführung",
+          "score": 100,
+          "category": "ux"
+        },
+        "seo": {
+          "label": "Auffindbarkeit",
+          "score": 81,
+          "category": "seo"
+        },
+        "trust": {
+          "label": "Vertrauen",
+          "score": 100,
+          "category": "trust"
+        },
+        "design": {
+          "label": "Design",
+          "score": 100,
+          "category": "design"
+        },
+        "conversion": {
+          "label": "Anfragen",
+          "score": 100,
+          "category": "conversion"
+        },
+        "performance": {
+          "label": "Ladegefühl",
+          "score": 100,
+          "category": "performance"
+        },
+        "aiVisibility": {
+          "label": "KI-Sichtbarkeit",
+          "score": 91,
+          "category": "aiVisibility"
+        }
+      },
+      "criticalIssues": [],
+      "technicalNotes": [
+        "Die erste Seitenfassung war zu dünn, daher wurde eine echte Browseransicht genutzt.",
+        "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht für Screenshots.",
+        "Der Browser-Fallback war nicht erfolgreich. Es wird die statische HTML-Auswertung verwendet."
+      ],
+      "recommendations": [
+        {
+          "text": "Es wurden 2 Hauptüberschriften gefunden. Das kann Angebot und Priorität unklar wirken lassen.",
+          "title": "Die Seite sendet mehrere Hauptbotschaften verbessern",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 0,
+          "category": "seo",
+          "description": "Es wurden 2 Hauptüberschriften gefunden. Das kann Angebot und Priorität unklar wirken lassen."
+        },
+        {
+          "text": "Beschreibe relevante Bilder kurz und konkret, damit Besucher mit Hilfssystemen, Google und KI den Bildinhalt besser verstehen.",
+          "title": "Wichtige Bilder verständlich beschreiben",
+          "effort": "medium",
+          "impact": "medium",
+          "weight": 0,
+          "category": "seo",
+          "description": "Beschreibe relevante Bilder kurz und konkret, damit Besucher mit Hilfssystemen, Google und KI den Bildinhalt besser verstehen."
+        },
+        {
+          "text": "Einige Hinweise sind sichtbar (versand), aber Besucher bekommen noch zu wenig Sicherheit.",
+          "title": "Es gibt nur wenige Vertrauenssignale verbessern",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 0,
+          "category": "trust",
+          "description": "Einige Hinweise sind sichtbar (versand), aber Besucher bekommen noch zu wenig Sicherheit."
+        },
+        {
+          "text": "Die Startseite zeigt kaum klare Nutzen- oder USP-Woerter wie schnell, einfach oder professionell.",
+          "title": "Wenig Nutzenkommunikation verbessern",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 0,
+          "category": "conversion",
+          "description": "Die Startseite zeigt kaum klare Nutzen- oder USP-Woerter wie schnell, einfach oder professionell."
+        }
+      ],
+      "revenueBlockers": [
+        {
+          "action": "Hauptbotschaft, Nutzen und Seitenstruktur schärfen.",
+          "problem": "Die Seite erklärt Angebot und Nutzen nicht schnell genug.",
+          "category": "Klarheit",
+          "priority": 1,
+          "sourceCheck": "Bildverständnis",
+          "estimatedEffort": "mittel",
+          "estimatedImpact": "hoch",
+          "whyItCostsCustomers": "Unklare Botschaften führen dazu, dass Besucher nicht weiterdenken oder vergleichen."
+        },
+        {
+          "action": "Eine eindeutige Hauptbotschaft setzen und Inhalte mit klaren Abschnittsüberschriften ordnen.",
+          "problem": "Die Seitenstruktur führt Besucher nicht klar genug.",
+          "category": "Klarheit",
+          "priority": 2,
+          "sourceCheck": "Klarheit der Seitenbotschaft",
+          "estimatedEffort": "niedrig",
+          "estimatedImpact": "mittel",
+          "whyItCostsCustomers": "Ohne klare Überschriften erkennen Nutzer Angebot, Nutzen und Reihenfolge der Inhalte langsamer."
+        },
+        {
+          "action": "Eine About-/Unternehmensseite mit Team, Erfahrung, Standort und Leistungsprofil sichtbar verlinken.",
+          "problem": "Unternehmens- und Expertise-Signale sind zu schwach.",
+          "category": "AI-Sichtbarkeit",
+          "priority": 3,
+          "sourceCheck": "About-Seite",
+          "estimatedEffort": "mittel",
+          "estimatedImpact": "mittel",
+          "whyItCostsCustomers": "Ohne klare About-Seite fehlt Kontext zu Marke, Menschen, Erfahrung und Vertrauenswuerdigkeit."
+        },
+        {
+          "action": "Marke, Leistungen, Zielgruppen und Nutzen in klaren Abschnitten benennen.",
+          "problem": "Die Inhalte sind thematisch noch nicht klar genug aufgebaut.",
+          "category": "AI-Sichtbarkeit",
+          "priority": 4,
+          "sourceCheck": "Klare Themenstruktur",
+          "estimatedEffort": "mittel",
+          "estimatedImpact": "mittel",
+          "whyItCostsCustomers": "Unklare Themenstruktur erschwert sowohl Nutzern als auch KI-Systemen die Einordnung deines Angebots."
+        }
+      ],
+      "visibleFindings": 5,
+      "premiumInsightsPreview": [
+        {
+          "text": "Premium bewertet die kritischen Punkte nach Umsatzwirkung, Aufwand und Reihenfolge.",
+          "title": "Priorisierte Maßnahmen-Roadmap",
+          "effort": "medium",
+          "impact": "high",
+          "weight": 90,
+          "description": "Premium bewertet die kritischen Punkte nach Umsatzwirkung, Aufwand und Reihenfolge."
+        },
+        {
+          "text": "Premium ergänzt, welche stärkeren Wettbewerber die sichtbaren Hebel bereits besser lösen.",
+          "title": "Wettbewerbs-Kontext",
+          "effort": "medium",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Premium ergänzt, welche stärkeren Wettbewerber die sichtbaren Hebel bereits besser lösen."
+        },
+        {
+          "text": "Premium nutzt verfügbare Screenshots und visuelle Signale für konkrete Layout- und CTA-Hinweise.",
+          "title": "Visuelle Problemzonen",
+          "effort": "low",
+          "impact": "medium",
+          "weight": 60,
+          "description": "Premium nutzt verfügbare Screenshots und visuelle Signale für konkrete Layout- und CTA-Hinweise."
+        }
+      ],
+      "visualPreviewAvailable": false
+    },
+    "screenshots": null,
+    "visual_preview_available": false,
+    "metadata": {
+      "runtime": "vercel",
+      "screenshotError": "Die Seite konnte nicht als echte Browseransicht geladen werden: Execution context was destroyed, most likely because of a navigation.",
+      "renderedModeRequested": true,
+      "screenshotErrorSource": "rendered_fallback"
+    },
+    "payment_status": "free",
+    "paid_at": null,
+    "stripe_session_id": null,
+    "stripe_customer_email": null,
+    "product_type": "analysis_teaser",
+    "plan": "free",
+    "contact_request_id": null,
+    "audit_context_id": null,
+    "is_premium": false,
+    "access_level": "free"
+  },
+  "premiumDom": {
+    "overflow": false,
+    "hasPremium": true,
+    "text": "SHOPHEBEL\nAnalyse abgeschlossen\nsnocks.com\nPremium\n\nANALYSEWERT\n\n96\n/100\nSTARK\n\n03.07.26, 22:22\n\nSTATISCHE ANSICHT GEPRUEFT\n\nSHOPHEBEL REPORT\n\nDiagnose und Top-Hebel fuer diese Seite\n\nStarke digitale Basis mit klarer Fuehrung und belastbaren Vertrauenssignalen.\n\n01\nDie Seite sendet mehrere Hauptbotschaften\n02\nBilder erklären sich nicht gut genug\n03\nEs gibt nur wenige Vertrauenssignale\n\nGeschaeftliche Lesart\n\nPrimaerer Handlungsweg lesbar\nVertrauensbasis sichtbar\nOberflaechenhierarchie weitgehend stabil\nSuch- und KI-Signale abgestimmt\n\nStrategischer Bericht freigeschaltet\n\nPriorisierte Empfehlungen aktiv\nKI-Beratung aktiv\n7-Tage-Fahrplan aktiv\nPremium-PDF herunterladen\nAnfrageklarheit\n100\nVertrauen\n100\nUX-Klarheit\n100\nMobile\n100\nSEO\n81\nKI-Sichtbarkeit\n91\n\nVISUELLE WEBSITE-ANALYSE\n\nHier sieht man sofort, wo die Seite Vertrauen und Anfragen verliert.\n\nDie nummerierten Marker erklären die sichtbaren Problemzonen in Alltagssprache: was stört, warum es wirtschaftlich relevant ist und welche Änderung zuerst sinnvoll ist.\n\nBewertung: Kritisch / Wichtig / Chance\n\nVISUELLER SEITENÜBERBLICK\n\nVisuelle Ansicht nicht verfügbar\n\nDie Analyse bleibt nutzbar, aber der visuelle Seitenüberblick braucht eine gespeicherte Desktop- oder Mobile-Ansicht.\n\nDiagnose\n\nScreenshot-Erstellung wurde beim Analyse-Lauf nicht abgeschlossen.\n\nFür eine vollständige visuelle Analyse bitte die Analyse neu ausführen.\n\nAnalyse neu ausführen\n\nBEFUNDÜBERSICHT\n\nWichtigste Marker\n4 sichtbar\n\nVERTRAUEN\n\n1. Vertrauen weiter stärken\nChance\n\nVertrauen: die geprüften Signale wirken stabil.\n\nBeratungshinweis\n\nKLARHEIT\n\n2. Klarheit weiter stärken\nChance\n\nAnfragen: die geprüften Signale wirken stabil.\n\nBeratungshinweis\n\nMOBILE UX\n\n3. Stabilität beim Laden\nChance\n\nOb sich Elemente beim Laden verschieben, wurde in diesem Lauf nicht als Felddaten gemessen.\n\nBeratungshinweis\n\nBUTTON\n\n4. Button weiter stärken\nChance\n\nAnfragen: die geprüften Signale wirken stabil.\n\nBeratungshinweis\nWeitere Befunde anzeigen\n\nWAS BEDEUTET DAS KONKRET?\n\nDie Seite wird wie ein Erstbesuch gelesen: Was faellt sofort auf, was fehlt und welcher Klick wirkt am wahrscheinlichsten?\n\nWARUM KOSTET DAS?\n\nUnsichtbare Buttons, schwache Vertrauenssignale oder unklare Hierarchie senken die Sicherheit des Besuchers genau vor der Entscheidung.\n\nVORHER-NACHHER-DENKWEISE\n\nZiel ist kein versprochenes Redesign, sondern eine klare Richtung: was nach vorne muss, was weniger Gewicht braucht und welcher nächste Schritt sichtbarer wird.\n\nPREMIUM FREIGESCHALTET\n\nPremium-Bericht inkl. KI-Beratung\n\nEin eigenständiger Arbeitsbericht für Priorität, Entscheidung und Umsetzung: ruhig lesbar, als PDF nutzbar und durch KI-Beratung direkt verdichtet.\n\n01\n\nKI-Beratung\n\n02\n\nwichtigste 3 Hebel\n\n03\n\n7-Tage-Fahrplan\n\n04\n\nPDF-Bericht\n\n05\n\nUmsetzungsempfehlungen\n\nBERICHTSZUGANG\n\nPDF plus KI-Einordnung\n\nDer Download ist der statische Bericht. Die KI-Beratung darunter macht daraus Diagnose, Reihenfolge und konkrete Umsetzungsideen.\n\nPDF-Bericht herunterladen\n\nKURZÜBERBLICK\n\nPremium Anfrage- und Vertrauens-Audit\n\nDer wahrscheinlich größte Bremsfaktor ist: Die Seite erklärt Angebot und Nutzen nicht schnell genug.\n\nStarte mit Klarheit, weil dieser Punkt direkt auf Anfrage- und Kaufbereitschaft wirkt.\n\nJede reduzierte Reibung im sichtbaren Startbereich, bei Vertrauen und beim nächsten Schritt kann mehr qualifizierte Anfragen aus bestehendem Traffic holen.\n\nSCHNELLSTER HEBEL\n\nKlarheit der Seitenbotschaft\n\nKI-Einordnung\n\nDie Beratung ordnet Score und Befunde in eine klare Diagnose ein.\n\nWichtigste 3 Hebel\n\nDie größten Bremsen werden nach Wirkung und Reihenfolge sortiert.\n\n7-Tage-Fahrplan und PDF\n\nDer Bericht bleibt als PDF greifbar und wird als Arbeitsplan fortgesetzt.\n\nCONVERSION-HYPOTHESE\n\nWenn der nächste Schritt auf der Seite klarer sichtbar wird, verstehen Besucher schneller, was sie tun sollen. Dadurch sinkt die Reibung im sichtbaren Startbereich und die Wahrscheinlichkeit für Anfragen oder Käufe steigt.\n\nKI-BERATUNG\n\nKI-Einordnung\n\nEine zusätzliche Beratungsebene mit Diagnose, Prioritäten und konkreten Textideen.\n\nKI-Einordnung erzeugen\nBereit zur Erstellung\n\nDer Bericht wird erst erzeugt, wenn du den Button klickst. Falls für diese Analyse bereits ein KI-Bericht gespeichert ist, wird er direkt wiederverwendet.\n\nDIE WICHTIGSTEN 3 HEBEL\n\nWas jetzt am staerksten auf Anfragen und Kaeufe wirkt\n\nDieser Block buendelt Befunde, Empfehlungen und Umsatzbremsen zu drei priorisierten Hebeln. Weitere Details bleiben darunter abrufbar.\n\n3 priorisierte Hebel\n1\n\nKLARHEIT\n\nDie Seite erklärt Angebot und Nutzen nicht schnell genug.\nPrioritaet hoch\n\nGESCHAEFTLICHE WIRKUNG\n\nUnklare Botschaften führen dazu, dass Besucher nicht weiterdenken oder vergleichen.\n\nKI-CHANCE\n\nEin kleines KI-Modul statt großem Relaunch kann Botschaft, Vertrauenselemente und Button-Varianten schneller testbar machen.\n\nEMPFOHLENER UMSETZUNGSPFAD\n\nAnfrage-Erfassung\n\nEMPFOHLENE BEGLEITUNG\n\nAnfrage-/Kaufwahrscheinlichkeit Umsetzung\n\nERWARTETER EFFEKT\n\nMehr Vertrauen, klarere Nu"
+  },
+  "pdf": {
+    "status": 200,
+    "contentType": "application/pdf",
+    "bytes": 71354,
+    "startsWithPdf": true,
+    "pageCount": 9,
+    "forbiddenLabels": []
+  }
+}
