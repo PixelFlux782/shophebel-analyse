@@ -126,6 +126,32 @@ async function readPageWithNavigationRetry<T>(
   throw lastError;
 }
 
+async function waitForVisualAssets(
+  page: Awaited<ReturnType<Awaited<ReturnType<typeof launchBrowser>>["newPage"]>>,
+) {
+  await page.evaluate(async () => {
+    await document.fonts?.ready?.catch(() => undefined);
+
+    const images = Array.from(document.images)
+      .filter((image) => {
+        const rect = image.getBoundingClientRect();
+        return rect.top < window.innerHeight * 1.5 && rect.width > 24 && rect.height > 24;
+      })
+      .slice(0, 16);
+
+    await Promise.allSettled(
+      images.map((image) => {
+        if (image.complete && image.naturalWidth > 0) {
+          return Promise.resolve();
+        }
+
+        return image.decode?.() ?? Promise.resolve();
+      }),
+    );
+  }).catch(() => undefined);
+  await wait(1800);
+}
+
 export async function fetchRenderedHtml(
   inputUrl: string,
 ): Promise<FetchRenderedHtmlResult> {
@@ -159,6 +185,7 @@ export async function fetchRenderedHtml(
     });
     await wait(500);
     await dismissCommonConsentOverlays(page);
+    await waitForVisualAssets(page);
     try {
       await assertPublicHttpUrl(page.url() || requestedUrl);
     } catch (error) {
