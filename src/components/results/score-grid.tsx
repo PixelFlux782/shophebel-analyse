@@ -33,7 +33,7 @@ export function ScoreGrid({ result }: ScoreGridProps) {
         description="Wie gut die Seite auf kleinen Screens wirkt und führt."
       />
       <ScoreCard
-        title="CTA"
+        title="Button"
         score={categories.conversion.score}
         description="Wie klar Besucher zur nächsten Handlung geführt werden."
       />

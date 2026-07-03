@@ -121,7 +121,7 @@ function buildVisualProblems(result: AnalysisResult): VisualProblem[] {
     ["Vertrauen", result.categories.trust],
     ["Klarheit", result.categories.conversion],
     ["Mobile UX", result.categories.performance],
-    ["CTA", result.categories.conversion],
+    ["Button", result.categories.conversion],
     ["Design", result.categories.design],
     ["Ladegefühl", result.categories.performance],
     ["AI-Sichtbarkeit", result.categories.aiVisibility],
@@ -163,7 +163,7 @@ function problemImpact(problem: VisualProblem) {
     return "Wenn Sicherheit, Bewertungen oder Kontaktwege zu spät sichtbar werden, zögern Besucher eher vor Anfrage oder Kauf.";
   }
 
-  if (problem.category === "CTA" || problem.category === "Klarheit") {
+  if (problem.category === "Button" || problem.category === "CTA" || problem.category === "Klarheit") {
     return "Wenn der nächste Schritt nicht sofort klar ist, muss der Besucher selbst nachdenken und springt schneller ab.";
   }
 
@@ -179,7 +179,7 @@ function problemRecommendation(problem: VisualProblem) {
     return "Vertrauenselemente wie Bewertungen, Referenzen, Kontaktmöglichkeiten oder Sicherheitshinweise vor der Entscheidung platzieren.";
   }
 
-  if (problem.category === "CTA" || problem.category === "Klarheit") {
+  if (problem.category === "Button" || problem.category === "CTA" || problem.category === "Klarheit") {
     return "Hauptversprechen und primären Button im sichtbaren Startbereich klarer priorisieren und sprachlich eindeutiger machen.";
   }
 
@@ -424,7 +424,9 @@ export function VisualAuditSection({
   const isPremium = plan === "premium";
   const isFree = plan === "free";
   const problems = buildVisualProblems(result);
-  const visibleProblems = isPremium ? problems : problems.slice(0, isFree ? 2 : 4);
+  const directProblemLimit = isFree ? 2 : isPremium ? 4 : 3;
+  const visibleProblems = problems.slice(0, directProblemLimit);
+  const hiddenProblems = problems.slice(directProblemLimit);
   const hotspots =
     result.visualMap && desktopImage
       ? getVisualHotspots(result, screenshots?.viewport ? "viewport" : "fullPage").slice(0, isFree ? 2 : isPremium ? 10 : 8)
@@ -487,7 +489,7 @@ export function VisualAuditSection({
           ) : null}
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-1">
           {visibleProblems.map((problem, index) => (
             <article
               key={`${problem.category}-${problem.title}`}
@@ -529,6 +531,31 @@ export function VisualAuditSection({
               </p>
             </article>
           ) : null}
+          {hiddenProblems.length ? (
+            <details className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-950 md:col-span-2 xl:col-span-1">
+              <summary className="cursor-pointer text-sm font-bold">
+                Weitere Befunde anzeigen
+              </summary>
+              <div className="mt-4 grid gap-3">
+                {hiddenProblems.map((problem) => (
+                  <article key={`${problem.category}-${problem.title}`} className="rounded-xl border border-slate-200 bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
+                          {problem.category}
+                        </p>
+                        <h3 className="mt-2 text-base font-bold">{problem.title}</h3>
+                      </div>
+                      <span className={`shrink-0 rounded-full px-3 py-1 text-xs font-bold ${toneBadgeClasses[problem.tone]}`}>
+                        {problem.tone}
+                      </span>
+                    </div>
+                    <p className="mt-3 text-sm leading-6 text-slate-700">{problem.text}</p>
+                  </article>
+                ))}
+              </div>
+            </details>
+          ) : null}
         </div>
       </div>
 
@@ -543,7 +570,7 @@ export function VisualAuditSection({
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Warum kostet das?</p>
             <p className="mt-2 text-sm leading-7 text-slate-700">
-              Unsichtbare CTAs, schwache Trust-Signale oder unklare Hierarchie senken die Sicherheit des Besuchers genau vor der Entscheidung.
+              Unsichtbare Buttons, schwache Vertrauenssignale oder unklare Hierarchie senken die Sicherheit des Besuchers genau vor der Entscheidung.
             </p>
           </div>
           <div>

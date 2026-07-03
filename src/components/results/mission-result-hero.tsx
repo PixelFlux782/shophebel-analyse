@@ -45,17 +45,17 @@ function categoryScore(result: AnalysisResult, category: AnalysisCategory, fallb
 }
 
 function scoreHint(score: number, label: string) {
-  if (score >= 82) return `${label} calibrated`;
-  if (score >= 68) return `${label} stable, watch friction`;
-  if (score >= 52) return `${label} below optimal range`;
-  return `${label} needs immediate focus`;
+  if (score >= 82) return `${label} gut eingeordnet`;
+  if (score >= 68) return `${label} erkennbar, Reibung pruefen`;
+  if (score >= 52) return `${label} unter dem empfohlenen Bereich`;
+  return `${label} braucht sofort Fokus`;
 }
 
 function formatDate(value?: string) {
-  if (!value) return "Completed";
+  if (!value) return "Abgeschlossen";
 
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Completed";
+  if (Number.isNaN(date.getTime())) return "Abgeschlossen";
 
   return new Intl.DateTimeFormat("de-DE", {
     day: "2-digit",
@@ -75,13 +75,13 @@ function getDomain(value: string) {
 }
 
 function modeLabel(mode: AnalysisResult["analysisMode"]) {
-  return mode === "rendered" ? "Rendered live scan" : "Static intelligence scan";
+  return mode === "rendered" ? "Live-Ansicht geprueft" : "Statische Ansicht geprueft";
 }
 
 function reportLevel(plan: AnalysisPlan) {
   if (plan === "premium") return "Premium";
-  if (plan === "full") return "Full";
-  return "Free";
+  if (plan === "full") return "Vollanalyse";
+  return "Kostenlos";
 }
 
 function scoreInterpretation(result: AnalysisResult, subscores: Subscore[]) {
@@ -122,10 +122,10 @@ function buildSubscores(result: AnalysisResult, canViewFull: boolean): Subscore[
   const aiVisibility = categoryScore(result, "aiVisibility", Math.round((seo + overall) / 2));
 
   const items: Subscore[] = [
-    { key: "conversion", label: "Anfrageklarheit", score: conversion, hint: scoreHint(conversion, "Button-Weg") },
+    { key: "conversion", label: "Anfrageklarheit", score: conversion, hint: scoreHint(conversion, "Handlungsweg") },
     { key: "trust", label: "Vertrauen", score: trust, hint: scoreHint(trust, "Vertrauensebene") },
     { key: "ux", label: "UX-Klarheit", score: ux, hint: scoreHint(ux, "Hierarchie") },
-    { key: "mobile", label: "Mobile", score: mobile, hint: scoreHint(mobile, "Mobile scan") },
+    { key: "mobile", label: "Mobile", score: mobile, hint: scoreHint(mobile, "Mobile Ansicht") },
     { key: "seo", label: "SEO", score: seo, hint: scoreHint(seo, "Suchsignale") },
     { key: "aiVisibility", label: "KI-Sichtbarkeit", score: aiVisibility, hint: scoreHint(aiVisibility, "Entitätssignale") },
   ];
@@ -192,15 +192,15 @@ function businessImpact(subscores: Subscore[]) {
 function lockedLayerCopy(plan: AnalysisPlan) {
   if (plan === "premium") {
     return {
-      title: "Strategischer Report freigeschaltet",
-      items: ["Priorisierte Empfehlungen aktiv", "Consultant-Report aktiv", "7-Tage-Fahrplan aktiv"],
+      title: "Strategischer Bericht freigeschaltet",
+      items: ["Priorisierte Empfehlungen aktiv", "KI-Beratung aktiv", "7-Tage-Fahrplan aktiv"],
     };
   }
 
   if (plan === "full") {
     return {
       title: "Strategische Beratungsebene gesperrt",
-      items: ["Premium-Report verfügbar", "Priorisierte Empfehlungen", "7-Tage-Fahrplan"],
+      items: ["Premium-Bericht verfügbar", "Priorisierte Empfehlungen", "7-Tage-Fahrplan"],
     };
   }
 
@@ -232,7 +232,7 @@ export function MissionResultHero({
           <div className="flex min-w-0 flex-wrap items-center gap-2 text-xs font-medium text-slate-300">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1.5 text-emerald-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-              Analysis complete
+              Analyse abgeschlossen
             </span>
             <span className="break-all rounded-full border border-white/10 bg-slate-900 px-3 py-1.5">
               {getDomain(result.finalUrl ?? result.url)}
@@ -244,9 +244,9 @@ export function MissionResultHero({
           <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
             <span>{formatDate(result.scannedAt ?? result.createdAt)}</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:block" />
-            <span>{reportLevel(plan)} report</span>
+            <span>{reportLevel(plan)}</span>
             <span className="hidden h-1 w-1 rounded-full bg-slate-600 sm:block" />
-            <span>Visual / UX / SEO / AI calibrated</span>
+            <span>Visuelle Pruefung, Nutzerfuehrung, Auffindbarkeit und KI-Sichtbarkeit eingeordnet</span>
           </div>
         </div>
       </div>
@@ -305,7 +305,7 @@ export function MissionResultHero({
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-white">{item.label}</p>
-                      <p className="mt-1 text-xs leading-5 text-slate-400">{item.locked ? "Deeper layer locked" : item.hint}</p>
+                      <p className="mt-1 text-xs leading-5 text-slate-400">{item.locked ? "Tiefere Ebene gesperrt" : item.hint}</p>
                     </div>
                     <span className="font-mono text-xl font-semibold text-white">{item.score}</span>
                   </div>
@@ -324,9 +324,9 @@ export function MissionResultHero({
             <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
               <div className="flex items-center justify-between gap-3">
                 <h2 className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-300">
-                  Critical Signals
+                  Wichtige Warnsignale
                 </h2>
-                <span className="text-xs text-slate-500">{signals.length} detected</span>
+                <span className="text-xs text-slate-500">{signals.length} erkannt</span>
               </div>
               <div className="mt-4 space-y-3">
                 {signals.map((signal, index) => (
@@ -358,19 +358,19 @@ export function MissionResultHero({
                     href={`/api/premium-report/${encodeURIComponent(analysisId)}/pdf`}
                     className="inline-flex w-full items-center justify-center rounded-lg border border-emerald-300/30 bg-emerald-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-200"
                   >
-                    Premium PDF herunterladen
+                    Premium-PDF herunterladen
                   </Link>
                 ) : canViewFull ? (
                   <PremiumReportRequestButton
                     analysisId={analysisId}
                     url={result.url}
-                    label="49 EUR Premium Report"
+                    label="49 EUR Premium-Bericht"
                     className="w-full rounded-lg px-4 py-3 text-sm"
                   />
                 ) : (
                   <CheckoutButton
                     analysisId={analysisId}
-                    label="5 EUR Full Analysis"
+                    label="5 EUR Vollanalyse"
                     className="w-full justify-center rounded-lg bg-cyan-300 px-4 py-3 text-sm font-bold text-slate-950 hover:bg-cyan-200"
                   />
                 )}

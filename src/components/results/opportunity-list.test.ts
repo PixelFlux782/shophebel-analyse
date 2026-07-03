@@ -47,9 +47,10 @@ describe("OpportunityList", () => {
       React.createElement(OpportunityList, { opportunities }),
     );
 
-    expect(markup).toContain("KI- und Umsatzchancen aus deiner Analyse");
+    expect(markup).toContain("Die wichtigsten 3 Hebel");
+    expect(markup).toContain("Was jetzt am staerksten auf Anfragen und Kaeufe wirkt");
     expect(markup).toContain("Erkannter Hebel 1");
-    expect(markup).toContain("Geschäftliche Wirkung");
+    expect(markup).toContain("Geschaeftliche Wirkung");
     expect(markup).toContain("KI-Chance");
     expect(markup).toContain("Empfohlener Umsetzungspfad");
     expect(markup).toContain("Empfohlene Begleitung");
@@ -61,7 +62,8 @@ describe("OpportunityList", () => {
     expect(markup).toContain("module=AI+Button+Rewrite");
     expect(markup).toContain("service=Anfrage-%2FKaufwahrscheinlichkeit+Umsetzung");
     expect(markup).toContain("#kontakt");
-    expect(markup).not.toContain("Erkannter Hebel 7");
+    expect(markup).toContain("Weitere Hebel anzeigen");
+    expect(markup).toContain("Erkannter Hebel 7");
   });
 
   it("faellt bei Opportunities ohne Modul oder Service auf den bestehenden CTA zurueck", () => {

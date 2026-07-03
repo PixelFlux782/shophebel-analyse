@@ -15,7 +15,7 @@ const DEMO_OPTIONS = [
   {
     type: "onlineshop",
     title: "Onlineshop",
-    description: "Naturkosmetik-Shop mit typischen Trust- und CTA-Hebeln",
+    description: "Naturkosmetik-Shop mit typischen Vertrauens- und Button-Hebeln",
     icon: "01",
   },
   {
@@ -36,7 +36,7 @@ const TRUST_BADGES = [
   "Keine Registrierung",
   "Ergebnis sofort sichtbar",
   "Konkrete Maßnahmen",
-  "Premium-Report optional",
+  "Premium-Bericht optional",
 ];
 
 export function UrlForm({ initialUrl = "", initialPlan }: UrlFormProps) {
@@ -182,7 +182,7 @@ export function UrlForm({ initialUrl = "", initialPlan }: UrlFormProps) {
                 : initialPlan === "full"
                   ? "Analyse starten und Vollanalyse freischalten"
                   : initialPlan === "premium"
-                    ? "Analyse starten und Premium-Report kaufen"
+                    ? "Analyse starten und Premium-Bericht kaufen"
                     : "Kostenlose Analyse starten"}
             </span>
           </button>
@@ -206,7 +206,7 @@ export function UrlForm({ initialUrl = "", initialPlan }: UrlFormProps) {
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-[0.22em] text-slate-300">Beispiel-Analyse</h3>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Sieh dir zuerst ein fertiges Ergebnis an und prüfe, wie der Report aufgebaut ist.
+              Sieh dir zuerst ein fertiges Ergebnis an und prüfe, wie der Bericht aufgebaut ist.
             </p>
           </div>
           <button
@@ -244,9 +244,9 @@ export function UrlForm({ initialUrl = "", initialPlan }: UrlFormProps) {
       </div>
 
       <div className="rounded-[1.5rem] border border-cyan-300/15 bg-cyan-300/[0.06] p-5 backdrop-blur-xl">
-        <p className="text-sm font-semibold text-cyan-100">Premium-Report</p>
+        <p className="text-sm font-semibold text-cyan-100">Premium-Bericht</p>
         <p className="mt-2 text-sm leading-6 text-slate-300">
-          Willst du wissen, was du konkret ändern solltest? Der Premium-Report ergänzt Screenshots, Prioritäten und einen 7-Tage-Maßnahmenplan.
+          Willst du wissen, was du konkret ändern solltest? Der Premium-Bericht ergänzt Screenshots, Prioritäten und einen 7-Tage-Fahrplan.
         </p>
       </div>
     </div>

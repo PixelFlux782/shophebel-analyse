@@ -6,7 +6,7 @@ interface OpportunityListProps {
   opportunities?: AnalysisOpportunity[];
 }
 
-const MAX_VISIBLE_OPPORTUNITIES = 6;
+const MAX_VISIBLE_OPPORTUNITIES = 3;
 
 const severityClasses: Record<OpportunitySeverity, string> = {
   low: "bg-slate-100 text-slate-700",
@@ -16,20 +16,20 @@ const severityClasses: Record<OpportunitySeverity, string> = {
 };
 
 const severityLabels: Record<OpportunitySeverity, string> = {
-  low: "Priorität niedrig",
-  medium: "Priorität mittel",
-  high: "Priorität hoch",
-  critical: "Priorität kritisch",
+  low: "Prioritaet niedrig",
+  medium: "Prioritaet mittel",
+  high: "Prioritaet hoch",
+  critical: "Prioritaet kritisch",
 };
 
 const categoryLabels: Record<string, string> = {
   seo: "Auffindbarkeit",
-  performance: "Ladegefühl",
+  performance: "Ladegefuehl",
   trust: "Vertrauen",
-  conversion: "Conversion",
+  conversion: "Anfrage- und Kaufklarheit",
   design: "Design",
   aiVisibility: "KI-Sichtbarkeit",
-  ux: "Nutzerführung",
+  ux: "Nutzerfuehrung",
 };
 
 function getCategoryLabel(category: string) {
@@ -75,6 +75,7 @@ function OpportunityField({
 
 export function OpportunityList({ opportunities }: OpportunityListProps) {
   const visibleOpportunities = opportunities?.slice(0, MAX_VISIBLE_OPPORTUNITIES) ?? [];
+  const hiddenOpportunities = opportunities?.slice(MAX_VISIBLE_OPPORTUNITIES) ?? [];
 
   if (visibleOpportunities.length === 0) {
     return null;
@@ -88,14 +89,14 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
       <div className="grid gap-5 lg:grid-cols-[1fr_auto] lg:items-start">
         <div>
           <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-700">
-            Erkannte Hebel
+            Die wichtigsten 3 Hebel
           </p>
           <h2 className="mt-2 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            KI- und Umsatzchancen aus deiner Analyse
+            Was jetzt am staerksten auf Anfragen und Kaeufe wirkt
           </h2>
           <p className="mt-3 max-w-3xl text-base leading-8 text-slate-600">
-            Diese Potenziale übersetzen die wichtigsten Signale in konkrete Hebel: geschäftliche Wirkung,
-            KI-Chance, empfohlener Umsetzungspfad und der nächste sinnvolle Schritt.
+            Dieser Block buendelt Befunde, Empfehlungen und Umsatzbremsen zu drei priorisierten Hebeln.
+            Weitere Details bleiben darunter abrufbar.
           </p>
         </div>
         <div className="rounded-2xl border border-cyan-100 bg-cyan-50 px-4 py-3 text-sm font-bold text-cyan-900">
@@ -127,7 +128,7 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
             </div>
 
             <div className="grid gap-4 p-5 lg:grid-cols-2">
-              <OpportunityField label="Geschäftliche Wirkung" value={opportunity.businessImpact} />
+              <OpportunityField label="Geschaeftliche Wirkung" value={opportunity.businessImpact} />
               <OpportunityField label="KI-Chance" value={opportunity.aiOpportunity} />
               <OpportunityField label="Empfohlener Umsetzungspfad" value={opportunity.suggestedModule} />
               <OpportunityField label="Empfohlene Begleitung" value={opportunity.suggestedService} />
@@ -139,7 +140,7 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
                 <p className="mt-2 text-sm leading-6 text-slate-700">
                   {opportunity.recurringPotential
                     ? "Eignet sich als wiederkehrender Optimierungs- oder Monitoring-Hebel."
-                    : "Vor allem als einmaliger nächster sinnvoller Schritt geeignet."}
+                    : "Vor allem als einmaliger naechster sinnvoller Schritt geeignet."}
                 </p>
               </div>
             </div>
@@ -155,6 +156,29 @@ export function OpportunityList({ opportunities }: OpportunityListProps) {
           </article>
         ))}
       </div>
+
+      {hiddenOpportunities.length ? (
+        <details className="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <summary className="cursor-pointer text-sm font-bold text-slate-950">
+            Weitere Hebel anzeigen
+          </summary>
+          <div className="mt-4 grid gap-3 lg:grid-cols-2">
+            {hiddenOpportunities.map((opportunity) => (
+              <article key={opportunity.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                  {getCategoryLabel(opportunity.category)}
+                </p>
+                <h3 className="mt-2 text-base font-bold text-slate-950">
+                  {polishPremiumText(opportunity.title)}
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  {polishPremiumText(opportunity.businessImpact)}
+                </p>
+              </article>
+            ))}
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }

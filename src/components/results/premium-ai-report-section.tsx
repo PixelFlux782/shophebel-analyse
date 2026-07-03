@@ -240,10 +240,10 @@ export function PremiumAiReportSection({
     return (
       <section className="rounded-[2rem] border border-white/10 bg-slate-900 p-6 text-white shadow-[0_30px_90px_-60px_rgba(15,23,42,0.9)] sm:p-8">
         <p className="text-sm font-bold uppercase tracking-[0.2em] text-cyan-200">
-          KI-Premiumbericht
+          KI-Beratung
         </p>
         <h2 className="mt-3 text-2xl font-bold tracking-tight">
-          Der KI-Beraterbericht ist in Premium enthalten.
+          Die KI-Einordnung ist in Premium enthalten.
         </h2>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300">
           Nach dem Premium-Upgrade kannst du den gespeicherten KI-Bericht für diese Analyse erzeugen und erneut lesen.
@@ -261,7 +261,7 @@ export function PremiumAiReportSection({
               KI-Beratung
             </p>
             <h2 className="mt-4 text-3xl font-bold tracking-tight sm:text-4xl">
-          KI-Premiumbericht
+              KI-Einordnung
             </h2>
             <p className="mt-4 max-w-2xl text-base leading-8 text-slate-200">
               Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und konkreten Textideen.
@@ -275,7 +275,7 @@ export function PremiumAiReportSection({
               disabled={state === "loading"}
               className="inline-flex w-full items-center justify-center rounded-2xl bg-cyan-300 px-6 py-4 text-base font-extrabold text-slate-950 shadow-[0_20px_60px_-28px_rgba(34,211,238,0.9)] transition hover:-translate-y-0.5 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0 sm:w-auto"
             >
-              {state === "loading" ? "KI-Bericht wird erstellt ..." : "KI-Premiumbericht erzeugen"}
+              {state === "loading" ? "KI-Beratung wird erstellt ..." : "KI-Einordnung erzeugen"}
             </button>
           ) : null}
         </div>

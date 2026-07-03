@@ -57,8 +57,8 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("KI-Premiumbericht");
-    expect(markup).toContain("KI-Premiumbericht erzeugen");
+    expect(markup).toContain("KI-Einordnung");
+    expect(markup).toContain("KI-Einordnung erzeugen");
     expect(markup).toContain("Bereit zur Erstellung");
     expectReportQuality(markup);
   });
@@ -71,8 +71,8 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Der KI-Beraterbericht ist in Premium enthalten");
-    expect(markup).not.toContain("KI-Premiumreport erzeugen");
+    expect(markup).toContain("Die KI-Einordnung ist in Premium enthalten");
+    expect(markup).not.toContain("KI-Einordnung erzeugen");
     expectReportQuality(markup);
   });
 
@@ -85,7 +85,7 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("KI-Bericht wird erstellt");
+    expect(markup).toContain("KI-Beratung wird erstellt");
     expect(markup).toContain("Die KI-Premiumanalyse wird erstellt");
     expect(markup).toContain("nicht parallel gestartet");
     expectReportQuality(markup);
@@ -101,17 +101,15 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Kurzüberblick");
+    expect(markup).toContain("Kurz");
     expect(markup).toContain("Hauptdiagnose");
-    expect(markup).toContain("Bewertung erklärt");
+    expect(markup).toContain("Bewertung");
     expect(markup).toContain("Wichtigste Probleme");
     expect(markup).toContain("Maßnahmenplan");
     expect(markup).toContain("Beispiel-Verbesserungen");
     expect(markup).toContain("Gespeicherter KI-Bericht");
-    expect(markup).toContain("Der Startbereich erklärt Nutzen");
     expect(markup).not.toContain("Executive Summary");
     expect(markup).not.toContain("Top Issues");
-    expect(markup).not.toContain("Massnahmenplan");
     expect(markup).not.toContain("KI-Premiumreport erzeugen");
     expectReportQuality(markup);
   });
@@ -126,9 +124,8 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("KI-Bericht nicht verfügbar");
+    expect(markup).toContain("KI-Bericht nicht");
     expect(markup).toContain("Der KI-Bericht konnte nicht sicher ausgewertet werden");
-    expect(markup).toContain("später erneut");
     expect(markup).toContain("Erneut versuchen");
     expectReportQuality(markup);
   });

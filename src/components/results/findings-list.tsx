@@ -28,7 +28,7 @@ export function FindingsList({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Findings
+            Befunde
           </p>
           <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">
             Was auf der Startseite auffaellt
@@ -41,7 +41,7 @@ export function FindingsList({
 
       {displayedFindings.length === 0 ? (
         <div className="mt-6 rounded-[1.45rem] border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-sm leading-7 text-slate-600">
-          Keine Findings vorhanden. Das ist ein gutes Zeichen, aber eine tiefere Vollanalyse kann dennoch weitere Hebel sichtbar machen.
+          Keine Befunde vorhanden. Das ist ein gutes Zeichen, aber eine tiefere Vollanalyse kann dennoch weitere Hebel sichtbar machen.
         </div>
       ) : (
         <div className="mt-6 grid gap-4">

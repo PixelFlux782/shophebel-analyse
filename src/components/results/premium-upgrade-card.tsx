@@ -23,7 +23,7 @@ export function PremiumUpgradeCard({
           Du siehst die komplette Analyse
         </h2>
         <p className="mt-4 max-w-3xl text-base leading-8 text-slate-600">
-          Alle Findings und Empfehlungen sind freigeschaltet. Diese Ansicht eignet sich als priorisierte Arbeitsgrundlage für die nächsten Optimierungsschritte.
+          Alle Befunde und Empfehlungen sind freigeschaltet. Diese Ansicht eignet sich als priorisierte Arbeitsgrundlage für die nächsten Optimierungsschritte.
         </p>
       </section>
     );

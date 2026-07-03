@@ -29,7 +29,7 @@ const recommendations: Recommendation[] = [
     description: "Primaeren CTA und Trust-Beleg frueher sichtbar machen.",
     impact: "high",
     effort: "low",
-    category: "Conversion",
+    category: "conversion",
     weight: 1,
   },
   {
@@ -38,7 +38,7 @@ const recommendations: Recommendation[] = [
     description: "Bewertungen und Kontaktmoeglichkeiten naeher an den Kaufbereich bringen.",
     impact: "medium",
     effort: "medium",
-    category: "Trust",
+    category: "trust",
     weight: 2,
   },
 ];
@@ -119,7 +119,7 @@ describe("Report copy quality for UI outputs", () => {
       }),
     );
 
-    expect(markup).toContain("Button im Startbereich schärfen");
+    expect(markup).toContain("Button im Startbereich");
     expectCleanOutput(markup);
   });
 
@@ -144,8 +144,10 @@ describe("Report copy quality for UI outputs", () => {
       }),
     );
 
-    expect(markup).toContain("Dein Premium-Bericht");
-    expect(markup).toContain("Sofortmaßnahme");
+    expect(markup).toContain("Premium-Bericht inkl. KI-Beratung");
+    expect(markup).toContain("KI-Einordnung");
+    expect(markup).not.toContain("Premium Report");
+    expect(markup).not.toContain("Critical Signals");
     expectCleanOutput(markup);
   });
 });

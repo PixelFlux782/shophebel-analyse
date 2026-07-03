@@ -17,38 +17,38 @@ type PanelState = "queued" | "running" | "complete";
 
 const analysisStages = [
   {
-    label: "Scanning visual hierarchy...",
-    detail: "Capturing above-the-fold structure, headline weight and CTA position.",
+    label: "Visuelle Hierarchie wird geprüft...",
+    detail: "Sichtbarer Startbereich, Überschriftengewicht und Button-Position werden erfasst.",
     progress: 13,
     targetScore: 24,
   },
   {
-    label: "Detecting conversion friction...",
-    detail: "Checking purchase paths, action clarity and decision blockers.",
+    label: "Anfrage- und Kaufreibung wird erkannt...",
+    detail: "Kaufwege, Handlungsklarheit und Entscheidungsbremsen werden geprüft.",
     progress: 28,
     targetScore: 39,
   },
   {
-    label: "Analyzing trust architecture...",
-    detail: "Mapping social proof, contact signals, legal confidence and risk cues.",
+    label: "Vertrauenssignale werden analysiert...",
+    detail: "Bewertungen, Kontaktwege, rechtliche Sicherheit und Risikohinweise werden eingeordnet.",
     progress: 44,
     targetScore: 53,
   },
   {
-    label: "Evaluating mobile experience...",
-    detail: "Comparing mobile readability, fold priority and thumb-zone actions.",
+    label: "Mobile Wirkung wird bewertet...",
+    detail: "Lesbarkeit, Reihenfolge und Daumenbereich werden mobil verglichen.",
     progress: 61,
     targetScore: 66,
   },
   {
-    label: "Checking AI visibility...",
-    detail: "Reading semantic clarity, entity signals and answer-engine readiness.",
+    label: "KI-Sichtbarkeit wird geprüft...",
+    detail: "Semantische Klarheit, Entitätssignale und Antwortfähigkeit werden gelesen.",
     progress: 78,
     targetScore: 76,
   },
   {
-    label: "Building intelligence report...",
-    detail: "Prioritizing findings into revenue levers and next actions.",
+    label: "Analysebericht wird erstellt...",
+    detail: "Befunde werden zu Umsatzhebeln und nächsten Schritten priorisiert.",
     progress: 92,
     targetScore: 84,
   },
@@ -57,53 +57,53 @@ const analysisStages = [
 const intelligencePanels = [
   {
     title: "Visuelle Analyse",
-    metric: "Hierarchy map",
-    finding: "Hero, CTA density and first-screen clarity are being mapped.",
+    metric: "Hierarchie-Karte",
+    finding: "Startbereich, Button-Dichte und erste Orientierung werden kartiert.",
     accent: "bg-sky-300",
   },
   {
-    title: "Conversion Signals",
-    metric: "Friction model",
-    finding: "Primary actions, form effort and decision paths are compared.",
+    title: "Anfrage- und Kaufsignale",
+    metric: "Reibungsmodell",
+    finding: "Haupthandlung, Formularaufwand und Entscheidungswege werden verglichen.",
     accent: "bg-emerald-300",
   },
   {
-    title: "AI Visibility",
-    metric: "Entity layer",
-    finding: "Offer language, topical signals and crawlable context are checked.",
+    title: "KI-Sichtbarkeit",
+    metric: "Entitätsebene",
+    finding: "Angebotssprache, Themensignale und lesbarer Kontext werden geprüft.",
     accent: "bg-violet-300",
   },
   {
     title: "Mobile UX",
-    metric: "Viewport pass",
-    finding: "Fold sequence, spacing and action reach are evaluated for mobile.",
+    metric: "Mobile Ansicht",
+    finding: "Reihenfolge, Abstände und erreichbare Handlungen werden mobil bewertet.",
     accent: "bg-cyan-300",
   },
   {
-    title: "Trust Layer",
-    metric: "Confidence graph",
-    finding: "Reviews, contact routes, guarantees and risk reducers are located.",
+    title: "Vertrauensebene",
+    metric: "Sicherheitskarte",
+    finding: "Bewertungen, Kontaktwege, Garantien und Risikominderer werden lokalisiert.",
     accent: "bg-amber-300",
   },
   {
-    title: "Technical Scan",
-    metric: "Runtime signals",
-    finding: "Indexability, response behavior and rendered structure are validated.",
+    title: "Technische Prüfung",
+    metric: "Ladesignale",
+    finding: "Indexierbarkeit, Antwortverhalten und gerenderte Struktur werden geprüft.",
     accent: "bg-rose-300",
   },
 ];
 
 const scanMarkers = [
-  { label: "CTA", top: "38%", left: "16%", delay: 0.1 },
-  { label: "Trust", top: "64%", left: "69%", delay: 0.28 },
-  { label: "Hero", top: "24%", left: "51%", delay: 0.46 },
+  { label: "Button", top: "38%", left: "16%", delay: 0.1 },
+  { label: "Vertrauen", top: "64%", left: "69%", delay: 0.28 },
+  { label: "Start", top: "24%", left: "51%", delay: 0.46 },
   { label: "Mobile", top: "76%", left: "33%", delay: 0.64 },
 ];
 
 function planLabel(plan?: CheckoutPlan) {
-  if (plan === "full") return "Full analysis pipeline";
-  if (plan === "premium") return "Premium report pipeline";
-  return "Live website intelligence";
+  if (plan === "full") return "Vollanalyse wird vorbereitet";
+  if (plan === "premium") return "Premium-Bericht wird vorbereitet";
+  return "Live-Website-Analyse";
 }
 
 function normalizeUrlInput(value: string) {
@@ -568,9 +568,9 @@ export function AnalyseDashboardEntry({
             </section>
 
             <section className="rounded-lg border border-white/[0.08] bg-[#0b0e13] p-4">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">detected work queue</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-slate-500">erkannte Prüfpunkte</p>
               <div className="mt-4 grid gap-3">
-                {["Above-the-fold clarity", "Primary CTA contrast", "Review proof placement", "Mobile purchase path"].map((item, index) => {
+                {["Klarheit im Startbereich", "Kontrast des Hauptbuttons", "Platzierung von Vertrauensbelegen", "Mobiler Kaufweg"].map((item, index) => {
                   const visible = isScanning && scanIndex >= index + 1;
 
                   return (
