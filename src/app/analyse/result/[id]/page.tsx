@@ -36,6 +36,9 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface AnalyseResultPageProps {
   params: Promise<{
     id: string;
@@ -55,9 +58,9 @@ function fallbackOpportunities(analysis: AnalysisResult): AnalysisOpportunity[] 
       description: item.action,
       category: item.category,
       businessImpact: item.whyItCostsCustomers,
-      suggestedModule: item.suggestedModule ?? "Priorisierter Umsetzungshebel",
-      suggestedService: item.suggestedService ?? "Umsetzung besprechen",
-      expectedEffect: item.businessImpact,
+      suggestedModule: "Priorisierter Umsetzungshebel",
+      suggestedService: "Umsetzung besprechen",
+      expectedEffect: `Wirkung: ${item.estimatedImpact}`,
       priorityScore: 95 - index,
     })),
     ...(analysis.measures ?? []).map((item, index) => ({
