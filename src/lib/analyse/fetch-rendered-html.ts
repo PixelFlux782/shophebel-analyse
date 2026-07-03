@@ -8,6 +8,15 @@ import { collectVisualMap } from "@/lib/analyse/visual-map";
 import { collectVisualSignals } from "@/lib/analyse/visual-signals";
 
 const NAVIGATION_TIMEOUT_MS = 25000;
+const CONSENT_BUTTON_LABELS = [
+  "alle akzeptieren",
+  "akzeptieren",
+  "zustimmen",
+  "einverstanden",
+  "accept all",
+  "accept",
+  "ok",
+];
 
 export class FetchRenderedHtmlError extends Error {}
 
@@ -30,6 +39,45 @@ interface PageMetrics {
   pageTitle: string;
   visibleText: string;
   pageSignals: PageRenderSignals;
+}
+
+async function dismissCommonConsentOverlays(
+  page: Awaited<ReturnType<Awaited<ReturnType<typeof launchBrowser>>["newPage"]>>,
+) {
+  const clicked = await page.evaluate((labels) => {
+    const normalize = (value: string) => value.trim().replace(/\s+/g, " ").toLowerCase();
+    const candidates = Array.from(
+      document.querySelectorAll<HTMLElement>("button, [role='button'], a"),
+    ).filter((element) => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+
+      return (
+        style.visibility !== "hidden" &&
+        style.display !== "none" &&
+        rect.width > 0 &&
+        rect.height > 0
+      );
+    });
+
+    for (const label of labels) {
+      const match = candidates.find((element) => normalize(element.innerText || element.textContent || "") === label);
+
+      if (match) {
+        match.click();
+        return label;
+      }
+    }
+
+    return null;
+  }, CONSENT_BUTTON_LABELS).catch(() => null);
+
+  if (clicked) {
+    console.info("[analysis] dismissed common consent overlay", {
+      label: clicked,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 700));
+  }
 }
 
 export async function fetchRenderedHtml(
@@ -63,6 +111,7 @@ export async function fetchRenderedHtml(
       waitUntil: "networkidle2",
       timeout: NAVIGATION_TIMEOUT_MS,
     });
+    await dismissCommonConsentOverlays(page);
     try {
       await assertPublicHttpUrl(page.url() || requestedUrl);
     } catch (error) {

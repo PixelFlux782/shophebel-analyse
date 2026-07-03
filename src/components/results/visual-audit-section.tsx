@@ -435,7 +435,7 @@ export function VisualAuditSection({
   const screenshotDiagnostic = buildScreenshotDiagnostic(result, plan, analysisId);
 
   return (
-    <section data-component="VisualAuditSection" className="border border-slate-200 bg-white p-5 shadow-[0_30px_100px_-68px_rgba(15,23,42,0.42)] sm:p-6">
+    <section data-component="VisualAuditSection" className="scroll-mt-28 border border-slate-200 bg-white p-5 shadow-[0_30px_100px_-68px_rgba(15,23,42,0.42)] sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl">
           <p className="text-sm font-bold uppercase tracking-[0.16em] text-slate-500">

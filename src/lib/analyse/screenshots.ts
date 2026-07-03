@@ -13,11 +13,69 @@ export interface ScreenshotCaptureDiagnostics {
   }>;
 }
 
-export async function capturePageScreenshot(page: Page, prefix: string) {
-  const buffer = await page.screenshot({
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function prepareScreenshotSurface(page: Page) {
+  await page.evaluate(() => {
+    window.scrollTo(0, 0);
+
+    const styleId = "shophebel-screenshot-stability";
+    if (!document.getElementById(styleId)) {
+      const style = document.createElement("style");
+      style.id = styleId;
+      style.textContent = `
+        *, *::before, *::after {
+          animation-duration: 0s !important;
+          animation-delay: 0s !important;
+          transition-duration: 0s !important;
+          scroll-behavior: auto !important;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }).catch(() => undefined);
+  await wait(250);
+}
+
+async function captureClippedPng(
+  page: Page,
+  clip: {
+    width: number;
+    height: number;
+  },
+) {
+  await prepareScreenshotSurface(page);
+
+  return page.screenshot({
     type: "png",
-    fullPage: true,
+    captureBeyondViewport: true,
+    clip: {
+      x: 0,
+      y: 0,
+      width: clip.width,
+      height: clip.height,
+    },
   });
+}
+
+async function getDocumentClip(page: Page) {
+  return page.evaluate(() => ({
+    width: Math.max(
+      document.documentElement.clientWidth,
+      Math.min(document.documentElement.scrollWidth, 1440),
+    ),
+    height: Math.max(
+      document.documentElement.clientHeight,
+      Math.min(document.documentElement.scrollHeight, 2600),
+    ),
+  }));
+}
+
+export async function capturePageScreenshot(page: Page, prefix: string) {
+  const clip = await getDocumentClip(page);
+  const buffer = await captureClippedPng(page, clip);
 
   return saveScreenshotBuffer({
     buffer: buffer as Uint8Array,
@@ -27,9 +85,15 @@ export async function capturePageScreenshot(page: Page, prefix: string) {
 }
 
 export async function captureViewportScreenshot(page: Page, prefix: string) {
-  const buffer = await page.screenshot({
-    type: "png",
-    fullPage: false,
+  await page.setViewport({
+    width: 1365,
+    height: 900,
+    deviceScaleFactor: 1,
+  });
+
+  const buffer = await captureClippedPng(page, {
+    width: 1365,
+    height: 900,
   });
 
   return saveScreenshotBuffer({
@@ -56,11 +120,11 @@ export async function captureMobileScreenshot(page: Page, prefix: string) {
     isMobile: true,
   });
 
-  await new Promise((resolve) => setTimeout(resolve, 350));
+  await wait(350);
 
-  const buffer = await page.screenshot({
-    type: "png",
-    fullPage: false,
+  const buffer = await captureClippedPng(page, {
+    width: 390,
+    height: 844,
   });
 
   if (currentViewport) {

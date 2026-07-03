@@ -36,46 +36,46 @@ export function PremiumReportSection({
   return (
     <section
       data-component="PremiumReportSection"
-      className="overflow-hidden border border-[#2b2118] bg-[#18130f] text-[#fff8ed] shadow-[0_42px_150px_-74px_rgba(24,19,15,0.88)]"
+      className="scroll-mt-28 overflow-hidden border border-[#2c3a38] bg-[#151918] text-[#f4fbf7] shadow-[0_42px_150px_-74px_rgba(15,23,42,0.78)]"
     >
       <div className="grid lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="px-5 py-8 sm:px-7 lg:px-10 lg:py-11">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#d9b36f]">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#9fd3c7]">
             Premium freigeschaltet
           </p>
           <h2 className="mt-4 max-w-4xl text-4xl font-semibold tracking-tight sm:text-5xl">
             Premium-Bericht inkl. KI-Beratung
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-8 text-[#d8c7b3]">
+          <p className="mt-5 max-w-2xl text-base leading-8 text-[#c8d8d3]">
             Ein eigenständiger Arbeitsbericht für Priorität, Entscheidung und Umsetzung:
             ruhig lesbar, als PDF nutzbar und durch KI-Beratung direkt verdichtet.
           </p>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-5">
             {includedItems.map((item, index) => (
-              <div key={item} className="border-t border-[#d9b36f]/35 pt-3">
-                <span className="font-mono text-sm text-[#d9b36f]">0{index + 1}</span>
+              <div key={item} className="border-t border-[#9fd3c7]/35 pt-3">
+                <span className="font-mono text-sm text-[#9fd3c7]">0{index + 1}</span>
                 <p className="mt-2 text-sm font-semibold text-[#fff8ed]">{item}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <aside className="border-t border-[#d9b36f]/20 bg-[#241b14] p-5 sm:p-7 lg:border-l lg:border-t-0">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#d9b36f]">
+        <aside className="border-t border-[#9fd3c7]/20 bg-[#1d2423] p-5 sm:p-7 lg:border-l lg:border-t-0">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#9fd3c7]">
             Berichtszugang
           </p>
           <h3 className="mt-3 text-2xl font-semibold tracking-tight">
             PDF plus KI-Einordnung
           </h3>
-          <p className="mt-4 text-sm leading-7 text-[#d8c7b3]">
+          <p className="mt-4 text-sm leading-7 text-[#c8d8d3]">
             Der Download ist der statische Bericht. Die KI-Beratung darunter macht daraus
             Diagnose, Reihenfolge und konkrete Umsetzungsideen.
           </p>
           {pdfHref ? (
             <Link
               href={pdfHref}
-              className="mt-6 inline-flex w-full items-center justify-center bg-[#f4d28c] px-5 py-3 text-sm font-bold text-[#18130f] transition hover:bg-[#ffe1a3]"
+              className="mt-6 inline-flex w-full items-center justify-center bg-[#d8f2ea] px-5 py-3 text-sm font-bold text-[#111817] transition hover:bg-[#e9fff8]"
             >
               PDF-Bericht herunterladen
             </Link>
@@ -83,10 +83,10 @@ export function PremiumReportSection({
         </aside>
       </div>
 
-      <div className="border-t border-[#d9b36f]/20 bg-[#fff8ed] p-5 text-slate-950 sm:p-7 lg:p-9">
+      <div className="border-t border-[#9fd3c7]/20 bg-[#fff8ed] p-5 text-slate-950 sm:p-7 lg:p-9">
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.58fr)]">
-          <article className="border-l-4 border-[#b07a2b] pl-5">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a5a1f]">
+          <article className="border-l-4 border-[#3f9c8a] pl-5">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2f7668]">
               Kurzüberblick
             </p>
             <h3 className="mt-3 text-3xl font-semibold text-slate-950">
@@ -100,7 +100,7 @@ export function PremiumReportSection({
           </article>
 
           <article className="bg-white p-5 shadow-[0_18px_70px_-58px_rgba(15,23,42,0.45)]">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a5a1f]">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2f7668]">
               Schnellster Hebel
             </p>
             <p className="mt-3 text-lg font-semibold leading-7 text-slate-950">
@@ -131,7 +131,7 @@ export function PremiumReportSection({
         </div>
 
         <article className="mt-8 border-t border-slate-300 pt-5">
-          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#8a5a1f]">
+          <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#2f7668]">
             Conversion-Hypothese
           </p>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-slate-700">

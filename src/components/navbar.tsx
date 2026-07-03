@@ -18,15 +18,15 @@ const homepageLinks = [
 
 export function Navbar() {
   return (
-    <nav className="fixed left-0 right-0 top-0 z-50 flex justify-center p-4 sm:p-5">
-      <div className="flex w-full max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-black/50 px-4 py-4 shadow-[0_0_40px_rgba(37,99,235,0.10)] backdrop-blur-xl sm:px-8">
+    <nav className="fixed left-0 right-0 top-0 z-50 flex justify-center p-3 sm:p-5">
+      <div className="flex w-full max-w-7xl items-center justify-between rounded-2xl border border-white/10 bg-black/50 px-4 py-3 shadow-[0_0_40px_rgba(37,99,235,0.10)] backdrop-blur-xl sm:px-8 sm:py-4">
         <div className="flex min-w-0 items-center gap-5 lg:gap-8">
           <Link href={SHOPHEBEL_HOME_URL} className="group flex items-center gap-3 transition-opacity hover:opacity-80">
             <Image
               src="/branding/logo_only_letter.jpeg"
               alt="Logo"
-              width={28}
-              height={28}
+              width={26}
+              height={26}
               className="rounded-sm grayscale brightness-200"
               priority
             />

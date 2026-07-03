@@ -146,8 +146,9 @@ export default async function AnalyseResultPage({
       : fallbackOpportunities(analysis);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#f5f2ec] text-slate-800">
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[linear-gradient(180deg,_#fdfbf7_0%,_#f5f2ec_70%,_rgba(245,242,236,0)_100%)]" />
+    <div className="relative min-h-screen overflow-hidden bg-[#090c10] text-slate-800">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-[30rem] bg-[linear-gradient(180deg,_rgba(22,35,42,0.95)_0%,_rgba(9,12,16,0.88)_48%,_rgba(245,242,236,0)_100%)]" />
+      <div className="pointer-events-none absolute inset-x-0 top-56 bottom-0 bg-[#f5f2ec]" />
       <div className="pointer-events-none absolute inset-y-0 left-0 w-px bg-slate-200/70 sm:left-8" />
       <div className="pointer-events-none absolute inset-y-0 right-0 w-px bg-slate-200/70 sm:right-8" />
 

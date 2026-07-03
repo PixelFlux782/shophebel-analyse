@@ -213,10 +213,10 @@ export function MissionResultHero({
   return (
     <section
       data-component="MissionResultHero"
-      className="overflow-hidden border border-slate-200 bg-[#fffdf8] text-slate-950 shadow-[0_28px_120px_-82px_rgba(15,23,42,0.5)]"
+      className="scroll-mt-28 overflow-hidden border border-slate-200 bg-[#fffdf8] text-slate-950 shadow-[0_28px_120px_-82px_rgba(15,23,42,0.5)]"
     >
       <div className="grid lg:grid-cols-[18rem_minmax(0,1fr)]">
-        <aside className="border-b border-slate-200 bg-white px-5 py-6 sm:px-7 lg:border-b-0 lg:border-r">
+        <aside className="border-b border-slate-200 bg-white px-4 py-4 sm:px-7 sm:py-6 lg:border-b-0 lg:border-r">
           <div className="flex flex-wrap gap-2 text-xs font-medium text-slate-600 lg:block lg:space-y-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-800">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -230,53 +230,53 @@ export function MissionResultHero({
             </span>
           </div>
 
-          <div className="mt-8">
+          <div className="mt-4 sm:mt-8">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
               Analysewert
             </p>
             <div className="mt-3 flex items-end gap-2">
-              <div className="font-mono text-7xl font-semibold leading-none tracking-normal text-slate-950">
+              <div className="font-mono text-5xl font-semibold leading-none tracking-normal text-slate-950 sm:text-7xl">
                 <ScoreCountUp value={overall} />
               </div>
-              <div className="pb-2 font-mono text-2xl font-semibold text-slate-400">/100</div>
+              <div className="pb-1 font-mono text-xl font-semibold text-slate-400 sm:pb-2 sm:text-2xl">/100</div>
             </div>
-            <div className="mt-5 h-3 rounded-full bg-slate-100">
+            <div className="mt-4 h-2.5 rounded-full bg-slate-100 sm:mt-5 sm:h-3">
               <div
-                className={`h-3 rounded-full ${tone.progress}`}
+                className={`h-2.5 rounded-full sm:h-3 ${tone.progress}`}
                 style={{ width: `${Math.max(8, overall)}%` }}
               />
             </div>
-            <span className={`mt-5 inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${tone.badge}`}>
+            <span className={`mt-4 inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] sm:mt-5 ${tone.badge}`}>
               {getOverallStatusLabel(overall)}
             </span>
           </div>
 
-          <div className="mt-8 border-t border-slate-200 pt-5 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+          <div className="mt-5 border-t border-slate-200 pt-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500 sm:mt-8 sm:pt-5">
             <p>{formatDate(result.scannedAt ?? result.createdAt)}</p>
             <p className="mt-2">{modeLabel(result.analysisMode)}</p>
           </div>
         </aside>
 
-        <div className="px-5 py-6 sm:px-7 lg:px-8">
+        <div className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,0.72fr)]">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
                 Shophebel Report
               </p>
-              <h1 className="mt-3 max-w-3xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+              <h1 className="mt-3 max-w-3xl text-2xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
                 Diagnose und Top-Hebel fuer diese Seite
               </h1>
-              <p className="mt-5 max-w-3xl text-lg leading-8 text-slate-600">
+              <p className="mt-4 max-w-3xl text-base leading-7 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">
                 {scoreInterpretation(result, subscores)}
               </p>
 
-              <ol className="mt-7 grid gap-3">
+              <ol className="mt-5 grid gap-3 sm:mt-7">
                 {signals.map((signal, index) => (
                   <li
                     key={signal}
-                    className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-4 border-t border-slate-200 pt-4 text-base leading-7 text-slate-700"
+                    className="grid grid-cols-[2.1rem_minmax(0,1fr)] gap-3 border-t border-slate-200 pt-3 text-sm leading-6 text-slate-700 sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-4 sm:pt-4 sm:text-base sm:leading-7"
                   >
-                    <span className="font-mono text-2xl font-semibold text-slate-950">
+                    <span className="font-mono text-xl font-semibold text-slate-950 sm:text-2xl">
                       0{index + 1}
                     </span>
                     <span>{signal}</span>

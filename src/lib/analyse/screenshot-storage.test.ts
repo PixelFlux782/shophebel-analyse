@@ -17,6 +17,13 @@ vi.mock("fs/promises", () => ({
 
 function createScreenshotPage() {
   return {
+    evaluate: vi.fn((callback: () => unknown) => {
+      if (String(callback).includes("documentElement.scrollWidth")) {
+        return Promise.resolve({ width: 1280, height: 1600 });
+      }
+
+      return Promise.resolve(undefined);
+    }),
     screenshot: vi.fn().mockResolvedValue(new Uint8Array([1, 2, 3])),
     viewport: vi.fn().mockReturnValue({
       width: 1280,
