@@ -45,6 +45,23 @@ function getErrorMessage(code?: string | null) {
   }
 }
 
+function leverText(
+  lever: PremiumAiReport["topLevers"][number],
+  key: "whyItMatters" | "shopObservation" | "improvement" | "expectedEffect" | "difficulty",
+) {
+  const legacy = lever as unknown as {
+    problem?: string;
+    businessImpact?: string;
+    recommendation?: string;
+  };
+
+  if (key === "whyItMatters") return lever.whyItMatters ?? legacy.problem ?? "";
+  if (key === "shopObservation") return lever.shopObservation ?? legacy.businessImpact ?? "";
+  if (key === "improvement") return lever.improvement ?? legacy.recommendation ?? "";
+  if (key === "expectedEffect") return lever.expectedEffect ?? legacy.businessImpact ?? "Qualitativer Effekt ohne Zahlenversprechen.";
+  return lever.difficulty ?? "mittel";
+}
+
 function ReportView({
   report,
   source,
@@ -52,22 +69,24 @@ function ReportView({
   report: PremiumAiReport;
   source?: PremiumAiReportSource | null;
 }) {
+  const isDevelopment = process.env.NODE_ENV === "development";
+
   return (
-    <div className="mt-6 space-y-6">
+    <div className="mt-6 space-y-5">
       <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
-        <article className="rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_20px_80px_-58px_rgba(15,23,42,0.45)]">
+        <article className="rounded-lg border border-cyan-200 bg-white p-5 shadow-[0_16px_55px_-48px_rgba(15,23,42,0.45)]">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
             Management-Fazit
           </p>
           <p className="mt-3 text-base leading-8 text-slate-700">{normalizeGermanReportText(report.executiveSummary)}</p>
         </article>
 
-        <article className="rounded-2xl border border-amber-200 bg-white p-5 shadow-[0_20px_80px_-58px_rgba(15,23,42,0.45)]">
+        <article className="rounded-lg border border-amber-200 bg-white p-5 shadow-[0_16px_55px_-48px_rgba(15,23,42,0.45)]">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
             KI-Einordnung
           </p>
           <p className="mt-3 text-base leading-8 text-slate-700">{normalizeGermanReportText(report.mainDiagnosis)}</p>
-          {source ? (
+          {source && isDevelopment ? (
             <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
               {source === "cache"
                 ? "Gespeicherter KI-Bericht"
@@ -79,39 +98,60 @@ function ReportView({
         </article>
       </div>
 
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
+      <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_14px_55px_-48px_rgba(15,23,42,0.45)]">
         <h3 className="text-xl font-bold text-slate-950">Die wichtigsten 3 Hebel</h3>
-        <div className="mt-4 grid gap-4">
+        <div className="mt-4 grid gap-3">
           {report.topLevers.map((lever, index) => (
-            <div key={`${lever.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-                Hebel {index + 1}
-              </p>
-              <h4 className="mt-2 text-lg font-bold text-slate-950">{normalizeGermanReportText(lever.title)}</h4>
-              <p className="mt-3 text-sm leading-7 text-slate-700">
-                <strong className="text-slate-950">Problem:</strong> {normalizeGermanReportText(lever.problem)}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-700">
-                <strong className="text-slate-950">Wirkung:</strong> {normalizeGermanReportText(lever.businessImpact)}
-              </p>
-              <p className="mt-2 text-sm leading-7 text-slate-700">
-                <strong className="text-slate-950">Umsetzung:</strong> {normalizeGermanReportText(lever.recommendation)}
-              </p>
-              <p className="mt-3 rounded-xl border border-white bg-white px-4 py-3 text-sm font-bold leading-7 text-slate-950">
-                Erster Schritt: {normalizeGermanReportText(lever.firstStep)}
+            <div key={`${lever.title}-${index}`} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                    Hebel {index + 1}
+                  </p>
+                  <h4 className="mt-2 text-lg font-bold text-slate-950">{normalizeGermanReportText(lever.title)}</h4>
+                </div>
+                <p className="inline-flex w-fit rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600">
+                  {normalizeGermanReportText(leverText(lever, "difficulty"))}
+                </p>
+              </div>
+              <div className="mt-3 grid gap-3 md:grid-cols-2">
+                <p className="text-sm leading-7 text-slate-700">
+                  <strong className="text-slate-950">Warum wichtig:</strong> {normalizeGermanReportText(leverText(lever, "whyItMatters"))}
+                </p>
+                <p className="text-sm leading-7 text-slate-700">
+                  <strong className="text-slate-950">Im Shop passiert vermutlich:</strong> {normalizeGermanReportText(leverText(lever, "shopObservation"))}
+                </p>
+                <p className="text-sm leading-7 text-slate-700">
+                  <strong className="text-slate-950">Verbesserung:</strong> {normalizeGermanReportText(leverText(lever, "improvement"))}
+                </p>
+                <p className="text-sm leading-7 text-slate-700">
+                  <strong className="text-slate-950">Erwarteter Effekt:</strong> {normalizeGermanReportText(leverText(lever, "expectedEffect"))}
+                </p>
+              </div>
+              <p className="mt-3 rounded-lg border border-white bg-white px-4 py-3 text-sm font-bold leading-7 text-slate-950">
+                Erster kleiner Schritt: {normalizeGermanReportText(lever.firstStep)}
               </p>
             </div>
           ))}
         </div>
       </article>
 
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
-        <h3 className="text-xl font-bold text-slate-950">7-Tage-Fahrplan</h3>
-        <ol className="mt-4 grid gap-3">
+      <article className="rounded-lg border border-cyan-200 bg-white p-5 shadow-[0_14px_55px_-48px_rgba(15,23,42,0.45)]">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Umsetzung</p>
+            <h3 className="mt-2 text-xl font-bold text-slate-950">7-Tage-Fahrplan</h3>
+          </div>
+          <p className="text-sm font-semibold text-slate-600">Erst Klarheit, dann Umsetzung, dann Kontrolle.</p>
+        </div>
+        <ol className="mt-5 grid gap-3 lg:grid-cols-3">
           {report.sevenDayPlan.map((step) => (
-            <li key={`${step.day}-${step.focus}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <p className="text-sm font-bold text-slate-950">
-                {normalizeGermanReportText(step.day)}: {normalizeGermanReportText(step.focus)}
+            <li key={`${step.day}-${step.focus}`} className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-cyan-700">
+                {normalizeGermanReportText(step.day)}
+              </p>
+              <p className="mt-2 text-sm font-bold text-slate-950">
+                {normalizeGermanReportText(step.focus)}
               </p>
               <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-7 text-slate-700">
                 {step.tasks.map((task) => (
@@ -123,7 +163,7 @@ function ReportView({
         </ol>
       </article>
 
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
+      <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_14px_55px_-48px_rgba(15,23,42,0.45)]">
         <h3 className="text-xl font-bold text-slate-950">Fazit für Inhaber</h3>
         <p className="mt-3 text-sm leading-7 text-slate-700">{normalizeGermanReportText(report.ownerConclusion)}</p>
       </article>
@@ -210,10 +250,10 @@ export function PremiumAiReportSection({
               KI-Beratung
             </p>
             <h2 className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl">
-              KI-Einordnung
+              Premium-KI-Beratung
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
-              Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und einem umsetzbaren 7-Tage-Fahrplan.
+              Diagnose, die drei wichtigsten Hebel und ein umsetzbarer 7-Tage-Fahrplan aus den Analyse-Daten.
             </p>
           </div>
 

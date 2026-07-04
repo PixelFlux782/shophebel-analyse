@@ -373,6 +373,23 @@ function drawInsightCard(
   });
 }
 
+function aiLeverText(
+  lever: PremiumAiReport["topLevers"][number],
+  key: "whyItMatters" | "shopObservation" | "improvement" | "expectedEffect" | "difficulty",
+) {
+  const legacy = lever as unknown as {
+    problem?: string;
+    businessImpact?: string;
+    recommendation?: string;
+  };
+
+  if (key === "whyItMatters") return lever.whyItMatters ?? legacy.problem ?? MISSING_REPORT_VALUE;
+  if (key === "shopObservation") return lever.shopObservation ?? legacy.businessImpact ?? MISSING_REPORT_VALUE;
+  if (key === "improvement") return lever.improvement ?? legacy.recommendation ?? MISSING_REPORT_VALUE;
+  if (key === "expectedEffect") return lever.expectedEffect ?? legacy.businessImpact ?? "Qualitativer Effekt ohne Zahlenversprechen.";
+  return lever.difficulty ?? "mittel";
+}
+
 function drawMetricRow(doc: PDFKit.PDFDocument, fonts: Record<FontKey, string>, analysis: StoredAnalysisResult) {
   const x = doc.page.margins.left;
   const width = pageWidth(doc);
@@ -946,7 +963,7 @@ async function renderPremiumReportPdfWithFooterStats({
     drawTextBox(doc, fonts, {
       title: "Management-Fazit",
       tone: "ink",
-      body: [aiReport.executiveSummary, aiReport.ownerConclusion],
+      body: [aiReport.executiveSummary],
     });
     drawTextBox(doc, fonts, {
       title: "KI-Einordnung",
@@ -959,12 +976,19 @@ async function renderPremiumReportPdfWithFooterStats({
         tone: index === 0 ? "rose" : index === 1 ? "gold" : "mist",
         label: "KI-Hebel",
         body: [
-          `Problem: ${lever.problem}`,
-          `Wirkung: ${lever.businessImpact}`,
-          `Umsetzung: ${lever.recommendation}`,
-          `Erster Schritt: ${lever.firstStep}`,
+          `Warum wichtig: ${aiLeverText(lever, "whyItMatters")}`,
+          `Im Shop passiert vermutlich: ${aiLeverText(lever, "shopObservation")}`,
+          `Konkrete Verbesserung: ${aiLeverText(lever, "improvement")}`,
+          `Erster kleiner Schritt: ${lever.firstStep}`,
+          `Schwierigkeit: ${aiLeverText(lever, "difficulty")}`,
+          `Erwarteter Effekt: ${aiLeverText(lever, "expectedEffect")}`,
         ],
       });
+    });
+    drawTextBox(doc, fonts, {
+      title: "Inhaber-Fazit",
+      tone: "sage",
+      body: [aiReport.ownerConclusion],
     });
   } else {
     drawTextBox(doc, fonts, {

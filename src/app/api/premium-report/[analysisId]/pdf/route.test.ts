@@ -118,24 +118,30 @@ function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiRepo
     topLevers: [
       {
         title: "CTA schaerfen",
-        problem: "Der naechste Schritt ist nicht eindeutig.",
-        businessImpact: "Unklarheit kann Anfragen bremsen.",
-        recommendation: "Primaeren Button konkretisieren.",
+        whyItMatters: "Der naechste Schritt ist nicht eindeutig.",
+        shopObservation: "Unklarheit kann Anfragen bremsen.",
+        improvement: "Primaeren Button konkretisieren.",
         firstStep: "Button-Text pruefen.",
+        difficulty: "leicht",
+        expectedEffect: "Qualitativ: klarere Fuehrung bis zur Anfrage.",
       },
       {
         title: "Trust frueher zeigen",
-        problem: "Vertrauen kommt zu spaet.",
-        businessImpact: "Unsicherheit kann Besucher verlieren.",
-        recommendation: "Bewertungen im Startbereich zeigen.",
+        whyItMatters: "Vertrauen kommt zu spaet.",
+        shopObservation: "Unsicherheit kann Besucher verlieren.",
+        improvement: "Bewertungen im Startbereich zeigen.",
         firstStep: "Zwei Trust-Signale auswaehlen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: mehr Sicherheit vor der Entscheidung.",
       },
       {
         title: "Mobile Reihenfolge pruefen",
-        problem: "Wichtige Signale erscheinen mobil spaet.",
-        businessImpact: "Mobile Nutzer muessen mehr suchen.",
-        recommendation: "Startbereich mobil verdichten.",
+        whyItMatters: "Wichtige Signale erscheinen mobil spaet.",
+        shopObservation: "Mobile Nutzer muessen mehr suchen.",
+        improvement: "Startbereich mobil verdichten.",
         firstStep: "Mobile Ansicht gegenlesen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: schnelleres Verstehen auf kleinen Bildschirmen.",
       },
     ],
     sevenDayPlan: [
@@ -236,7 +242,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
       analysisId: "analysis-123",
       report: aiReport,
       status: "generated",
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: "premium-ai-report-v3",
       inputHash: "hash-123",
     });
     vi.doMock("@/lib/premium/premiumReportPdf", () => ({

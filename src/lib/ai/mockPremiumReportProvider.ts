@@ -41,21 +41,37 @@ function fallbackText(value: string | undefined, fallback: string) {
 function buildLever(
   blocker: PromptRevenueBlocker | undefined,
   fallbackTitle: string,
-  fallbackProblem: string,
-  fallbackRecommendation: string,
+  fallbackObservation: string,
+  fallbackImprovement: string,
+  fallbackFirstStep: string,
+  difficulty: "leicht" | "mittel" | "anspruchsvoll",
 ) {
   return {
     title: fallbackText(blocker?.title, fallbackTitle),
-    problem: fallbackText(blocker?.description, fallbackProblem),
-    businessImpact: fallbackText(
+    whyItMatters: fallbackText(
       blocker?.description,
-      "Dieser Punkt kann Besucher genau vor Anfrage oder Kauf unsicher machen.",
+      "Dieser Punkt ist wichtig, weil Besucher vor einer Anfrage oder einem Kauf schnell Sicherheit brauchen.",
     ),
-    recommendation: fallbackText(blocker?.action, fallbackRecommendation),
-    firstStep: fallbackText(
-      blocker?.action,
-      "Den betroffenen Abschnitt prüfen und eine konkrete Änderung direkt umsetzen.",
-    ),
+    shopObservation: fallbackText(blocker?.description, fallbackObservation),
+    improvement: fallbackText(blocker?.action, fallbackImprovement),
+    firstStep: fallbackText(blocker?.action, fallbackFirstStep),
+    difficulty,
+    expectedEffect: "Qualitativ: weniger Unsicherheit, klarere Orientierung und ein leichterer Weg zur nächsten Handlung.",
+  };
+}
+
+function estimateMockUsage(messages: PremiumPromptMessage[], content: string) {
+  const promptChars = messages.reduce((sum, message) => sum + message.content.length, 0);
+  const completionChars = content.length;
+  const promptTokens = Math.ceil(promptChars / 4);
+  const completionTokens = Math.ceil(completionChars / 4);
+
+  return {
+    promptTokens,
+    completionTokens,
+    totalTokens: promptTokens + completionTokens,
+    estimatedCost: 0,
+    isEstimated: true,
   };
 }
 
@@ -69,61 +85,73 @@ export const mockPremiumReportProvider: PremiumReportProvider = {
     const overallScore = payload.analysis?.overallScore ?? 0;
     const url = payload.analysis?.url ?? "die analysierte Seite";
 
-    return JSON.stringify({
-      executiveSummary: `Die Analyse zeigt für ${url} einen Score von ${overallScore}/100 und klare Ansatzpunkte, um Orientierung, Vertrauen und Kaufbereitschaft zu verbessern.`,
+    const content = JSON.stringify({
+      executiveSummary: `Die Analyse zeigt für ${url} einen Score von ${overallScore}/100: Der Shop hat eine brauchbare Grundlage, aber der erste Eindruck arbeitet noch nicht hart genug für die Entscheidung. Positiv ist, dass Angebot, Handlung und Vertrauen bereits erkennbare Anknüpfungspunkte haben. Gebremst wird der Shop vor allem, weil Besucher Nutzen, Sicherheit und nächsten Schritt noch zu stark selbst zusammensetzen müssen. Die nächsten sieben Tage sollten deshalb nicht in einen Komplettumbau gehen, sondern in eine klare Reihenfolge: erst Nutzen verstehen, dann Vertrauen spüren, dann eindeutig handeln.`,
       mainDiagnosis:
-        "Das Hauptproblem ist fehlende Priorisierung im ersten Eindruck. Das kostet wahrscheinlich Umsatz, weil Besucher Nutzen, Sicherheit und nächsten Schritt nicht schnell genug zusammenbringen. Der wichtigste erste Schritt ist, die Hauptbotschaft und den primären Button gemeinsam zu schärfen.",
+        "Das eigentliche Problem ist nicht, dass dem Shop einzelne Optimierungen fehlen, sondern dass die Entscheidungshilfe noch zu verteilt wirkt. Besucher bekommen vermutlich mehrere richtige Signale, aber nicht in der Reihenfolge, in der sie innerlich entscheiden: Was ist das Angebot, warum ist es glaubwürdig, was soll ich jetzt tun? Der erste Beratungshebel ist deshalb eine klarere Dramaturgie im sichtbaren und kaufnahen Bereich.",
       topLevers: [
         buildLever(
           firstBlocker,
-          "Nächster Schritt ist nicht klar genug",
-          "Wenn der nächste Schritt nicht sofort erkennbar ist, verlieren Besucher leichter die Orientierung.",
-          "Startbereich und primären Call to Action konkreter formulieren.",
+          "Nächsten Schritt im Startbereich eindeutiger machen",
+          "Im ersten Sichtbereich ist die empfohlene Handlung noch nicht stark genug geführt.",
+          "Startbereich und wichtigsten Button so formulieren, dass Angebot, Nutzen und Handlung zusammen lesbar werden.",
+          "Headline, Kurztext und Hauptbutton nebeneinander legen und alles streichen, was nicht direkt zur nächsten Entscheidung führt.",
+          "leicht",
         ),
         buildLever(
           secondBlocker,
-          "Vertrauen früher sichtbar machen",
-          "Vertrauenssignale senken Unsicherheit, bevor Besucher eine Anfrage oder einen Kauf erwägen.",
-          "Bewertungen, Garantien, Kontaktoptionen oder Referenzen näher an kaufnahe Bereiche bringen.",
+          "Vertrauen vor der Entscheidung sichtbar machen",
+          "Vertrauenssignale wirken erst dann, wenn sie nahe an Angebot, Preis, Produkt oder Anfrageweg stehen.",
+          "Vorhandene Belege wie Bewertungen, Servicehinweise, Kontakt oder Referenzen in die kaufnahe Zone rücken.",
+          "Zwei vorhandene Vertrauensbelege auswählen und direkt an der Stelle platzieren, an der Besucher zögern könnten.",
+          "mittel",
         ),
         buildLever(
           thirdBlocker,
-          "Anfrageweg einfacher führen",
-          "Wenn zu viele Signale gleichzeitig konkurrieren, wirkt die Entscheidung anstrengender als nötig.",
-          "Die wichtigste Handlung priorisieren und ablenkende Elemente im Startbereich reduzieren.",
+          "Anfrage- oder Kaufweg ruhiger führen",
+          "Mehrere gleich laute Signale können die Entscheidung unnötig anstrengend machen.",
+          "Die wichtigste Handlung priorisieren und konkurrierende Elemente im Startbereich zurücknehmen.",
+          "Alle sichtbaren Handlungsaufforderungen notieren und eine davon als klare Hauptaktion festlegen.",
+          "mittel",
         ),
       ],
       sevenDayPlan: [
         {
           day: "Tag 1-2",
-          focus: "Sofortmaßnahmen",
+          focus: "Klarheit schaffen: Texte und wichtigste Handlung",
           tasks: [
             fallbackText(
               firstMeasure?.description,
-              "Nutzenversprechen, Zielgruppe und Hauptaktion in einem sichtbaren Block klären.",
+              "Headline, kurzer Erklärungstext und Hauptbutton so gegenlesen, dass ein Erstbesucher Angebot, Nutzen und nächsten Schritt ohne Vorwissen versteht.",
             ),
-            "Wichtigsten Button auf eine konkrete Handlung zuspitzen.",
+            "Den wichtigsten Button auf eine konkrete Handlung zuspitzen und Nebenhandlungen sichtbar niedriger priorisieren.",
           ],
         },
         {
           day: "Tag 3-5",
-          focus: "Umsetzung",
+          focus: "Umsetzung an Startseite, Produktseite, Vertrauen und Navigation",
           tasks: [
-            "Vertrauensbelege näher an den ersten Entscheidungsbereich rücken.",
-            "Startbereich und mobile Ansicht auf klare Reihenfolge prüfen.",
+            "Startbereich und kaufnahe Produkt- oder Angebotsbereiche mit den drei priorisierten Hebeln überarbeiten.",
+            "Vertrauensbelege näher an die Entscheidung rücken und die Navigation auf den wichtigsten Weg ausrichten.",
+            "Mobile Ansicht prüfen: erst Nutzen, dann Beleg, dann Handlung.",
           ],
         },
         {
           day: "Tag 6-7",
-          focus: "Kontrolle und Optimierung",
+          focus: "Kontrolle, Vergleich und nächste Optimierung",
           tasks: [
-            "Nach der Umsetzung prüfen, ob Nutzen, Vertrauen und nächster Schritt ohne Vorwissen lesbar sind.",
-            "Eine zweite Button- oder Headline-Variante für spätere Tests vorbereiten.",
+            "Vorher-Nachher-Vergleich auf Desktop und Mobil machen: Was versteht man in den ersten Sekunden besser?",
+            "Eine nächste Variante für Headline, Button oder Vertrauensblock vorbereiten, ohne neue Zahlen zu versprechen.",
           ],
         },
       ],
       ownerConclusion:
-        "Der Bericht empfiehlt keinen großen Umbau, sondern eine klare Reihenfolge: erst Verstehen erleichtern, dann Vertrauen zeigen, dann den nächsten Schritt sichtbarer machen.",
+        "Der Shop braucht keinen blinden Komplettumbau, sondern eine ruhigere und deutlichere Entscheidungsführung. Wenn du diese Woche nur drei Dinge angehst, dann bitte diese: Startbereich schärfen, Vertrauen näher an die Entscheidung bringen und den wichtigsten Weg konsequent führen. Das ist kein Ergebnisversprechen, aber die sauberste Reihenfolge, um aus der Analyse konkrete Verbesserung zu machen.",
     });
+
+    return {
+      content,
+      usage: estimateMockUsage(messages, content),
+    };
   },
 };

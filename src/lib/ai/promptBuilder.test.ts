@@ -127,14 +127,17 @@ describe("promptBuilder", () => {
     });
   });
 
-  it("enthaelt die wichtigsten Sicherheits-Constraints", () => {
+  it("enthaelt die wichtigsten Sicherheits- und Beratungs-Constraints", () => {
     const prompt = buildPremiumReportPrompt(createInput()).messages.map((message) => message.content).join("\n");
 
+    expect(prompt).toContain("erfahrener E-Commerce- und Conversion-Berater");
     expect(prompt).toContain("einzige Faktenbasis");
     expect(prompt).toContain("Bewerte keine Webseite frei");
     expect(prompt).toContain("Erfinde keine Fakten");
-    expect(prompt).toContain("Behaupte nichts über Dinge, die nicht im Input stehen");
-    expect(prompt).toContain("keine Garantien für Umsatzsteigerung");
+    expect(prompt).toContain("Behaupte nichts ueber Dinge, die nicht im Input stehen");
+    expect(prompt).toContain("keine Garantien");
+    expect(prompt).toContain("Optimieren Sie Ihre Website");
+    expect(prompt).toContain("Benutzererfahrung verbessern");
     expect(prompt).toContain("Sprache: Deutsch");
     expect(prompt).toContain("Shop-Betreiber ohne technisches Spezialwissen");
   });
@@ -175,10 +178,12 @@ describe("promptBuilder", () => {
         topLevers: [
           {
             title: "string",
-            problem: "string",
-            businessImpact: "string",
-            recommendation: "string",
+            whyItMatters: "string",
+            shopObservation: "string",
+            improvement: "string",
             firstStep: "string",
+            difficulty: "leicht | mittel | anspruchsvoll",
+            expectedEffect: "string ohne Zahlenversprechen",
           },
         ],
         sevenDayPlan: [

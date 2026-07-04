@@ -167,15 +167,40 @@ describe("openRouterPremiumReportProvider", () => {
     });
   });
 
-  it("gibt bei Erfolg den rohen Content-String zurueck", async () => {
+  it("gibt bei Erfolg Content und Usage-Metadaten zurueck", async () => {
     const rawContent = "{\"executiveSummary\":\"Kurzfassung\"}";
+    const infoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse({
         choices: [{ message: { content: rawContent } }],
+        usage: {
+          prompt_tokens: 120,
+          completion_tokens: 80,
+          total_tokens: 200,
+          cost: 0.00042,
+        },
       }),
     );
 
-    await expect(createProvider({ fetchFn: fetchMock }).generate(messages)).resolves.toBe(rawContent);
+    await expect(createProvider({ fetchFn: fetchMock, model: "openrouter/test-model" }).generate(messages)).resolves.toEqual({
+      content: rawContent,
+      usage: {
+        promptTokens: 120,
+        completionTokens: 80,
+        totalTokens: 200,
+        estimatedCost: 0.00042,
+        isEstimated: false,
+      },
+    });
+    expect(infoSpy).toHaveBeenCalledWith(
+      "[premium-ai-report:openrouter-usage]",
+      expect.objectContaining({
+        model: "openrouter/test-model",
+        totalTokens: 200,
+        promptTokens: 120,
+        completionTokens: 80,
+      }),
+    );
   });
 
   it("nutzt env-Konfiguration und ein defensives Default-Modell", async () => {
@@ -206,7 +231,9 @@ describe("openRouterPremiumReportProvider", () => {
     expectTypeOf(createOpenRouterPremiumReportProvider().generate).parameters.toEqualTypeOf<
       [PremiumPromptMessage[]]
     >();
-    expectTypeOf(createOpenRouterPremiumReportProvider().generate).returns.toEqualTypeOf<Promise<string>>();
+    expectTypeOf(createOpenRouterPremiumReportProvider().generate).returns.toEqualTypeOf<
+      ReturnType<PremiumReportProvider["generate"]>
+    >();
 
     const providerSource = readFileSync(
       join(process.cwd(), "src/lib/ai/openRouterPremiumReportProvider.ts"),

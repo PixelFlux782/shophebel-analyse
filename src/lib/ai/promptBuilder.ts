@@ -64,21 +64,25 @@ const FORBIDDEN_PROMPT_TERMS = [
 ];
 
 const SYSTEM_PROMPT = [
-  "Du erstellst eine Premium-Beratung für Shophebel.",
+  "Du bist ein erfahrener E-Commerce- und Conversion-Berater.",
+  "Du erstellst eine kompakte Premium-Beratung fuer Shophebel.",
   "Sprache: Deutsch.",
   "Zielgruppe: Shop-Betreiber ohne technisches Spezialwissen.",
-  "Ton: ruhig, beratend, klar, professionell, wie ein guter Digitalberater für Onlineshops.",
+  "Ton: ruhig, beratend, klar, hochwertig, konkret, wie ein erfahrener Shop-Berater nach einer echten Durchsicht.",
   "Die bestehende Shophebel-Analyse ist die einzige Faktenbasis.",
-  "Bewerte keine Webseite frei und führe keine eigene Recherche durch.",
+  "Erklaere dem Shopbetreiber, welche 3 Dinge den Shop aktuell am staerksten bremsen und was er in den naechsten 7 Tagen konkret tun sollte.",
+  "Bewerte keine Webseite frei und fuehre keine eigene Recherche durch.",
   "Erfinde keine Fakten, Kennzahlen, Beobachtungen, Ursachen oder Belege.",
-  "Behaupte nichts über Dinge, die nicht im Input stehen.",
-  "Gib keine Garantien für Umsatzsteigerung oder wirtschaftliche Ergebnisse.",
-  "Schreibe konkret und handlungsorientiert, aber ohne übertriebene Versprechen.",
-  "Vermeide generische Floskeln, lange Textwände und Formulierungen wie aus einem Chatbot.",
+  "Behaupte nichts ueber Dinge, die nicht im Input stehen.",
+  "Gib keine Garantien fuer Umsatzsteigerung oder wirtschaftliche Ergebnisse.",
+  "Schreibe konkret am analysierten Shop: nutze URL, Score, Subscores, Umsatzbremsen, Visual Audit, Screenshotbefunde, Opportunities und vorhandene Premium-Analyse, falls im Input vorhanden.",
+  "Vermeide generische Saetze wie \"Optimieren Sie Ihre Website\" oder \"Verbessern Sie die Benutzererfahrung\".",
+  "Nutze keine leeren Begriffe wie \"User Experience verbessern\", wenn du nicht direkt erklaerst, was genau im Shop passieren soll.",
+  "Vermeide Wiederholungen, lange Textwaende, Marketing-Sprache und Formulierungen wie aus einem Chatbot.",
   "Nutze keine Fachbegriffe ohne kurze Einordnung in Alltagssprache.",
   "Nutze keine Screenshots, Rohdaten, Markup, Zahlungsdaten oder interne Zusatzdaten.",
-  "Deine Aufgabe: Hauptproblem einordnen, Umsatzwirkung erklären, drei Hebel priorisieren und einen 7-Tage-Fahrplan ableiten.",
-  "Antworte ausschließlich als valides JSON im geforderten Schema.",
+  "Deine Aufgabe: Hauptproblem einordnen, vorhandene Staerken nennen, Bremsen priorisieren, drei Hebel beraten und einen praktischen 7-Tage-Fahrplan ableiten.",
+  "Antworte ausschliesslich als valides JSON im geforderten Schema.",
 ].join("\n");
 
 function limitText(value: unknown, maxLength = MAX_PROMPT_TEXT_LENGTH): string | undefined {
@@ -241,10 +245,12 @@ function buildRequiredOutputSchema() {
     topLevers: [
       {
         title: "string",
-        problem: "string",
-        businessImpact: "string",
-        recommendation: "string",
+        whyItMatters: "string",
+        shopObservation: "string",
+        improvement: "string",
         firstStep: "string",
+        difficulty: "leicht | mittel | anspruchsvoll",
+        expectedEffect: "string ohne Zahlenversprechen",
       },
     ],
     sevenDayPlan: [
@@ -298,11 +304,16 @@ function buildUserPrompt(input: PremiumReportInput): string {
   return [
     "Erstelle aus dieser Shophebel-Analyse die Premium-KI-Beratung.",
     "Pflichtstruktur:",
-    "- executiveSummary: Management-Fazit in 2-3 kurzen Sätzen.",
-    "- mainDiagnosis: Hauptproblem, warum es wahrscheinlich Umsatz kostet, und wichtigster erster Schritt.",
-    "- topLevers: exakt 3 Hebel, jeweils Problem, Wirkung, konkrete Umsetzung und erster Schritt.",
-    "- sevenDayPlan: exakt Tag 1-2, Tag 3-5, Tag 6-7 mit kurzen Aufgaben.",
-    "- ownerConclusion: kurze Abschlussnotiz für Inhaber oder Geschäftsführer.",
+    "- executiveSummary: Management-Fazit in 3-5 kurzen Saetzen. Konkret sagen, was der Shop schon gut macht und was ihn bremst.",
+    "- mainDiagnosis: zentrale Diagnose im Muster: Das eigentliche Problem ist nicht X, sondern Y. Es muss nach echter Einordnung klingen.",
+    "- topLevers: exakt 3 Hebel. Jeder Hebel braucht Titel, warum das wichtig ist, was im Shop vermutlich passiert, konkrete Verbesserung, erster kleiner Schritt, Schwierigkeit und qualitativen Effekt ohne Zahlenversprechen.",
+    "- sevenDayPlan: exakt diese Phasen: Tag 1-2, Tag 3-5, Tag 6-7. Tag 1-2 klaert Texte und wichtigste Handlung. Tag 3-5 setzt Startseite, Produktseite, Vertrauen und Navigation um. Tag 6-7 kontrolliert, vergleicht und leitet die naechste Optimierung ab.",
+    "- ownerConclusion: ehrliches Fazit fuer den Inhaber: ruhig, klar, motivierend, nicht werblich.",
+    "Anti-Generic-Regeln:",
+    "- Schreibe nie nur \"Optimieren Sie Ihre Website\".",
+    "- Schreibe nie nur \"Benutzererfahrung verbessern\".",
+    "- Keine erfundenen Zahlen, keine Garantien, keine Umsatzversprechen.",
+    "- Keine Wiederholungen und keine langen Textwaende.",
     "Nutze nur die folgenden strukturierten Analyse-Fakten und gib ausschliesslich JSON zurueck.",
     JSON.stringify(payload, null, 2),
   ].join("\n\n");

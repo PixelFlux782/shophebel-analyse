@@ -6,10 +6,15 @@ import { createOpenRouterPremiumReportProvider, DEFAULT_OPENROUTER_MODEL, OpenRo
 import { getPremiumAiReportByAnalysisId, savePremiumAiReportForAnalysis } from "@/lib/ai/premiumAiReportStore";
 import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
-import { buildFallbackPremiumAiReport, generatePremiumAiReport, PremiumAiReportValidationError } from "@/lib/ai/premiumReportService";
+import {
+  buildFallbackPremiumAiReport,
+  generatePremiumAiReport,
+  generatePremiumAiReportWithUsage,
+  PremiumAiReportValidationError,
+} from "@/lib/ai/premiumReportService";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
 
-export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v2";
+export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v3";
 const MOCK_PREMIUM_AI_MODEL = "shophebel-mock-premium-ai-report";
 
 export type PremiumAiReportSource = "cache" | "generated" | "fallback";
@@ -117,6 +122,43 @@ function logPremiumAiFailure(message: string, details: { analysisId: string; cod
   });
 }
 
+function logPremiumAiUsage(input: {
+  analysisId: string;
+  providerName: PremiumAiProviderName | string;
+  model: string;
+  reportVersion: string;
+  usage?: {
+    promptTokens?: number | null;
+    completionTokens?: number | null;
+    totalTokens?: number | null;
+    estimatedCost?: number | null;
+    isEstimated?: boolean | null;
+  } | null;
+}) {
+  if (!input.usage) {
+    return;
+  }
+
+  const payload = {
+    provider: input.providerName,
+    model: input.model,
+    totalTokens: input.usage.totalTokens ?? null,
+    promptTokens: input.usage.promptTokens ?? null,
+    completionTokens: input.usage.completionTokens ?? null,
+    estimatedCost: input.usage.estimatedCost ?? null,
+    usageEstimated: input.usage.isEstimated ?? false,
+    reportVersion: input.reportVersion,
+    analysisId: input.analysisId,
+  };
+
+  if (input.providerName === "openrouter" && !input.usage.isEstimated) {
+    console.info("[premium-ai-report:openrouter-cost]", payload);
+    return;
+  }
+
+  console.info("[premium-ai-report:usage]", payload);
+}
+
 export async function getOrGeneratePremiumAiReport(input: {
   analysisId: unknown;
   provider?: PremiumReportProvider;
@@ -200,15 +242,27 @@ export async function getOrGeneratePremiumAiReport(input: {
 
   try {
     const provider = input.provider ?? createDefaultProvider(runtimeConfig.providerName);
-    const report = await generatePremiumAiReport(reportInput, provider);
+    const generated = await generatePremiumAiReportWithUsage(reportInput, provider);
+    logPremiumAiUsage({
+      analysisId,
+      providerName: input.providerName ?? runtimeConfig.providerName,
+      model: runtimeConfig.model,
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
+      usage: generated.usage,
+    });
     const saved = await savePremiumAiReportForAnalysis({
       analysisId,
-      report,
+      report: generated.report,
       provider: input.providerName ?? runtimeConfig.providerName,
       model: runtimeConfig.model,
       status: "generated",
       reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash,
+      promptTokens: generated.usage?.promptTokens ?? null,
+      completionTokens: generated.usage?.completionTokens ?? null,
+      totalTokens: generated.usage?.totalTokens ?? null,
+      estimatedCost: generated.usage?.estimatedCost ?? null,
+      usageEstimated: generated.usage?.isEstimated ?? null,
     });
 
     return {

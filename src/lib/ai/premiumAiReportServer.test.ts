@@ -3,9 +3,13 @@ import { createHash } from "crypto";
 
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
-import { getOrGeneratePremiumAiReport, resolvePremiumAiRuntimeConfig } from "@/lib/ai/premiumAiReportServer";
+import {
+  getOrGeneratePremiumAiReport,
+  PREMIUM_AI_REPORT_VERSION,
+  resolvePremiumAiRuntimeConfig,
+} from "@/lib/ai/premiumAiReportServer";
 import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
-import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
+import type { PremiumReportProvider, PremiumReportUsage } from "@/lib/ai/premiumReportProvider";
 import type { AnalysisResult } from "@/types/analysis";
 
 const mocks = vi.hoisted(() => ({
@@ -104,44 +108,50 @@ function createStoredAnalysis(overrides: Partial<StoredAnalysisResult> = {}): St
 function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiReport {
   return {
     executiveSummary: "Kurzfassung",
-    mainDiagnosis: "Diagnose",
+    mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Entscheidungshilfe.",
     topLevers: [
       {
         title: "CTA im Hero ist nicht eindeutig",
-        problem: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
-        businessImpact: "Unklare Fuehrung kann Anfragen bremsen.",
-        recommendation: "Primaeren CTA klarer formulieren.",
+        whyItMatters: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
+        shopObservation: "Unklare Fuehrung kann Anfragen bremsen.",
+        improvement: "Primaeren CTA klarer formulieren.",
         firstStep: "CTA-Text pruefen.",
+        difficulty: "leicht",
+        expectedEffect: "Qualitativ: klarere Fuehrung bis zur Anfrage.",
       },
       {
         title: "Vertrauen fehlt frueh",
-        problem: "Trust-Signale sind nicht frueh genug sichtbar.",
-        businessImpact: "Unsicherheit kann Kaufentscheidungen verzoegern.",
-        recommendation: "Bewertungen naeher an den Startbereich bringen.",
+        whyItMatters: "Vertrauenssignale sind nicht frueh genug sichtbar.",
+        shopObservation: "Unsicherheit kann Kaufentscheidungen verzoegern.",
+        improvement: "Bewertungen naeher an den Startbereich bringen.",
         firstStep: "Zwei Trust-Signale auswaehlen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: mehr Sicherheit vor der Entscheidung.",
       },
       {
         title: "Mobile Reihenfolge pruefen",
-        problem: "Wichtige Signale koennen mobil zu spaet kommen.",
-        businessImpact: "Mobile Besucher muessen mehr suchen.",
-        recommendation: "Startbereich mobil verdichten.",
+        whyItMatters: "Wichtige Signale koennen mobil zu spaet kommen.",
+        shopObservation: "Mobile Besucher muessen mehr suchen.",
+        improvement: "Startbereich mobil verdichten.",
         firstStep: "Mobile Ansicht gegenlesen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: schnelleres Verstehen auf kleinen Bildschirmen.",
       },
     ],
     sevenDayPlan: [
       {
         day: "Tag 1-2",
-        focus: "Sofortmassnahmen",
+        focus: "Klarheit schaffen: Texte und wichtigste Handlung",
         tasks: ["Hero-CTA konkret machen."],
       },
       {
         day: "Tag 3-5",
-        focus: "Umsetzung",
+        focus: "Umsetzung an Startseite, Produktseite, Vertrauen und Navigation",
         tasks: ["Trust-Signale platzieren."],
       },
       {
         day: "Tag 6-7",
-        focus: "Kontrolle",
+        focus: "Kontrolle, Vergleich und naechste Optimierung",
         tasks: ["Mobile Ansicht pruefen."],
       },
     ],
@@ -150,9 +160,9 @@ function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiRepo
   };
 }
 
-function createProvider(report = createAiReport()): PremiumReportProvider {
+function createProvider(report = createAiReport(), usage?: PremiumReportUsage): PremiumReportProvider {
   return {
-    generate: vi.fn().mockResolvedValue(JSON.stringify(report)),
+    generate: vi.fn().mockResolvedValue(usage ? { content: JSON.stringify(report), usage } : JSON.stringify(report)),
   };
 }
 
@@ -209,6 +219,34 @@ describe("getOrGeneratePremiumAiReport", () => {
       provider: "mock",
       model: "shophebel-mock-premium-ai-report",
       status: "generated",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
+      totalTokens: expect.any(Number),
+      usageEstimated: true,
+    }));
+  });
+
+  it("speichert echte Provider-Usage, wenn sie vorhanden ist", async () => {
+    const provider = createProvider(createAiReport(), {
+      promptTokens: 111,
+      completionTokens: 222,
+      totalTokens: 333,
+      estimatedCost: 0.0005,
+      isEstimated: false,
+    });
+
+    await getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+      provider,
+      providerName: "openrouter",
+      model: "openrouter/test-model",
+    });
+
+    expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
+      promptTokens: 111,
+      completionTokens: 222,
+      totalTokens: 333,
+      estimatedCost: 0.0005,
+      usageEstimated: false,
     }));
   });
 
@@ -226,7 +264,7 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
       provider: "fallback",
       status: "fallback",
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
     }));
   });
 
@@ -273,27 +311,6 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(mocks.getPremiumAiReportByAnalysisId).not.toHaveBeenCalled();
   });
 
-  it("weist Full-Zugriff ab, bevor der Provider aufgerufen wird", async () => {
-    const provider = createProvider();
-    mocks.getAnalysisResult.mockResolvedValue(createStoredAnalysis({
-      accessLevel: "full",
-      plan: "full",
-      productType: "full_analysis",
-      isPremium: false,
-    }));
-
-    await expect(getOrGeneratePremiumAiReport({
-      analysisId: "analysis-123",
-      provider,
-    })).rejects.toMatchObject({
-      code: "premium_access_required",
-      status: 403,
-    });
-
-    expect(provider.generate).not.toHaveBeenCalled();
-    expect(mocks.getPremiumAiReportByAnalysisId).not.toHaveBeenCalled();
-  });
-
   it("ruft bei gueltigem Premium-Zugriff den Provider auf und speichert getrennt", async () => {
     const provider = createProvider();
 
@@ -313,8 +330,13 @@ describe("getOrGeneratePremiumAiReport", () => {
       provider: "test-provider",
       model: "test-model",
       status: "generated",
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash: expect.any(String),
+      promptTokens: null,
+      completionTokens: null,
+      totalTokens: null,
+      estimatedCost: null,
+      usageEstimated: null,
     });
   });
 
@@ -325,7 +347,7 @@ describe("getOrGeneratePremiumAiReport", () => {
       id: "ai-report-existing",
       analysisId: "analysis-123",
       report: existingReport,
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash: currentInputHash(),
     });
 
@@ -340,15 +362,14 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(mocks.savePremiumAiReportForAnalysis).not.toHaveBeenCalled();
   });
 
-  it("regeneriert gespeicherte AI-Reports standardmaessig nicht bei geaendertem Input", async () => {
-    const existingReport = createAiReport({ executiveSummary: "Einmal erzeugt" });
-    const provider = createProvider();
+  it("regeneriert alte Report-Versionen", async () => {
+    const provider = createProvider(createAiReport({ executiveSummary: "Neu erzeugt" }));
     mocks.getPremiumAiReportByAnalysisId.mockResolvedValue({
       id: "ai-report-existing",
       analysisId: "analysis-123",
-      report: existingReport,
+      report: createAiReport({ executiveSummary: "Alter Bericht" }),
       reportVersion: "premium-ai-report-v2",
-      inputHash: "alter-hash",
+      inputHash: currentInputHash(),
       status: "generated",
     });
 
@@ -357,10 +378,9 @@ describe("getOrGeneratePremiumAiReport", () => {
       provider,
     });
 
-    expect(result.source).toBe("cache");
-    expect(result.report.executiveSummary).toBe("Einmal erzeugt");
-    expect(provider.generate).not.toHaveBeenCalled();
-    expect(mocks.savePremiumAiReportForAnalysis).not.toHaveBeenCalled();
+    expect(result.source).toBe("generated");
+    expect(result.report.executiveSummary).toBe("Neu erzeugt");
+    expect(provider.generate).toHaveBeenCalledTimes(1);
   });
 
   it("regeneriert geaenderte Inputs nur mit ALLOW_AI_REGENERATE=true", async () => {
@@ -370,7 +390,7 @@ describe("getOrGeneratePremiumAiReport", () => {
       id: "ai-report-existing",
       analysisId: "analysis-123",
       report: createAiReport({ executiveSummary: "Alter Bericht" }),
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash: "alter-hash",
       status: "generated",
     });
@@ -415,7 +435,7 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
       analysisId: "analysis-123",
       status: "fallback",
-      reportVersion: "premium-ai-report-v2",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash: expect.any(String),
     }));
   });

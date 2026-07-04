@@ -4,11 +4,13 @@ import { join } from "node:path";
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import { mockPremiumReportProvider } from "@/lib/ai/mockPremiumReportProvider";
+import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import type { PremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 import {
   buildFallbackPremiumAiReport,
   generatePremiumAiReport,
+  generatePremiumAiReportWithUsage,
   normalizePremiumAiReportCopy,
   parsePremiumAiReportResponse,
   PremiumAiReportValidationError,
@@ -36,7 +38,7 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
     ],
     criticalSignals: [
       {
-        title: "Nächster Schritt unklar",
+        title: "Naechster Schritt unklar",
         severity: "high",
         category: "conversion",
         evidence: ["Der wichtigste Button ist im oberen Bereich nicht eindeutig."],
@@ -45,30 +47,30 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
     revenueBlockers: [
       {
         title: "Button im Startbereich ist nicht eindeutig",
-        description: "Besucher erkennen den nächsten Schritt nicht schnell genug.",
-        action: "Primären Button im sichtbaren Startbereich klarer formulieren.",
+        description: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
+        action: "Primaeren Button im sichtbaren Startbereich klarer formulieren.",
         impact: "hoch",
         effort: "niedrig",
         category: "Button",
         priority: 1,
         severity: "high",
-        evidence: ["Nächster Schritt ist nicht klar sichtbar."],
+        evidence: ["Naechster Schritt ist nicht klar sichtbar."],
       },
     ],
     measures: [
       {
-        title: "Startbereich und Button schärfen",
+        title: "Startbereich und Button schaerfen",
         description: "Startbereich und Button klarer formulieren.",
         effort: "niedrig",
         impact: "hoch",
         priority: 1,
         category: "Button",
-        source: "Nächster Schritt",
+        source: "Naechster Schritt",
       },
     ],
     opportunities: [],
     detectedPageSignals: {
-      heroText: ["Bessere Shops für mehr Anfragen"],
+      heroText: ["Bessere Shops fuer mehr Anfragen"],
       ctaTexts: ["Angebot anfragen"],
       trustSignals: ["Impressum", "Datenschutz"],
       technicalNotes: ["Die Analyse basiert auf der Seite, wie sie im Browser sichtbar wird."],
@@ -83,39 +85,45 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
   };
 }
 
-function createRawReport() {
+function createRawReport(): PremiumAiReport {
   return {
-    executiveSummary: "Kurzfassung für den Shop",
-    mainDiagnosis: "Der Startbereich und Button sind unklar.",
+    executiveSummary: "Kurzfassung fuer den Shop mit Staerke und Bremse.",
+    mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Entscheidungsfuehrung.",
     topLevers: [
       {
         title: "Button im Startbereich",
-        problem: "Besucher verstehen den nächsten Schritt nicht.",
-        businessImpact: "Das kann Anfragen unnötig bremsen.",
-        recommendation: "Primären Button konkreter formulieren.",
-        firstStep: "Button-Text prüfen.",
+        whyItMatters: "Besucher verstehen den naechsten Schritt nicht.",
+        shopObservation: "Der Hauptbutton beschreibt keinen konkreten Nutzen.",
+        improvement: "Primaeren Button konkreter formulieren.",
+        firstStep: "Button-Text pruefen.",
+        difficulty: "leicht",
+        expectedEffect: "Qualitativ: klarere Fuehrung bis zur Anfrage.",
       },
       {
-        title: "Vertrauen früher zeigen",
-        problem: "Vertrauen entsteht zu spät.",
-        businessImpact: "Unsicherheit kann Entscheidungen verlangsamen.",
-        recommendation: "Bewertungen früher platzieren.",
-        firstStep: "Zwei Belege auswählen.",
+        title: "Vertrauen frueher zeigen",
+        whyItMatters: "Vertrauen entsteht zu spaet.",
+        shopObservation: "Vertrauenssignale stehen nicht nah genug an der Entscheidung.",
+        improvement: "Bewertungen frueher platzieren.",
+        firstStep: "Zwei Belege auswaehlen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: weniger Unsicherheit vor dem naechsten Schritt.",
       },
       {
-        title: "Mobile Reihenfolge prüfen",
-        problem: "Wichtige Signale kommen mobil zu spät.",
-        businessImpact: "Mobile Besucher müssen mehr suchen.",
-        recommendation: "Mobile Startansicht verdichten.",
-        firstStep: "Mobile Ansicht öffnen.",
+        title: "Mobile Reihenfolge pruefen",
+        whyItMatters: "Wichtige Signale kommen mobil zu spaet.",
+        shopObservation: "Mobile Besucher muessen mehr suchen.",
+        improvement: "Mobile Startansicht verdichten.",
+        firstStep: "Mobile Ansicht oeffnen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: schnelleres Verstehen auf kleinen Bildschirmen.",
       },
     ],
     sevenDayPlan: [
-      { day: "Tag 1-2", focus: "Sofortmaßnahmen", tasks: ["Button prüfen."] },
+      { day: "Tag 1-2", focus: "Klarheit schaffen", tasks: ["Button pruefen."] },
       { day: "Tag 3-5", focus: "Umsetzung", tasks: ["Vertrauen platzieren."] },
-      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht prüfen."] },
+      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht pruefen."] },
     ],
-    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann nächster Schritt.",
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann naechster Schritt.",
   };
 }
 
@@ -149,9 +157,24 @@ describe("premiumReportService", () => {
     expect(report.topLevers).toHaveLength(3);
     expect(report.topLevers[0]).toMatchObject({
       title: "Button im Startbereich ist nicht eindeutig",
+      difficulty: "leicht",
     });
-    expect(report.sevenDayPlan).toHaveLength(3);
+    expect(report.sevenDayPlan.map((step) => step.day)).toEqual(["Tag 1-2", "Tag 3-5", "Tag 6-7"]);
     expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
+  });
+
+  it("liefert im Mock-Modus geschaetzte Usage-Daten", async () => {
+    const result = await generatePremiumAiReportWithUsage(createInput(), mockPremiumReportProvider);
+
+    expect(result.usage).toMatchObject({
+      isEstimated: true,
+      estimatedCost: 0,
+    });
+    expect(result.usage?.promptTokens).toBeGreaterThan(0);
+    expect(result.usage?.completionTokens).toBeGreaterThan(0);
+    expect(result.usage?.totalTokens).toBe(
+      (result.usage?.promptTokens ?? 0) + (result.usage?.completionTokens ?? 0),
+    );
   });
 
   it("faengt ungueltiges JSON ab", () => {
@@ -163,6 +186,21 @@ describe("premiumReportService", () => {
     const raw = JSON.stringify({
       executiveSummary: "Kurzfassung",
       mainDiagnosis: "Diagnose",
+    });
+
+    expect(() => parsePremiumAiReportResponse(raw)).toThrow(PremiumAiReportValidationError);
+    expect(() => parsePremiumAiReportResponse(raw)).toThrow("failed validation");
+  });
+
+  it("erzwingt die drei festen 7-Tage-Plan-Phasen", () => {
+    const report = createRawReport();
+    const raw = JSON.stringify({
+      ...report,
+      sevenDayPlan: [
+        { ...report.sevenDayPlan[0], day: "Tag 1" },
+        report.sevenDayPlan[1],
+        report.sevenDayPlan[2],
+      ],
     });
 
     expect(() => parsePremiumAiReportResponse(raw)).toThrow(PremiumAiReportValidationError);
@@ -186,7 +224,7 @@ ${JSON.stringify(createRawReport(), null, 2)}
         {
           ...createRawReport().topLevers[0],
           title: "CTA im Hero",
-          recommendation: "Primaeren CTA schaerfen.",
+          improvement: "Primaeren CTA schaerfen.",
         },
         createRawReport().topLevers[1],
         createRawReport().topLevers[2],

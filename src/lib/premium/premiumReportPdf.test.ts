@@ -117,39 +117,44 @@ function createReport(): PremiumReport {
 function createAiReport(): PremiumAiReport {
   return {
     executiveSummary: "Management-Fazit: Der Shop braucht zuerst mehr Klarheit im Startbereich.",
-    mainDiagnosis: "Das Hauptproblem ist ein unklarer nächster Schritt. Das kann Umsatz kosten, weil Besucher länger überlegen müssen.",
+    mainDiagnosis: "Das eigentliche Problem ist nicht ein einzelner Button, sondern die unklare Reihenfolge aus Nutzen, Vertrauen und naechstem Schritt.",
     topLevers: [
       {
         title: "Button klarer formulieren",
-        problem: "Der nächste Schritt ist nicht eindeutig.",
-        businessImpact: "Unklarheit kann Anfragen bremsen.",
-        recommendation: "Den wichtigsten Button konkreter formulieren.",
-        firstStep: "Button-Text im Startbereich prüfen.",
+        whyItMatters: "Der naechste Schritt ist nicht eindeutig.",
+        shopObservation: "Unklarheit kann Anfragen bremsen.",
+        improvement: "Den wichtigsten Button konkreter formulieren.",
+        firstStep: "Button-Text im Startbereich pruefen.",
+        difficulty: "leicht",
+        expectedEffect: "Qualitativ: klarere Fuehrung bis zur Anfrage.",
       },
       {
-        title: "Vertrauen früher zeigen",
-        problem: "Trust-Signale kommen zu spät.",
-        businessImpact: "Unsicherheit kann Entscheidungen verzögern.",
-        recommendation: "Bewertungen näher an den Startbereich bringen.",
-        firstStep: "Zwei Vertrauensbelege auswählen.",
+        title: "Vertrauen frueher zeigen",
+        whyItMatters: "Vertrauenssignale kommen zu spaet.",
+        shopObservation: "Unsicherheit kann Entscheidungen verzoegern.",
+        improvement: "Bewertungen naeher an den Startbereich bringen.",
+        firstStep: "Zwei Vertrauensbelege auswaehlen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: mehr Sicherheit vor der Entscheidung.",
       },
       {
         title: "Mobile Ansicht ordnen",
-        problem: "Wichtige Signale erscheinen mobil zu spät.",
-        businessImpact: "Mobile Besucher müssen mehr suchen.",
-        recommendation: "Mobile Reihenfolge vereinfachen.",
+        whyItMatters: "Wichtige Signale erscheinen mobil zu spaet.",
+        shopObservation: "Mobile Besucher muessen mehr suchen.",
+        improvement: "Mobile Reihenfolge vereinfachen.",
         firstStep: "Mobile Startansicht gegenlesen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: schnelleres Verstehen auf kleinen Bildschirmen.",
       },
     ],
     sevenDayPlan: [
-      { day: "Tag 1-2", focus: "Sofortmaßnahmen", tasks: ["Button und Startbereich prüfen."] },
+      { day: "Tag 1-2", focus: "Klarheit schaffen", tasks: ["Button und Startbereich pruefen."] },
       { day: "Tag 3-5", focus: "Umsetzung", tasks: ["Trust-Signale platzieren."] },
-      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht prüfen."] },
+      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht pruefen."] },
     ],
-    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann nächster Schritt.",
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann naechster Schritt.",
   };
 }
-
 describe("premiumReportPdf consultant notes", () => {
   afterEach(() => {
     vi.unstubAllEnvs();

@@ -1,7 +1,11 @@
 import { buildPremiumReportPrompt } from "@/lib/ai/promptBuilder";
 import type { PremiumReportInput } from "@/lib/ai/premiumReportInput";
 import { mockPremiumReportProvider } from "@/lib/ai/mockPremiumReportProvider";
-import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
+import type {
+  PremiumReportProvider,
+  PremiumReportProviderResult,
+  PremiumReportUsage,
+} from "@/lib/ai/premiumReportProvider";
 import { premiumAiReportSchema, type PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import { normalizeGermanReportText, validateReportCopyQuality } from "@/lib/report/reportCopy";
 
@@ -59,10 +63,12 @@ export function normalizePremiumAiReportCopy(report: PremiumAiReport): PremiumAi
     mainDiagnosis: normalizeGermanReportText(report.mainDiagnosis),
     topLevers: report.topLevers.slice(0, 3).map((issue) => ({
       title: normalizeGermanReportText(issue.title),
-      problem: normalizeGermanReportText(issue.problem),
-      businessImpact: normalizeGermanReportText(issue.businessImpact),
-      recommendation: normalizeGermanReportText(issue.recommendation),
+      whyItMatters: normalizeGermanReportText(issue.whyItMatters),
+      shopObservation: normalizeGermanReportText(issue.shopObservation),
+      improvement: normalizeGermanReportText(issue.improvement),
       firstStep: normalizeGermanReportText(issue.firstStep),
+      difficulty: issue.difficulty,
+      expectedEffect: normalizeGermanReportText(issue.expectedEffect),
     })),
     sevenDayPlan: report.sevenDayPlan.map((step) => ({
       day: normalizeGermanReportText(step.day),
@@ -77,7 +83,25 @@ function firstText(values: Array<string | undefined>, fallback: string) {
   return values.find((value) => typeof value === "string" && value.trim())?.trim() ?? fallback;
 }
 
-function fallbackLever(input: PremiumReportInput, index: number) {
+function normalizeDifficulty(value: string | undefined, fallback: "leicht" | "mittel" | "anspruchsvoll") {
+  const normalized = value?.toLowerCase().trim();
+
+  if (normalized === "hoch" || normalized === "high" || normalized === "anspruchsvoll") {
+    return "anspruchsvoll";
+  }
+
+  if (normalized === "mittel" || normalized === "medium") {
+    return "mittel";
+  }
+
+  if (normalized === "niedrig" || normalized === "low" || normalized === "leicht") {
+    return "leicht";
+  }
+
+  return fallback;
+}
+
+function fallbackLever(input: PremiumReportInput, index: number): PremiumAiReport["topLevers"][number] {
   const blocker = input.revenueBlockers[index];
   const measure = input.measures[index] ?? input.measures[0];
   const opportunity = input.opportunities[index] ?? input.opportunities[0];
@@ -85,53 +109,59 @@ function fallbackLever(input: PremiumReportInput, index: number) {
   if (blocker) {
     return {
       title: blocker.title,
-      problem: blocker.description || blocker.title,
-      businessImpact: blocker.impact
-        ? `${blocker.description} Die Analyse bewertet die Wirkung als ${blocker.impact}.`
-        : blocker.description,
-      recommendation: blocker.action || measure?.description || "Diesen Punkt zuerst sichtbar und verständlich überarbeiten.",
+      whyItMatters: blocker.impact
+        ? `${blocker.description || blocker.title} Die Analyse bewertet die Wirkung als ${blocker.impact}.`
+        : blocker.description || blocker.title,
+      shopObservation: blocker.description || blocker.title,
+      improvement: blocker.action || measure?.description || "Diesen Punkt zuerst sichtbar und verstaendlich ueberarbeiten.",
       firstStep: measure?.title
         ? `${measure.title}: ${measure.description}`
-        : blocker.action || "Den betroffenen Abschnitt prüfen und die nächste Handlung klarer formulieren.",
+        : blocker.action || "Den betroffenen Abschnitt pruefen und die naechste Handlung klarer formulieren.",
+      difficulty: normalizeDifficulty(blocker.effort, "mittel"),
+      expectedEffect: "Qualitativ: mehr Orientierung und weniger Unsicherheit vor der Entscheidung.",
     };
   }
 
   if (opportunity) {
     return {
       title: opportunity.title,
-      problem: opportunity.description,
-      businessImpact: opportunity.expectedEffect || opportunity.impact || "Dieser Punkt kann Entscheidungen unnötig bremsen.",
-      recommendation: opportunity.description,
+      whyItMatters: opportunity.expectedEffect || opportunity.impact || "Dieser Punkt kann Entscheidungen unnoetig bremsen.",
+      shopObservation: opportunity.description,
+      improvement: opportunity.description,
       firstStep: opportunity.title,
+      difficulty: normalizeDifficulty(opportunity.effort, "mittel"),
+      expectedEffect: opportunity.expectedEffect || "Qualitativ: Besucher verstehen schneller, warum der naechste Schritt sinnvoll ist.",
     };
   }
 
   return {
-    title: index === 0 ? "Klarheit im Startbereich" : index === 1 ? "Vertrauen früher sichtbar machen" : "Nächsten Schritt vereinfachen",
-    problem:
+    title: index === 0 ? "Klarheit im Startbereich" : index === 1 ? "Vertrauen frueher sichtbar machen" : "Naechsten Schritt vereinfachen",
+    whyItMatters:
       index === 0
-        ? "Besucher müssen sehr schnell verstehen, ob das Angebot zu ihrem Bedarf passt."
+        ? "Besucher muessen sehr schnell verstehen, ob das Angebot zu ihrem Bedarf passt."
         : index === 1
-          ? "Ohne frühe Vertrauenssignale entsteht vor Anfrage oder Kauf unnötige Unsicherheit."
+          ? "Ohne fruehe Vertrauenssignale entsteht vor Anfrage oder Kauf unnoetige Unsicherheit."
           : "Wenn die wichtigste Handlung nicht eindeutig ist, gehen Besucher leichter verloren.",
-    businessImpact:
+    shopObservation:
       index === 0
-        ? "Unklare Orientierung kann dazu führen, dass vorhandener Traffic weniger Anfragen oder Käufe auslöst."
+        ? "Der erste Eindruck braucht eine klarere Reihenfolge aus Nutzen, Beleg und Handlung."
         : index === 1
-          ? "Mehr Sicherheit vor der Entscheidung kann Reibung reduzieren, ohne einen Relaunch zu brauchen."
-          : "Ein klarerer nächster Schritt senkt die Denkarbeit genau vor der Entscheidung.",
-    recommendation:
+          ? "Vertrauen wirkt erst stark, wenn es nahe an kauf- oder anfragenahen Bereichen steht."
+          : "Die wichtigste Handlung sollte weniger mit Nebenwegen konkurrieren.",
+    improvement:
       index === 0
         ? "Nutzen, Zielgruppe und Hauptaktion im ersten sichtbaren Bereich einfacher formulieren."
         : index === 1
-          ? "Bewertungen, Kontakt, Garantien oder Referenzen näher an kaufnahe Bereiche bringen."
+          ? "Bewertungen, Kontakt, Garantien oder Referenzen naeher an kaufnahe Bereiche bringen."
           : "Den wichtigsten Button sprachlich konkreter machen und optisch priorisieren.",
     firstStep:
       index === 0
         ? "Eine Headline schreiben, die Angebot, Nutzen und Zielgruppe in einem Satz verbindet."
         : index === 1
-          ? "Zwei vorhandene Vertrauensbelege auswählen und direkt unter dem Hauptangebot platzieren."
-          : "Alle Hauptbuttons prüfen und auf eine eindeutige Handlungsaufforderung reduzieren.",
+          ? "Zwei vorhandene Vertrauensbelege auswaehlen und direkt unter dem Hauptangebot platzieren."
+          : "Alle Hauptbuttons pruefen und auf eine eindeutige Handlungsaufforderung reduzieren.",
+    difficulty: index === 0 ? "leicht" : "mittel",
+    expectedEffect: "Qualitativ: Besucher koennen die Seite schneller einordnen und kommen leichter zur naechsten Handlung.",
   };
 }
 
@@ -143,41 +173,42 @@ export function buildFallbackPremiumAiReport(input: PremiumReportInput): Premium
   );
   const firstStep = firstText(
     [input.revenueBlockers[0]?.action, input.measures[0]?.description],
-    "Starte mit einer klareren Botschaft und einem eindeutigeren nächsten Schritt.",
+    "Starte mit einer klareren Botschaft und einem eindeutigeren naechsten Schritt.",
   );
 
   return normalizePremiumAiReportCopy({
-    executiveSummary: `Die Analyse zeigt einen Shop mit nutzbarer Grundlage, aber auch klaren Reibungspunkten. Am wichtigsten ist jetzt, den ersten Eindruck, Vertrauen und den nächsten Schritt so zu ordnen, dass Besucher schneller entscheiden können.`,
-    mainDiagnosis: `${mainProblem} Das kann Umsatz kosten, weil Besucher bei Unsicherheit eher vergleichen, zögern oder abbrechen. Der wichtigste erste Schritt ist: ${firstStep}`,
+    executiveSummary:
+      "Die Analyse zeigt einen Shop mit nutzbarer Grundlage und klaren Ansatzpunkten. Gut ist: Es gibt bereits verwertbare Signale fuer Angebot, Orientierung und naechste Handlung. Gebremst wird die Seite dort, wo Besucher Nutzen, Vertrauen und Entscheidung noch nicht schnell genug zusammenbringen. Am wichtigsten ist jetzt, den ersten Eindruck, die kaufnahen Belege und den naechsten Schritt in eine klare Reihenfolge zu bringen.",
+    mainDiagnosis: `Das eigentliche Problem ist nicht ein einzelnes Detail, sondern die Priorisierung der Entscheidungshilfe. ${mainProblem} Besucher muessen dadurch mehr selbst zusammensetzen, bevor sie handeln. Der wichtigste erste Schritt ist: ${firstStep}`,
     topLevers: [fallbackLever(input, 0), fallbackLever(input, 1), fallbackLever(input, 2)],
     sevenDayPlan: [
       {
         day: "Tag 1-2",
-        focus: "Sofortmaßnahmen",
+        focus: "Klarheit schaffen: Texte und wichtigste Handlung",
         tasks: [
           firstStep,
-          "Hauptbutton, Startbereich und wichtigste Vertrauenssignale gemeinsam prüfen.",
+          "Hauptbutton, Startbereich und wichtigste Vertrauenssignale gemeinsam pruefen.",
         ],
       },
       {
         day: "Tag 3-5",
-        focus: "Umsetzung",
+        focus: "Umsetzung an Startseite, Produktseite, Vertrauen und Navigation",
         tasks: [
           "Die drei priorisierten Hebel nacheinander umsetzen.",
-          "Texte kürzen, Kauf- oder Anfrageweg vereinfachen und sichtbare Belege ergänzen.",
+          "Texte kuerzen, Kauf- oder Anfrageweg vereinfachen und sichtbare Belege ergaenzen.",
         ],
       },
       {
         day: "Tag 6-7",
-        focus: "Kontrolle und Optimierung",
+        focus: "Kontrolle, Vergleich und naechste Optimierung",
         tasks: [
-          "Die Seite auf Desktop und Mobil erneut prüfen.",
-          "Kontrollieren, ob Nutzen, Vertrauen und nächster Schritt ohne Erklärung erkennbar sind.",
+          "Die Seite auf Desktop und Mobil erneut pruefen.",
+          "Kontrollieren, ob Nutzen, Vertrauen und naechster Schritt ohne Erklaerung erkennbar sind.",
         ],
       },
     ],
     ownerConclusion:
-      "Der sinnvollste Weg ist kein großer Umbau, sondern eine klare Reihenfolge: erst Orientierung, dann Vertrauen, dann der nächste Schritt. So wird aus der Analyse ein umsetzbarer Wochenplan.",
+      "Der sinnvollste Weg ist kein grosser Umbau, sondern eine klare Reihenfolge: erst Orientierung, dann Vertrauen, dann der naechste Schritt. So wird aus der Analyse ein umsetzbarer Wochenplan.",
   });
 }
 
@@ -214,12 +245,28 @@ export function parsePremiumAiReportResponse(raw: string): PremiumAiReport {
   return normalizedReport;
 }
 
+function unwrapProviderResult(result: string | PremiumReportProviderResult): PremiumReportProviderResult {
+  return typeof result === "string" ? { content: result, usage: null } : result;
+}
+
+export async function generatePremiumAiReportWithUsage(
+  input: PremiumReportInput,
+  provider: PremiumReportProvider = mockPremiumReportProvider,
+): Promise<{ report: PremiumAiReport; usage?: PremiumReportUsage | null }> {
+  const prompt = buildPremiumReportPrompt(input);
+  const providerResult = unwrapProviderResult(await provider.generate(prompt.messages));
+
+  return {
+    report: parsePremiumAiReportResponse(providerResult.content),
+    usage: providerResult.usage ?? null,
+  };
+}
+
 export async function generatePremiumAiReport(
   input: PremiumReportInput,
   provider: PremiumReportProvider = mockPremiumReportProvider,
 ): Promise<PremiumAiReport> {
-  const prompt = buildPremiumReportPrompt(input);
-  const rawReport = await provider.generate(prompt.messages);
+  const result = await generatePremiumAiReportWithUsage(input, provider);
 
-  return parsePremiumAiReportResponse(rawReport);
+  return result.report;
 }

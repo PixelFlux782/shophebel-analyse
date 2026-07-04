@@ -19,44 +19,50 @@ function expectReportQuality(text: string) {
 function createReport(): PremiumAiReport {
   return {
     executiveSummary: "Die Seite hat Potenzial, verliert aber im ersten Eindruck zu viel Klarheit.",
-    mainDiagnosis: "Der Startbereich erklärt Nutzen und nächsten Schritt nicht schnell genug.",
+    mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Reihenfolge aus Nutzen, Vertrauen und nächstem Schritt.",
     topLevers: [
       {
         title: "Button ist zu unkonkret",
-        problem: "Besucher verstehen nicht sofort, welcher Schritt empfohlen wird.",
-        businessImpact: "Der Hauptbutton beschreibt keinen konkreten Nutzen.",
-        recommendation: "Primären Button nutzenorientiert umformulieren.",
+        whyItMatters: "Besucher verstehen nicht sofort, welcher Schritt empfohlen wird.",
+        shopObservation: "Der Hauptbutton beschreibt keinen konkreten Nutzen.",
+        improvement: "Primären Button nutzenorientiert umformulieren.",
         firstStep: "Button im Startbereich prüfen.",
+        difficulty: "leicht",
+        expectedEffect: "Qualitativ: klarere Orientierung bis zur Anfrage.",
       },
       {
         title: "Vertrauen fehlt früh",
-        problem: "Vertrauen wird zu spät aufgebaut.",
-        businessImpact: "Unsichere Besucher vergleichen eher weiter.",
-        recommendation: "Bewertungen früher zeigen.",
+        whyItMatters: "Vertrauen wird zu spät aufgebaut.",
+        shopObservation: "Unsichere Besucher vergleichen eher weiter.",
+        improvement: "Bewertungen früher zeigen.",
         firstStep: "Zwei Vertrauensbelege auswählen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: weniger Unsicherheit vor der Entscheidung.",
       },
       {
         title: "Mobile Reihenfolge prüfen",
-        problem: "Mobile Nutzer sehen wichtige Signale später.",
-        businessImpact: "Mehr Sucharbeit kann Anfragen bremsen.",
-        recommendation: "Mobile Startansicht verdichten.",
+        whyItMatters: "Mobile Nutzer sehen wichtige Signale später.",
+        shopObservation: "Mehr Sucharbeit kann Anfragen bremsen.",
+        improvement: "Mobile Startansicht verdichten.",
         firstStep: "Mobile Ansicht gegenlesen.",
+        difficulty: "mittel",
+        expectedEffect: "Qualitativ: schnelleres Verstehen auf kleinen Bildschirmen.",
       },
     ],
     sevenDayPlan: [
       {
         day: "Tag 1-2",
-        focus: "Sofortmaßnahmen",
+        focus: "Klarheit schaffen: Texte und wichtigste Handlung",
         tasks: ["Nutzenversprechen, Zielgruppe und Button in einem sichtbaren Block klären."],
       },
       {
         day: "Tag 3-5",
-        focus: "Umsetzung",
+        focus: "Umsetzung an Startseite, Produktseite, Vertrauen und Navigation",
         tasks: ["Vertrauenssignale platzieren."],
       },
       {
         day: "Tag 6-7",
-        focus: "Kontrolle",
+        focus: "Kontrolle, Vergleich und nächste Optimierung",
         tasks: ["Mobile Ansicht prüfen."],
       },
     ],
@@ -120,9 +126,10 @@ describe("PremiumAiReportSection", () => {
     expect(markup).toContain("Management-Fazit");
     expect(markup).toContain("KI-Einordnung");
     expect(markup).toContain("Die wichtigsten 3 Hebel");
+    expect(markup).toContain("Warum wichtig");
+    expect(markup).toContain("Erwarteter Effekt");
     expect(markup).toContain("7-Tage-Fahrplan");
     expect(markup).toContain("Fazit");
-    expect(markup).toContain("Gespeicherter KI-Bericht");
     expect(markup).not.toContain("Top Issues");
     expect(markup).not.toContain("Beispiel-Verbesserungen");
     expect(markup).not.toContain("KI-Premiumreport erzeugen");
@@ -139,7 +146,6 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Stabiler Ersatzbericht");
     expect(markup).toContain("aus den vorhandenen Analyse-Daten");
     expectReportQuality(markup);
   });

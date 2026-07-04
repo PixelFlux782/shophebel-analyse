@@ -11,6 +11,11 @@ export type PremiumAiReportRecord = {
   status?: "pending" | "generated" | "failed" | "fallback" | string | null;
   reportVersion?: string | null;
   inputHash?: string | null;
+  promptTokens?: number | null;
+  completionTokens?: number | null;
+  totalTokens?: number | null;
+  estimatedCost?: number | null;
+  usageEstimated?: boolean | null;
   generatedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
@@ -25,6 +30,11 @@ type SupabasePremiumAiReportRow = {
   status?: string | null;
   report_version?: string | null;
   input_hash?: string | null;
+  prompt_tokens?: number | null;
+  completion_tokens?: number | null;
+  total_tokens?: number | null;
+  estimated_cost?: number | null;
+  usage_estimated?: boolean | null;
   generated_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
@@ -66,6 +76,11 @@ function toPremiumAiReportRecord(row: SupabasePremiumAiReportRow): PremiumAiRepo
     status: row.status ?? null,
     reportVersion: row.report_version ?? null,
     inputHash: row.input_hash ?? null,
+    promptTokens: row.prompt_tokens ?? null,
+    completionTokens: row.completion_tokens ?? null,
+    totalTokens: row.total_tokens ?? null,
+    estimatedCost: row.estimated_cost ?? null,
+    usageEstimated: row.usage_estimated ?? null,
     generatedAt: row.generated_at ?? row.created_at ?? null,
     createdAt: row.created_at ?? null,
     updatedAt: row.updated_at ?? null,
@@ -81,7 +96,7 @@ export async function getPremiumAiReportByAnalysisId(
     return getMemoryStore().get(analysisId) ?? null;
   }
 
-  const requestUrl = `${config.url}/rest/v1/premium_ai_reports?analysis_id=eq.${encodeURIComponent(analysisId)}&select=id,analysis_id,report,provider,model,status,report_version,input_hash,generated_at,created_at,updated_at&order=created_at.desc&limit=1`;
+  const requestUrl = `${config.url}/rest/v1/premium_ai_reports?analysis_id=eq.${encodeURIComponent(analysisId)}&select=id,analysis_id,report,provider,model,status,report_version,input_hash,prompt_tokens,completion_tokens,total_tokens,estimated_cost,usage_estimated,generated_at,created_at,updated_at&order=created_at.desc&limit=1`;
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
@@ -108,6 +123,11 @@ export async function savePremiumAiReportForAnalysis(input: {
   status?: PremiumAiReportRecord["status"];
   reportVersion?: string;
   inputHash?: string;
+  promptTokens?: number | null;
+  completionTokens?: number | null;
+  totalTokens?: number | null;
+  estimatedCost?: number | null;
+  usageEstimated?: boolean | null;
 }): Promise<PremiumAiReportRecord> {
   const config = getSupabaseConfig();
   const now = new Date().toISOString();
@@ -128,6 +148,11 @@ export async function savePremiumAiReportForAnalysis(input: {
       status: input.status ?? "generated",
       reportVersion: input.reportVersion ?? null,
       inputHash: input.inputHash ?? null,
+      promptTokens: input.promptTokens ?? null,
+      completionTokens: input.completionTokens ?? null,
+      totalTokens: input.totalTokens ?? null,
+      estimatedCost: input.estimatedCost ?? null,
+      usageEstimated: input.usageEstimated ?? null,
       generatedAt: now,
       createdAt: now,
       updatedAt: now,
@@ -146,6 +171,11 @@ export async function savePremiumAiReportForAnalysis(input: {
     status: input.status ?? "generated",
     report_version: input.reportVersion ?? null,
     input_hash: input.inputHash ?? null,
+    prompt_tokens: input.promptTokens ?? null,
+    completion_tokens: input.completionTokens ?? null,
+    total_tokens: input.totalTokens ?? null,
+    estimated_cost: input.estimatedCost ?? null,
+    usage_estimated: input.usageEstimated ?? null,
     generated_at: now,
     created_at: now,
     updated_at: now,

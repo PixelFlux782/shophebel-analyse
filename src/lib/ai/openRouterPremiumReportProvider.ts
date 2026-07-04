@@ -1,5 +1,5 @@
 import type { PremiumPromptMessage } from "@/lib/ai/promptBuilder";
-import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
+import type { PremiumReportProvider, PremiumReportProviderResult, PremiumReportUsage } from "@/lib/ai/premiumReportProvider";
 
 const OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
@@ -29,6 +29,12 @@ type OpenRouterChoice = {
 
 type OpenRouterResponseBody = {
   choices?: OpenRouterChoice[];
+  usage?: {
+    prompt_tokens?: unknown;
+    completion_tokens?: unknown;
+    total_tokens?: unknown;
+    cost?: unknown;
+  };
 };
 
 export class OpenRouterProviderError extends Error {
@@ -96,7 +102,27 @@ async function withTimeout<T>(timeoutMs: number, operation: (signal: AbortSignal
   }
 }
 
-async function parseOpenRouterResponse(response: Response): Promise<string> {
+function numberOrNull(value: unknown): number | null {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function parseUsage(value: OpenRouterResponseBody["usage"]): PremiumReportUsage | null {
+  if (!value) {
+    return null;
+  }
+
+  const usage = {
+    promptTokens: numberOrNull(value.prompt_tokens),
+    completionTokens: numberOrNull(value.completion_tokens),
+    totalTokens: numberOrNull(value.total_tokens),
+    estimatedCost: numberOrNull(value.cost),
+    isEstimated: false,
+  };
+
+  return Object.values(usage).some((item) => item !== null && item !== false) ? usage : null;
+}
+
+async function parseOpenRouterResponse(response: Response, model: string): Promise<PremiumReportProviderResult> {
   if (!response.ok) {
     const body = await response.text().catch(() => "");
     const detail = body.trim() ? `: ${body.slice(0, 500)}` : "";
@@ -112,13 +138,27 @@ async function parseOpenRouterResponse(response: Response): Promise<string> {
     throw new OpenRouterProviderError("OpenRouter response is not valid JSON.", { cause: error });
   }
 
-  const content = (parsed as OpenRouterResponseBody).choices?.[0]?.message?.content;
+  const body = parsed as OpenRouterResponseBody;
+  const content = body.choices?.[0]?.message?.content;
 
   if (typeof content !== "string" || !content.trim()) {
     throw new OpenRouterProviderError("OpenRouter response did not include a message content string.");
   }
 
-  return content;
+  const usage = parseUsage(body.usage);
+
+  if (usage) {
+    console.info("[premium-ai-report:openrouter-usage]", {
+      model,
+      totalTokens: usage.totalTokens,
+      promptTokens: usage.promptTokens,
+      completionTokens: usage.completionTokens,
+      estimatedCost: usage.estimatedCost,
+      isEstimated: usage.isEstimated,
+    });
+  }
+
+  return { content, usage };
 }
 
 export function createOpenRouterPremiumReportProvider(
@@ -149,7 +189,7 @@ export function createOpenRouterPremiumReportProvider(
         }),
       );
 
-      return parseOpenRouterResponse(response);
+      return parseOpenRouterResponse(response, config.model);
     },
   };
 }
