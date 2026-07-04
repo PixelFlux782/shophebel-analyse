@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import type { ReactNode } from "react";
 
 import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import { normalizeGermanReportText } from "@/lib/report/reportCopy";
 
+type PremiumAiReportSource = "cache" | "generated" | "fallback";
+
 type PremiumAiReportApiResponse = {
   analysisId?: string;
-  source?: "cache" | "generated";
+  source?: PremiumAiReportSource;
   report?: PremiumAiReport;
   error?: string;
   code?: string;
@@ -20,70 +21,28 @@ type PremiumAiReportSectionProps = {
   analysisId: string;
   canViewPremium: boolean;
   initialReport?: PremiumAiReport | null;
-  initialSource?: "cache" | "generated" | null;
+  initialSource?: PremiumAiReportSource | null;
   initialState?: ReportState;
   initialErrorCode?: string | null;
-};
-
-const impactLabels = {
-  low: "geringe Wirkung",
-  medium: "mittlere Wirkung",
-  high: "hohe Wirkung",
-};
-
-const effortLabels = {
-  low: "niedriger Aufwand",
-  medium: "mittlerer Aufwand",
-  high: "höherer Aufwand",
-};
-
-const priorityLabels = {
-  now: "Sofort",
-  next: "Danach",
-  later: "Später",
 };
 
 function getErrorMessage(code?: string | null) {
   switch (code) {
     case "premium_access_required":
       return "Diese KI-Beratung ist nur in freigeschalteten Premium-Analysen enthalten.";
-    case "invalid_ai_response":
-      return "Der KI-Bericht konnte nicht sicher ausgewertet werden. Bitte versuche es später erneut.";
-    case "openrouter_key_missing":
-      return "Die KI-Beratung ist gerade nicht verfügbar. Bitte versuche es später noch einmal.";
     case "missing_analysis_id":
     case "analysis_not_found":
-      return "Die passende Analyse wurde nicht gefunden. Starte die Seite bitte neu oder öffne den Ergebnislink erneut.";
+      return "Die passende Analyse wurde nicht gefunden. Öffne den Ergebnislink bitte erneut.";
     case "storage_error":
     case "save_failed":
+    case "fallback_save_failed":
     case "internal_error":
       return "Es gab ein Serverproblem beim Speichern oder Laden des KI-Berichts.";
-    case "provider_error":
-      return "Der KI-Bericht konnte gerade nicht erzeugt werden. Bitte versuche es in wenigen Minuten erneut.";
+    case "network_error":
+      return "Die Verbindung wurde unterbrochen. Der Bericht wurde nicht erneut gestartet.";
     default:
-      return "Der KI-Bericht konnte gerade nicht geladen werden. Bitte versuche es erneut.";
+      return "Der KI-Bericht konnte gerade nicht geladen werden. Bitte versuche es später erneut.";
   }
-}
-
-function Badge({ children }: { children: ReactNode }) {
-  return (
-    <span className="inline-flex rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1 text-xs font-bold text-cyan-900">
-      {children}
-    </span>
-  );
-}
-
-function ImprovementList({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <h4 className="text-sm font-bold text-slate-950">{title}</h4>
-      <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-slate-700">
-        {items.map((item) => (
-          <li key={item}>{normalizeGermanReportText(item)}</li>
-        ))}
-      </ul>
-    </div>
-  );
 }
 
 function ReportView({
@@ -91,64 +50,55 @@ function ReportView({
   source,
 }: {
   report: PremiumAiReport;
-  source?: "cache" | "generated" | null;
+  source?: PremiumAiReportSource | null;
 }) {
   return (
     <div className="mt-6 space-y-6">
       <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
         <article className="rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_20px_80px_-58px_rgba(15,23,42,0.45)]">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-cyan-700">
-            Kurzüberblick
+            Management-Fazit
           </p>
           <p className="mt-3 text-base leading-8 text-slate-700">{normalizeGermanReportText(report.executiveSummary)}</p>
         </article>
 
         <article className="rounded-2xl border border-amber-200 bg-white p-5 shadow-[0_20px_80px_-58px_rgba(15,23,42,0.45)]">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-amber-700">
-            Hauptdiagnose
+            KI-Einordnung
           </p>
           <p className="mt-3 text-base leading-8 text-slate-700">{normalizeGermanReportText(report.mainDiagnosis)}</p>
           {source ? (
             <p className="mt-4 text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-              {source === "cache" ? "Gespeicherter KI-Bericht" : "Neu erzeugter KI-Bericht"}
+              {source === "cache"
+                ? "Gespeicherter KI-Bericht"
+                : source === "fallback"
+                  ? "Stabiler Ersatzbericht"
+                  : "Neu erzeugter KI-Bericht"}
             </p>
           ) : null}
         </article>
       </div>
 
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
-        <h3 className="text-xl font-bold text-slate-950">Bewertung erklärt</h3>
-        <p className="mt-3 text-sm leading-7 text-slate-700">{normalizeGermanReportText(report.scoreExplanation)}</p>
-      </article>
-
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
-        <h3 className="text-xl font-bold text-slate-950">Wichtigste Probleme</h3>
+        <h3 className="text-xl font-bold text-slate-950">Die wichtigsten 3 Hebel</h3>
         <div className="mt-4 grid gap-4">
-          {report.topIssues.map((issue, index) => (
-            <div key={`${issue.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
-                    Problem {index + 1}
-                  </p>
-                  <h4 className="mt-2 text-lg font-bold text-slate-950">{normalizeGermanReportText(issue.title)}</h4>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Badge>{impactLabels[issue.impact]}</Badge>
-                  <Badge>{effortLabels[issue.effort]}</Badge>
-                </div>
-              </div>
-              <p className="mt-3 text-sm leading-7 text-slate-700">{normalizeGermanReportText(issue.whyItMatters)}</p>
-              <div className="mt-3 rounded-xl border border-white bg-white px-4 py-3">
-                <p className="text-sm font-bold text-slate-950">Belege aus der Analyse</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-7 text-slate-700">
-                  {issue.evidence.map((item) => (
-                    <li key={item}>{normalizeGermanReportText(item)}</li>
-                  ))}
-                </ul>
-              </div>
-              <p className="mt-3 text-sm font-bold leading-7 text-slate-950">
-                Empfehlung: {normalizeGermanReportText(issue.recommendedAction)}
+          {report.topLevers.map((lever, index) => (
+            <div key={`${lever.title}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">
+                Hebel {index + 1}
+              </p>
+              <h4 className="mt-2 text-lg font-bold text-slate-950">{normalizeGermanReportText(lever.title)}</h4>
+              <p className="mt-3 text-sm leading-7 text-slate-700">
+                <strong className="text-slate-950">Problem:</strong> {normalizeGermanReportText(lever.problem)}
+              </p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">
+                <strong className="text-slate-950">Wirkung:</strong> {normalizeGermanReportText(lever.businessImpact)}
+              </p>
+              <p className="mt-2 text-sm leading-7 text-slate-700">
+                <strong className="text-slate-950">Umsetzung:</strong> {normalizeGermanReportText(lever.recommendation)}
+              </p>
+              <p className="mt-3 rounded-xl border border-white bg-white px-4 py-3 text-sm font-bold leading-7 text-slate-950">
+                Erster Schritt: {normalizeGermanReportText(lever.firstStep)}
               </p>
             </div>
           ))}
@@ -156,34 +106,33 @@ function ReportView({
       </article>
 
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
-        <h3 className="text-xl font-bold text-slate-950">Maßnahmenplan</h3>
+        <h3 className="text-xl font-bold text-slate-950">7-Tage-Fahrplan</h3>
         <ol className="mt-4 grid gap-3">
-          {report.actionPlan.map((step) => (
-            <li key={`${step.step}-${step.title}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <p className="text-sm font-bold text-slate-950">
-                  {step.step}. {normalizeGermanReportText(step.title)}
-                </p>
-                <Badge>{priorityLabels[step.priority]}</Badge>
-              </div>
-              <p className="mt-2 text-sm leading-7 text-slate-700">{normalizeGermanReportText(step.description)}</p>
+          {report.sevenDayPlan.map((step) => (
+            <li key={`${step.day}-${step.focus}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-sm font-bold text-slate-950">
+                {normalizeGermanReportText(step.day)}: {normalizeGermanReportText(step.focus)}
+              </p>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-7 text-slate-700">
+                {step.tasks.map((task) => (
+                  <li key={task}>{normalizeGermanReportText(task)}</li>
+                ))}
+              </ul>
             </li>
           ))}
         </ol>
       </article>
 
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
-        <h3 className="text-xl font-bold text-slate-950">Beispiel-Verbesserungen</h3>
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <ImprovementList title="Startbereich" items={report.exampleImprovements.heroTextIdeas} />
-          <ImprovementList title="Button" items={report.exampleImprovements.ctaIdeas} />
-          <ImprovementList title="Vertrauen" items={report.exampleImprovements.trustElementIdeas} />
-        </div>
+        <h3 className="text-xl font-bold text-slate-950">Fazit für Inhaber</h3>
+        <p className="mt-3 text-sm leading-7 text-slate-700">{normalizeGermanReportText(report.ownerConclusion)}</p>
       </article>
 
-      <p className="rounded-2xl border border-slate-200 bg-white/75 px-5 py-4 text-xs leading-6 text-slate-500">
-        {normalizeGermanReportText(report.disclaimer)}
-      </p>
+      {source === "fallback" ? (
+        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-xs leading-6 text-amber-900">
+          Die Beratung wurde aus den vorhandenen Analyse-Daten als Ersatzbericht erstellt, weil der KI-Provider gerade nicht stabil geantwortet hat.
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -197,7 +146,7 @@ export function PremiumAiReportSection({
   initialErrorCode = null,
 }: PremiumAiReportSectionProps) {
   const [report, setReport] = useState<PremiumAiReport | null>(initialReport);
-  const [source, setSource] = useState<"cache" | "generated" | null>(initialSource);
+  const [source, setSource] = useState<PremiumAiReportSource | null>(initialSource);
   const [state, setState] = useState<ReportState>(
     initialState ?? (initialReport ? "success" : "idle"),
   );
@@ -264,7 +213,7 @@ export function PremiumAiReportSection({
               KI-Einordnung
             </h2>
             <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
-              Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und konkreten Textideen.
+              Eine zusätzliche Beratungsebene mit Diagnose, Prioritäten und einem umsetzbaren 7-Tage-Fahrplan.
             </p>
           </div>
 
@@ -286,7 +235,7 @@ export function PremiumAiReportSection({
           <div className="rounded-2xl border border-cyan-200 bg-white p-5 shadow-[0_18px_70px_-55px_rgba(15,23,42,0.45)]">
             <h3 className="text-xl font-bold text-slate-950">Bereit zur Erstellung</h3>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-700">
-              Der Bericht wird erst erzeugt, wenn du den Button klickst. Falls für diese Analyse bereits ein KI-Bericht gespeichert ist, wird er direkt wiederverwendet.
+              Der Bericht wird erst erzeugt, wenn du den Button klickst. Falls für diese Analyse bereits ein aktueller KI-Bericht gespeichert ist, wird er direkt wiederverwendet.
             </p>
           </div>
         ) : null}
@@ -315,6 +264,7 @@ export function PremiumAiReportSection({
             <button
               type="button"
               onClick={generateReport}
+              disabled={false}
               className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
             >
               Erneut versuchen

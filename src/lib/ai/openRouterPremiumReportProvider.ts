@@ -4,6 +4,7 @@ import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 const OPENROUTER_CHAT_COMPLETIONS_URL = "https://openrouter.ai/api/v1/chat/completions";
 const DEFAULT_OPENROUTER_MODEL = "openai/gpt-4o-mini";
 const DEFAULT_TIMEOUT_MS = 30_000;
+const DEFAULT_MAX_TOKENS = 1_400;
 
 export type OpenRouterProviderOptions = {
   apiKey?: string;
@@ -11,6 +12,7 @@ export type OpenRouterProviderOptions = {
   siteUrl?: string;
   appName?: string;
   timeoutMs?: number;
+  maxTokens?: number;
   fetchFn?: typeof fetch;
 };
 
@@ -55,6 +57,7 @@ function resolveConfig(options: OpenRouterProviderOptions = {}) {
     siteUrl: options.siteUrl?.trim() || readEnv("OPENROUTER_SITE_URL"),
     appName: options.appName?.trim() || readEnv("OPENROUTER_APP_NAME"),
     timeoutMs: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+    maxTokens: (options.maxTokens ?? Number(readEnv("OPENROUTER_MAX_TOKENS"))) || DEFAULT_MAX_TOKENS,
     fetchFn: options.fetchFn ?? fetch,
   };
 }
@@ -138,6 +141,7 @@ export function createOpenRouterPremiumReportProvider(
             model: config.model,
             messages: openRouterMessages,
             temperature: 0.2,
+            max_tokens: config.maxTokens,
             response_format: {
               type: "json_object",
             },

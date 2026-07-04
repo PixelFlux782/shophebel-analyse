@@ -1,42 +1,29 @@
 import { z } from "zod";
 
-const impactSchema = z.enum(["low", "medium", "high"]);
-const effortSchema = z.enum(["low", "medium", "high"]);
-const actionPrioritySchema = z.enum(["now", "next", "later"]);
+const boundedString = z.string().trim().min(1).max(900);
 
-export const premiumAiTopIssueSchema = z.object({
+export const premiumAiTopLeverSchema = z.object({
   title: z.string().min(1),
-  whyItMatters: z.string().min(1),
-  evidence: z.array(z.string().min(1)),
-  recommendedAction: z.string().min(1),
-  impact: impactSchema,
-  effort: effortSchema,
+  problem: boundedString,
+  businessImpact: boundedString,
+  recommendation: boundedString,
+  firstStep: boundedString,
 });
 
-export const premiumAiActionStepSchema = z.object({
-  step: z.number().int().positive(),
-  title: z.string().min(1),
-  description: z.string().min(1),
-  priority: actionPrioritySchema,
-});
-
-export const premiumAiExampleImprovementsSchema = z.object({
-  heroTextIdeas: z.array(z.string().min(1)),
-  ctaIdeas: z.array(z.string().min(1)),
-  trustElementIdeas: z.array(z.string().min(1)),
+export const premiumAiSevenDayPlanItemSchema = z.object({
+  day: z.string().min(1).max(40),
+  focus: boundedString,
+  tasks: z.array(z.string().trim().min(1).max(220)).min(1).max(4),
 });
 
 export const premiumAiReportSchema = z.object({
-  executiveSummary: z.string().min(1),
-  mainDiagnosis: z.string().min(1),
-  scoreExplanation: z.string().min(1),
-  topIssues: z.array(premiumAiTopIssueSchema).min(1),
-  actionPlan: z.array(premiumAiActionStepSchema).min(1),
-  exampleImprovements: premiumAiExampleImprovementsSchema,
-  disclaimer: z.string().min(1),
+  executiveSummary: boundedString,
+  mainDiagnosis: boundedString,
+  topLevers: z.array(premiumAiTopLeverSchema).min(3).max(3),
+  sevenDayPlan: z.array(premiumAiSevenDayPlanItemSchema).min(3).max(3),
+  ownerConclusion: boundedString,
 });
 
-export type PremiumAiTopIssue = z.infer<typeof premiumAiTopIssueSchema>;
-export type PremiumAiActionStep = z.infer<typeof premiumAiActionStepSchema>;
-export type PremiumAiExampleImprovements = z.infer<typeof premiumAiExampleImprovementsSchema>;
+export type PremiumAiTopLever = z.infer<typeof premiumAiTopLeverSchema>;
+export type PremiumAiSevenDayPlanItem = z.infer<typeof premiumAiSevenDayPlanItemSchema>;
 export type PremiumAiReport = z.infer<typeof premiumAiReportSchema>;

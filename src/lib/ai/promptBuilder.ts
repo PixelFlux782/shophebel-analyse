@@ -64,17 +64,20 @@ const FORBIDDEN_PROMPT_TERMS = [
 ];
 
 const SYSTEM_PROMPT = [
-  "Du erstellst eine Premiumanalyse für Shophebel.",
+  "Du erstellst eine Premium-Beratung für Shophebel.",
   "Sprache: Deutsch.",
   "Zielgruppe: Shop-Betreiber ohne technisches Spezialwissen.",
-  "Ton: klar, hilfreich, professionell, konkret.",
+  "Ton: ruhig, beratend, klar, professionell, wie ein guter Digitalberater für Onlineshops.",
   "Die bestehende Shophebel-Analyse ist die einzige Faktenbasis.",
   "Bewerte keine Webseite frei und führe keine eigene Recherche durch.",
   "Erfinde keine Fakten, Kennzahlen, Beobachtungen, Ursachen oder Belege.",
   "Behaupte nichts über Dinge, die nicht im Input stehen.",
   "Gib keine Garantien für Umsatzsteigerung oder wirtschaftliche Ergebnisse.",
+  "Schreibe konkret und handlungsorientiert, aber ohne übertriebene Versprechen.",
+  "Vermeide generische Floskeln, lange Textwände und Formulierungen wie aus einem Chatbot.",
+  "Nutze keine Fachbegriffe ohne kurze Einordnung in Alltagssprache.",
   "Nutze keine Screenshots, Rohdaten, Markup, Zahlungsdaten oder interne Zusatzdaten.",
-  "Deine Aufgabe: erklären, priorisieren und die Analyse in konkrete nächste Schritte übersetzen.",
+  "Deine Aufgabe: Hauptproblem einordnen, Umsatzwirkung erklären, drei Hebel priorisieren und einen 7-Tage-Fahrplan ableiten.",
   "Antworte ausschließlich als valides JSON im geforderten Schema.",
 ].join("\n");
 
@@ -235,31 +238,23 @@ function buildRequiredOutputSchema() {
   return {
     executiveSummary: "string",
     mainDiagnosis: "string",
-    scoreExplanation: "string",
-    topIssues: [
+    topLevers: [
       {
         title: "string",
-        whyItMatters: "string",
-        evidence: ["string"],
-        recommendedAction: "string",
-        impact: "low | medium | high",
-        effort: "low | medium | high",
+        problem: "string",
+        businessImpact: "string",
+        recommendation: "string",
+        firstStep: "string",
       },
     ],
-    actionPlan: [
+    sevenDayPlan: [
       {
-        step: "number",
-        title: "string",
-        description: "string",
-        priority: "now | next | later",
+        day: "Tag 1-2 | Tag 3-5 | Tag 6-7",
+        focus: "string",
+        tasks: ["string"],
       },
     ],
-    exampleImprovements: {
-      heroTextIdeas: ["string"],
-      ctaIdeas: ["string"],
-      trustElementIdeas: ["string"],
-    },
-    disclaimer: "string",
+    ownerConclusion: "string",
   };
 }
 
@@ -301,7 +296,13 @@ function buildUserPrompt(input: PremiumReportInput): string {
   const payload = buildPayload(input);
 
   return [
-    "Erstelle aus dieser Shophebel-Analyse die Premiumauswertung.",
+    "Erstelle aus dieser Shophebel-Analyse die Premium-KI-Beratung.",
+    "Pflichtstruktur:",
+    "- executiveSummary: Management-Fazit in 2-3 kurzen Sätzen.",
+    "- mainDiagnosis: Hauptproblem, warum es wahrscheinlich Umsatz kostet, und wichtigster erster Schritt.",
+    "- topLevers: exakt 3 Hebel, jeweils Problem, Wirkung, konkrete Umsetzung und erster Schritt.",
+    "- sevenDayPlan: exakt Tag 1-2, Tag 3-5, Tag 6-7 mit kurzen Aufgaben.",
+    "- ownerConclusion: kurze Abschlussnotiz für Inhaber oder Geschäftsführer.",
     "Nutze nur die folgenden strukturierten Analyse-Fakten und gib ausschliesslich JSON zurueck.",
     JSON.stringify(payload, null, 2),
   ].join("\n\n");

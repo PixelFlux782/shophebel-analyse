@@ -1,12 +1,16 @@
+import { createHash } from "crypto";
+
 import { getAnalysisResult } from "@/lib/analysisStore";
 import { createOpenRouterPremiumReportProvider, DEFAULT_OPENROUTER_MODEL, OpenRouterProviderError } from "@/lib/ai/openRouterPremiumReportProvider";
 import { getPremiumAiReportByAnalysisId, savePremiumAiReportForAnalysis } from "@/lib/ai/premiumAiReportStore";
 import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
-import { generatePremiumAiReport, PremiumAiReportValidationError } from "@/lib/ai/premiumReportService";
+import { buildFallbackPremiumAiReport, generatePremiumAiReport, PremiumAiReportValidationError } from "@/lib/ai/premiumReportService";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
 
-export type PremiumAiReportSource = "cache" | "generated";
+export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v2";
+
+export type PremiumAiReportSource = "cache" | "generated" | "fallback";
 
 export type PremiumAiReportGenerationResult = {
   analysisId: string;
@@ -32,6 +36,30 @@ function normalizeAnalysisId(value: unknown) {
 
 function createDefaultProvider() {
   return createOpenRouterPremiumReportProvider();
+}
+
+function buildInputHash(value: unknown) {
+  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function isReusableReport(input: {
+  reportVersion?: string | null;
+  inputHash?: string | null;
+  status?: string | null;
+}, inputHash: string) {
+  if (!input.reportVersion && !input.inputHash) {
+    return false;
+  }
+
+  return input.reportVersion === PREMIUM_AI_REPORT_VERSION && input.inputHash === inputHash && input.status !== "failed";
+}
+
+function logPremiumAiFailure(message: string, details: { analysisId: string; code: string; error: unknown }) {
+  console.warn("[premium-ai-report]", message, {
+    analysisId: details.analysisId,
+    code: details.code,
+    error: details.error instanceof Error ? details.error.message : "unknown",
+  });
 }
 
 export async function getOrGeneratePremiumAiReport(input: {
@@ -68,6 +96,9 @@ export async function getOrGeneratePremiumAiReport(input: {
     );
   }
 
+  const reportInput = buildPremiumReportInput(analysis.analysis);
+  const inputHash = buildInputHash(reportInput);
+
   let existingReport: Awaited<ReturnType<typeof getPremiumAiReportByAnalysisId>>;
 
   try {
@@ -81,7 +112,7 @@ export async function getOrGeneratePremiumAiReport(input: {
     );
   }
 
-  if (existingReport) {
+  if (existingReport && isReusableReport(existingReport, inputHash)) {
     return {
       analysisId,
       source: "cache",
@@ -90,7 +121,6 @@ export async function getOrGeneratePremiumAiReport(input: {
   }
 
   try {
-    const reportInput = buildPremiumReportInput(analysis.analysis);
     const provider = input.provider ?? createDefaultProvider();
     const report = await generatePremiumAiReport(reportInput, provider);
     const saved = await savePremiumAiReportForAnalysis({
@@ -98,6 +128,9 @@ export async function getOrGeneratePremiumAiReport(input: {
       report,
       provider: input.providerName ?? "openrouter",
       model: input.model ?? process.env.OPENROUTER_MODEL?.trim() ?? DEFAULT_OPENROUTER_MODEL,
+      status: "generated",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
+      inputHash,
     });
 
     return {
@@ -106,28 +139,6 @@ export async function getOrGeneratePremiumAiReport(input: {
       report: saved.report,
     };
   } catch (error) {
-    if (error instanceof OpenRouterProviderError) {
-      const missingApiKey = error.message.includes("OPENROUTER_API_KEY");
-
-      throw new PremiumAiReportRequestError(
-        missingApiKey ? "openrouter_key_missing" : "provider_error",
-        missingApiKey
-          ? "OpenRouter API-Key ist nicht konfiguriert."
-          : "OpenRouter konnte den KI-Premiumreport nicht erstellen.",
-        missingApiKey ? 503 : 502,
-        { cause: error },
-      );
-    }
-
-    if (error instanceof PremiumAiReportValidationError) {
-      throw new PremiumAiReportRequestError(
-        "invalid_ai_response",
-        "Die KI-Antwort konnte nicht als Premiumreport validiert werden.",
-        502,
-        { cause: error },
-      );
-    }
-
     if (error instanceof Error && error.message.includes("premium_ai_report")) {
       throw new PremiumAiReportRequestError(
         "save_failed",
@@ -135,6 +146,47 @@ export async function getOrGeneratePremiumAiReport(input: {
         500,
         { cause: error },
       );
+    }
+
+    if (
+      error instanceof OpenRouterProviderError ||
+      error instanceof PremiumAiReportValidationError ||
+      error instanceof Error
+    ) {
+      const missingApiKey = error.message.includes("OPENROUTER_API_KEY");
+      const fallbackReport = buildFallbackPremiumAiReport(reportInput);
+      const code = error instanceof PremiumAiReportValidationError
+        ? "invalid_ai_response"
+        : missingApiKey
+          ? "openrouter_key_missing"
+          : "provider_error";
+
+      logPremiumAiFailure("Provider failed; using fallback report.", { analysisId, code, error });
+
+      try {
+        const saved = await savePremiumAiReportForAnalysis({
+          analysisId,
+          report: fallbackReport,
+          provider: input.providerName ?? "fallback",
+          model: input.model ?? process.env.OPENROUTER_MODEL?.trim() ?? DEFAULT_OPENROUTER_MODEL,
+          status: "fallback",
+          reportVersion: PREMIUM_AI_REPORT_VERSION,
+          inputHash,
+        });
+
+        return {
+          analysisId,
+          source: "fallback",
+          report: saved.report,
+        };
+      } catch (saveError) {
+        throw new PremiumAiReportRequestError(
+          "fallback_save_failed",
+          "KI-Beratung konnte nur als Ersatzbericht erstellt, aber nicht gespeichert werden.",
+          500,
+          { cause: saveError },
+        );
+      }
     }
 
     throw new PremiumAiReportRequestError(

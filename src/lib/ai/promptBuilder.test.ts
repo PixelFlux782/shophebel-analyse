@@ -172,13 +172,23 @@ describe("promptBuilder", () => {
       schema: {
         executiveSummary: "string",
         mainDiagnosis: "string",
-        scoreExplanation: "string",
-        exampleImprovements: {
-          heroTextIdeas: ["string"],
-          ctaIdeas: ["string"],
-          trustElementIdeas: ["string"],
-        },
-        disclaimer: "string",
+        topLevers: [
+          {
+            title: "string",
+            problem: "string",
+            businessImpact: "string",
+            recommendation: "string",
+            firstStep: "string",
+          },
+        ],
+        sevenDayPlan: [
+          {
+            day: "Tag 1-2 | Tag 3-5 | Tag 6-7",
+            focus: "string",
+            tasks: ["string"],
+          },
+        ],
+        ownerConclusion: "string",
       },
     });
   });

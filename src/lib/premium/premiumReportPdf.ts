@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "fs";
 import { readFile } from "fs/promises";
 import path from "path";
 
+import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumBlocker, PremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { ConsultantNotes } from "@/lib/premium/consultantNotes";
@@ -17,6 +18,7 @@ type PremiumReportPdfInput = {
   analysis: StoredAnalysisResult;
   report: Partial<PremiumReport>;
   consultantNotes?: ConsultantNotes | null;
+  aiReport?: PremiumAiReport | null;
 };
 
 type BoxTone = "ink" | "mist" | "sage" | "gold" | "rose";
@@ -79,6 +81,9 @@ export function getPremiumReportPdfStaticLabels() {
   return [
     "Premium-Bericht inkl. KI-Beratung",
     "Executive Summary",
+    "Management-Fazit",
+    "KI-Einordnung",
+    "Die wichtigsten 3 Hebel",
     "Management-Zusammenfassung",
     "Kurzüberblick",
     "Die wichtigsten 3 Umsatzbremsen",
@@ -128,6 +133,7 @@ export function getPremiumReportPdfRenderTextData({
   analysis,
   report,
   consultantNotes,
+  aiReport,
 }: PremiumReportPdfInput) {
   const output = [
     ...getPremiumReportPdfStaticLabels(),
@@ -135,6 +141,9 @@ export function getPremiumReportPdfRenderTextData({
   ];
 
   collectNormalizedTextLeaves(report, output);
+  if (aiReport) {
+    collectNormalizedTextLeaves(aiReport, output);
+  }
   getCustomerFacingConsultantSections(consultantNotes).forEach((section) => {
     collectNormalizedTextLeaves(section, output);
   });
@@ -641,20 +650,35 @@ function drawCover(
   const score = analysis.analysis.overallScore;
   const summary: Partial<PremiumReport["premiumSummary"]> = report.premiumSummary ?? {};
   const blockers = Array.isArray(report.topRevenueBlockers) ? report.topRevenueBlockers.slice(0, 3) : [];
+  const title = "Premium-Bericht inkl. KI-Beratung";
+  const headerSubtitle = "Executive Summary f\u00fcr bessere Anfragen, mehr Vertrauen und klarere n\u00e4chste Schritte.";
+  const titleY = y + 34;
+  const titleWidth = width - 82;
+  const titleSize = 25.5;
+  const titleLineGap = 2.5;
+  const subtitleGap = 15;
+  const subtitleSize = 11.2;
+  const subtitleLineGap = 3;
+  const subtitleWidth = width - 78;
+  const titleHeight = measureTextBlock(doc, fonts, title, titleWidth, titleSize, titleLineGap, "bold");
+  const subtitleY = titleY + titleHeight + subtitleGap;
+  const subtitleHeight = measureTextBlock(doc, fonts, headerSubtitle, subtitleWidth, subtitleSize, subtitleLineGap, "regular");
+  const headerHeight = Math.ceil(Math.max(204, subtitleY + subtitleHeight + 28));
+  const dividerHeight = 6;
 
-  doc.rect(0, 0, doc.page.width, 178).fill(COLORS.ink);
-  doc.rect(0, 178, doc.page.width, 6).fill(COLORS.accent);
+  doc.rect(0, 0, doc.page.width, headerHeight).fill(COLORS.ink);
+  doc.rect(0, headerHeight, doc.page.width, dividerHeight).fill(COLORS.accent);
   font(doc, fonts, "bold", 9.2, "#b8f3e5");
   doc.text("SHOPHEBEL PREMIUM", x, y + 2, { width, lineBreak: false });
-  font(doc, fonts, "bold", 29, COLORS.white);
-  doc.text("Premium-Bericht inkl. KI-Beratung", x, y + 32, { width: width - 120, lineGap: 3 });
-  font(doc, fonts, "regular", 11.2, "#dbe3ee");
-  doc.text("Executive Summary für bessere Anfragen, mehr Vertrauen und klarere nächste Schritte.", x, y + 106, {
-    width: width - 78,
-    lineGap: 3,
+  font(doc, fonts, "bold", titleSize, COLORS.white);
+  doc.text(title, x, titleY, { width: titleWidth, lineGap: titleLineGap });
+  font(doc, fonts, "regular", subtitleSize, "#dbe3ee");
+  doc.text(headerSubtitle, x, subtitleY, {
+    width: subtitleWidth,
+    lineGap: subtitleLineGap,
   });
 
-  doc.y = 214;
+  doc.y = headerHeight + dividerHeight + 30;
   drawMetricRow(doc, fonts, analysis);
   drawTextBox(doc, fonts, {
     title: textValue(summary.headline, "Premium Anfrage- und Vertrauens-Audit"),
@@ -848,6 +872,7 @@ async function renderPremiumReportPdfWithFooterStats({
   analysis,
   report,
   consultantNotes,
+  aiReport,
 }: PremiumReportPdfInput): Promise<{ pdf: Buffer; footerPageStats: FooterPageStats }> {
   const doc = new PDFDocument({
     size: "A4",
@@ -917,15 +942,41 @@ async function renderPremiumReportPdfWithFooterStats({
   }
 
   drawSectionTitle(doc, fonts, "Premium-Bericht inkl. KI-Beratung", "Strategische Einordnung");
-  drawTextBox(doc, fonts, {
-    title: "Management-Zusammenfassung",
-    tone: "ink",
-    body: [
-      textValue(summary.firstFocus, "Starte mit dem Hebel, der Klarheit, Vertrauen und den nächsten Schritt am schnellsten verbessert."),
-      textValue(report.conversionHypothesis, "Wenn Klarheit, Vertrauen und der nächste Schritt sichtbarer werden, sinkt Reibung im sichtbaren Startbereich."),
-      `Schnellster Hebel: ${textValue(summary.fastestWin, "Wichtigste Maßnahme zuerst umsetzen.")}`,
-    ],
-  });
+  if (aiReport) {
+    drawTextBox(doc, fonts, {
+      title: "Management-Fazit",
+      tone: "ink",
+      body: [aiReport.executiveSummary, aiReport.ownerConclusion],
+    });
+    drawTextBox(doc, fonts, {
+      title: "KI-Einordnung",
+      tone: "sage",
+      body: [aiReport.mainDiagnosis],
+    });
+    aiReport.topLevers.slice(0, 3).forEach((lever, index) => {
+      drawTextBox(doc, fonts, {
+        title: `${index + 1}. ${lever.title}`,
+        tone: index === 0 ? "rose" : index === 1 ? "gold" : "mist",
+        label: "KI-Hebel",
+        body: [
+          `Problem: ${lever.problem}`,
+          `Wirkung: ${lever.businessImpact}`,
+          `Umsetzung: ${lever.recommendation}`,
+          `Erster Schritt: ${lever.firstStep}`,
+        ],
+      });
+    });
+  } else {
+    drawTextBox(doc, fonts, {
+      title: "Management-Zusammenfassung",
+      tone: "ink",
+      body: [
+        textValue(summary.firstFocus, "Starte mit dem Hebel, der Klarheit, Vertrauen und den nächsten Schritt am schnellsten verbessert."),
+        textValue(report.conversionHypothesis, "Wenn Klarheit, Vertrauen und der nächste Schritt sichtbarer werden, sinkt Reibung im sichtbaren Startbereich."),
+        `Schnellster Hebel: ${textValue(summary.fastestWin, "Wichtigste Maßnahme zuerst umsetzen.")}`,
+      ],
+    });
+  }
 
   if (hasCustomerFacingConsultantNotes(consultantNotes)) {
     customerConsultantSections.forEach((section) => drawTextBox(doc, fonts, section));
@@ -956,7 +1007,16 @@ async function renderPremiumReportPdfWithFooterStats({
   }
 
   drawSectionTitle(doc, fonts, REPORT_LABELS.sevenDayPlan, "Umsetzung");
-  if (quickImplementationPlan.length > 0) {
+  if (aiReport?.sevenDayPlan.length) {
+    aiReport.sevenDayPlan.forEach((step, index) => {
+      drawTextBox(doc, fonts, {
+        title: `${step.day}: ${step.focus}`,
+        tone: index === 0 ? "sage" : "mist",
+        label: timelineLabel(index),
+        body: step.tasks,
+      });
+    });
+  } else if (quickImplementationPlan.length > 0) {
     quickImplementationPlan.forEach((step, index) => {
       drawTextBox(doc, fonts, {
         title: `${textValue(step.days, "Zeitraum")}: ${textValue(step.focus, "Fokus")}`,

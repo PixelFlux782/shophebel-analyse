@@ -5,11 +5,16 @@ import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { AnalysisResult } from "@/types/analysis";
 
 const getAnalysisResultMock = vi.hoisted(() => vi.fn());
+const getPremiumAiReportByAnalysisIdMock = vi.hoisted(() => vi.fn());
 const getPremiumReportRecordByAnalysisIdMock = vi.hoisted(() => vi.fn());
 const getOrCreatePremiumReportMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/analysisStore", () => ({
   getAnalysisResult: getAnalysisResultMock,
+}));
+
+vi.mock("@/lib/ai/premiumAiReportStore", () => ({
+  getPremiumAiReportByAnalysisId: getPremiumAiReportByAnalysisIdMock,
 }));
 
 vi.mock("@/lib/premium/premiumReportStore", () => ({
@@ -125,6 +130,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
       updatedAt: "2026-05-08T12:00:00.000Z",
       version: "v1",
     });
+    getPremiumAiReportByAnalysisIdMock.mockResolvedValue(null);
     getOrCreatePremiumReportMock.mockResolvedValue(createPremiumReport());
   });
 

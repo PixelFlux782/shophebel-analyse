@@ -8,7 +8,10 @@ export type PremiumAiReportRecord = {
   report: PremiumAiReport;
   provider?: string | null;
   model?: string | null;
-  status?: string | null;
+  status?: "pending" | "generated" | "failed" | "fallback" | string | null;
+  reportVersion?: string | null;
+  inputHash?: string | null;
+  generatedAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -20,6 +23,9 @@ type SupabasePremiumAiReportRow = {
   provider?: string | null;
   model?: string | null;
   status?: string | null;
+  report_version?: string | null;
+  input_hash?: string | null;
+  generated_at?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
@@ -58,6 +64,9 @@ function toPremiumAiReportRecord(row: SupabasePremiumAiReportRow): PremiumAiRepo
     provider: row.provider ?? null,
     model: row.model ?? null,
     status: row.status ?? null,
+    reportVersion: row.report_version ?? null,
+    inputHash: row.input_hash ?? null,
+    generatedAt: row.generated_at ?? row.created_at ?? null,
     createdAt: row.created_at ?? null,
     updatedAt: row.updated_at ?? null,
   };
@@ -72,7 +81,7 @@ export async function getPremiumAiReportByAnalysisId(
     return getMemoryStore().get(analysisId) ?? null;
   }
 
-  const requestUrl = `${config.url}/rest/v1/premium_ai_reports?analysis_id=eq.${encodeURIComponent(analysisId)}&select=id,analysis_id,report,provider,model,status,created_at,updated_at&order=created_at.desc&limit=1`;
+  const requestUrl = `${config.url}/rest/v1/premium_ai_reports?analysis_id=eq.${encodeURIComponent(analysisId)}&select=id,analysis_id,report,provider,model,status,report_version,input_hash,generated_at,created_at,updated_at&order=created_at.desc&limit=1`;
   const response = await fetch(requestUrl, {
     method: "GET",
     headers: {
@@ -96,6 +105,9 @@ export async function savePremiumAiReportForAnalysis(input: {
   report: PremiumAiReport;
   provider?: string;
   model?: string;
+  status?: PremiumAiReportRecord["status"];
+  reportVersion?: string;
+  inputHash?: string;
 }): Promise<PremiumAiReportRecord> {
   const config = getSupabaseConfig();
   const now = new Date().toISOString();
@@ -113,7 +125,10 @@ export async function savePremiumAiReportForAnalysis(input: {
       report: input.report,
       provider: input.provider ?? null,
       model: input.model ?? null,
-      status: "generated",
+      status: input.status ?? "generated",
+      reportVersion: input.reportVersion ?? null,
+      inputHash: input.inputHash ?? null,
+      generatedAt: now,
       createdAt: now,
       updatedAt: now,
     };
@@ -128,7 +143,10 @@ export async function savePremiumAiReportForAnalysis(input: {
     report: input.report,
     provider: input.provider ?? null,
     model: input.model ?? null,
-    status: "generated",
+    status: input.status ?? "generated",
+    report_version: input.reportVersion ?? null,
+    input_hash: input.inputHash ?? null,
+    generated_at: now,
     created_at: now,
     updated_at: now,
   };

@@ -19,32 +19,48 @@ function expectReportQuality(text: string) {
 function createReport(): PremiumAiReport {
   return {
     executiveSummary: "Die Seite hat Potenzial, verliert aber im ersten Eindruck zu viel Klarheit.",
-    mainDiagnosis: "Der Hero erklaert Nutzen und naechsten Schritt nicht schnell genug.",
-    scoreExplanation: "Der Score wird vor allem durch Conversion- und Trust-Signale gedrueckt.",
-    topIssues: [
+    mainDiagnosis: "Der Startbereich erklärt Nutzen und nächsten Schritt nicht schnell genug.",
+    topLevers: [
       {
-        title: "CTA ist zu unkonkret",
-        whyItMatters: "Besucher verstehen nicht sofort, welcher Schritt empfohlen wird.",
-        evidence: ["Der Hauptbutton beschreibt keinen konkreten Nutzen."],
-        recommendedAction: "Primaeren CTA nutzenorientiert umformulieren.",
-        impact: "high",
-        effort: "low",
+        title: "Button ist zu unkonkret",
+        problem: "Besucher verstehen nicht sofort, welcher Schritt empfohlen wird.",
+        businessImpact: "Der Hauptbutton beschreibt keinen konkreten Nutzen.",
+        recommendation: "Primären Button nutzenorientiert umformulieren.",
+        firstStep: "Button im Startbereich prüfen.",
+      },
+      {
+        title: "Vertrauen fehlt früh",
+        problem: "Vertrauen wird zu spät aufgebaut.",
+        businessImpact: "Unsichere Besucher vergleichen eher weiter.",
+        recommendation: "Bewertungen früher zeigen.",
+        firstStep: "Zwei Vertrauensbelege auswählen.",
+      },
+      {
+        title: "Mobile Reihenfolge prüfen",
+        problem: "Mobile Nutzer sehen wichtige Signale später.",
+        businessImpact: "Mehr Sucharbeit kann Anfragen bremsen.",
+        recommendation: "Mobile Startansicht verdichten.",
+        firstStep: "Mobile Ansicht gegenlesen.",
       },
     ],
-    actionPlan: [
+    sevenDayPlan: [
       {
-        step: 1,
-        title: "Hero schaerfen",
-        description: "Nutzenversprechen, Zielgruppe und CTA in einem sichtbaren Block klaeren.",
-        priority: "now",
+        day: "Tag 1-2",
+        focus: "Sofortmaßnahmen",
+        tasks: ["Nutzenversprechen, Zielgruppe und Button in einem sichtbaren Block klären."],
+      },
+      {
+        day: "Tag 3-5",
+        focus: "Umsetzung",
+        tasks: ["Vertrauenssignale platzieren."],
+      },
+      {
+        day: "Tag 6-7",
+        focus: "Kontrolle",
+        tasks: ["Mobile Ansicht prüfen."],
       },
     ],
-    exampleImprovements: {
-      heroTextIdeas: ["Mehr qualifizierte Anfragen aus deiner Website"],
-      ctaIdeas: ["Website-Potenzial pruefen lassen"],
-      trustElementIdeas: ["Kundenstimmen direkt unter dem CTA zeigen"],
-    },
-    disclaimer: "Diese Einschaetzung ersetzt keine manuelle Fachberatung.",
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann nächster Schritt.",
   };
 }
 
@@ -101,16 +117,30 @@ describe("PremiumAiReportSection", () => {
       }),
     );
 
-    expect(markup).toContain("Kurz");
-    expect(markup).toContain("Hauptdiagnose");
-    expect(markup).toContain("Bewertung");
-    expect(markup).toContain("Wichtigste Probleme");
-    expect(markup).toContain("Maßnahmenplan");
-    expect(markup).toContain("Beispiel-Verbesserungen");
+    expect(markup).toContain("Management-Fazit");
+    expect(markup).toContain("KI-Einordnung");
+    expect(markup).toContain("Die wichtigsten 3 Hebel");
+    expect(markup).toContain("7-Tage-Fahrplan");
+    expect(markup).toContain("Fazit");
     expect(markup).toContain("Gespeicherter KI-Bericht");
-    expect(markup).not.toContain("Executive Summary");
     expect(markup).not.toContain("Top Issues");
+    expect(markup).not.toContain("Beispiel-Verbesserungen");
     expect(markup).not.toContain("KI-Premiumreport erzeugen");
+    expectReportQuality(markup);
+  });
+
+  it("rendert den Fallback-State kundenfreundlich", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(PremiumAiReportSection, {
+        analysisId: "analysis-123",
+        canViewPremium: true,
+        initialReport: createReport(),
+        initialSource: "fallback",
+      }),
+    );
+
+    expect(markup).toContain("Stabiler Ersatzbericht");
+    expect(markup).toContain("aus den vorhandenen Analyse-Daten");
     expectReportQuality(markup);
   });
 
@@ -120,12 +150,12 @@ describe("PremiumAiReportSection", () => {
         analysisId: "analysis-123",
         canViewPremium: true,
         initialState: "error",
-        initialErrorCode: "invalid_ai_response",
+        initialErrorCode: "fallback_save_failed",
       }),
     );
 
     expect(markup).toContain("KI-Bericht nicht");
-    expect(markup).toContain("Der KI-Bericht konnte nicht sicher ausgewertet werden");
+    expect(markup).toContain("Serverproblem");
     expect(markup).toContain("Erneut versuchen");
     expectReportQuality(markup);
   });

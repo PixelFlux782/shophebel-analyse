@@ -7,6 +7,7 @@ import { mockPremiumReportProvider } from "@/lib/ai/mockPremiumReportProvider";
 import type { PremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 import {
+  buildFallbackPremiumAiReport,
   generatePremiumAiReport,
   normalizePremiumAiReportCopy,
   parsePremiumAiReportResponse,
@@ -29,13 +30,13 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
         category: "conversion",
         score: 45,
         label: "Conversion",
-        summary: "CTA ist unklar.",
+        summary: "Button ist unklar.",
         evidence: ["Im Startbereich ist kein eindeutiger Hauptbutton sichtbar."],
       },
     ],
     criticalSignals: [
       {
-        title: "Naechster Schritt unklar",
+        title: "Nächster Schritt unklar",
         severity: "high",
         category: "conversion",
         evidence: ["Der wichtigste Button ist im oberen Bereich nicht eindeutig."],
@@ -43,31 +44,31 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
     ],
     revenueBlockers: [
       {
-        title: "CTA im Hero ist nicht eindeutig",
-        description: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
-        action: "Primaeren CTA im sichtbaren Startbereich klarer formulieren.",
+        title: "Button im Startbereich ist nicht eindeutig",
+        description: "Besucher erkennen den nächsten Schritt nicht schnell genug.",
+        action: "Primären Button im sichtbaren Startbereich klarer formulieren.",
         impact: "hoch",
         effort: "niedrig",
-        category: "CTA",
+        category: "Button",
         priority: 1,
         severity: "high",
-        evidence: ["Naechster Schritt ist nicht klar sichtbar."],
+        evidence: ["Nächster Schritt ist nicht klar sichtbar."],
       },
     ],
     measures: [
       {
-        title: "Hero und CTA schaerfen",
-        description: "Hero und CTA klarer formulieren.",
+        title: "Startbereich und Button schärfen",
+        description: "Startbereich und Button klarer formulieren.",
         effort: "niedrig",
         impact: "hoch",
         priority: 1,
-        category: "CTA",
-        source: "Naechster Schritt",
+        category: "Button",
+        source: "Nächster Schritt",
       },
     ],
     opportunities: [],
     detectedPageSignals: {
-      heroText: ["Bessere Shops fuer mehr Anfragen"],
+      heroText: ["Bessere Shops für mehr Anfragen"],
       ctaTexts: ["Angebot anfragen"],
       trustSignals: ["Impressum", "Datenschutz"],
       technicalNotes: ["Die Analyse basiert auf der Seite, wie sie im Browser sichtbar wird."],
@@ -82,6 +83,58 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
   };
 }
 
+function createRawReport() {
+  return {
+    executiveSummary: "Kurzfassung für den Shop",
+    mainDiagnosis: "Der Startbereich und Button sind unklar.",
+    topLevers: [
+      {
+        title: "Button im Startbereich",
+        problem: "Besucher verstehen den nächsten Schritt nicht.",
+        businessImpact: "Das kann Anfragen unnötig bremsen.",
+        recommendation: "Primären Button konkreter formulieren.",
+        firstStep: "Button-Text prüfen.",
+      },
+      {
+        title: "Vertrauen früher zeigen",
+        problem: "Vertrauen entsteht zu spät.",
+        businessImpact: "Unsicherheit kann Entscheidungen verlangsamen.",
+        recommendation: "Bewertungen früher platzieren.",
+        firstStep: "Zwei Belege auswählen.",
+      },
+      {
+        title: "Mobile Reihenfolge prüfen",
+        problem: "Wichtige Signale kommen mobil zu spät.",
+        businessImpact: "Mobile Besucher müssen mehr suchen.",
+        recommendation: "Mobile Startansicht verdichten.",
+        firstStep: "Mobile Ansicht öffnen.",
+      },
+    ],
+    sevenDayPlan: [
+      { day: "Tag 1-2", focus: "Sofortmaßnahmen", tasks: ["Button prüfen."] },
+      { day: "Tag 3-5", focus: "Umsetzung", tasks: ["Vertrauen platzieren."] },
+      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht prüfen."] },
+    ],
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann nächster Schritt.",
+  };
+}
+
+function visibleReportText(value: unknown): string {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(visibleReportText).join(" ");
+  }
+
+  if (value && typeof value === "object") {
+    return Object.values(value).map(visibleReportText).join(" ");
+  }
+
+  return "";
+}
+
 describe("premiumReportService", () => {
   it("akzeptiert typisiert nur PremiumReportInput und optionalen Provider", () => {
     expectTypeOf(generatePremiumAiReport).parameters.toEqualTypeOf<
@@ -93,18 +146,12 @@ describe("premiumReportService", () => {
     const report = await generatePremiumAiReport(createInput(), mockPremiumReportProvider);
 
     expect(report.executiveSummary).toContain("https://shop.test/");
-    expect(report.topIssues).toHaveLength(2);
-    expect(report.topIssues[0]).toMatchObject({
+    expect(report.topLevers).toHaveLength(3);
+    expect(report.topLevers[0]).toMatchObject({
       title: "Button im Startbereich ist nicht eindeutig",
-      impact: "high",
-      effort: "low",
     });
-    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
-    expect(report.actionPlan[0]).toMatchObject({
-      step: 1,
-      priority: "now",
-    });
-    expect(report.exampleImprovements.ctaIdeas.length).toBeGreaterThan(0);
+    expect(report.sevenDayPlan).toHaveLength(3);
+    expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
   });
 
   it("faengt ungueltiges JSON ab", () => {
@@ -124,83 +171,40 @@ describe("premiumReportService", () => {
 
   it("parst JSON auch aus einer gefenceten Provider-Antwort", () => {
     const report = parsePremiumAiReportResponse(`\`\`\`json
-{
-  "executiveSummary": "Kurzfassung",
-  "mainDiagnosis": "Diagnose",
-  "scoreExplanation": "Score-Erklaerung",
-  "topIssues": [
-    {
-      "title": "Problem",
-      "whyItMatters": "Warum es wichtig ist",
-      "evidence": ["Beleg"],
-      "recommendedAction": "Aktion",
-      "impact": "medium",
-      "effort": "low"
-    }
-  ],
-  "actionPlan": [
-    {
-      "step": 1,
-      "title": "Schritt",
-      "description": "Beschreibung",
-      "priority": "now"
-    }
-  ],
-  "exampleImprovements": {
-    "heroTextIdeas": ["Hero"],
-    "ctaIdeas": ["CTA"],
-    "trustElementIdeas": ["Trust"]
-  },
-  "disclaimer": "Nur auf Basis der Analyse."
-}
+${JSON.stringify(createRawReport(), null, 2)}
 \`\`\``);
 
-    expect(report.disclaimer).toBe("Nur auf Basis der Analyse.");
-    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
+    expect(report.ownerConclusion).toContain("Klarheit");
+    expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
   });
 
   it("normalisiert KI-Berichtskopie nach Schema-Validierung", () => {
     const report = normalizePremiumAiReportCopy({
-      executiveSummary: "Executive Summary fuer den Shop",
+      ...createRawReport(),
       mainDiagnosis: "Hero und CTA sind unklar.",
-      scoreExplanation: "Trust und Conversion werden gedrueckt.",
-      topIssues: [
+      topLevers: [
         {
-          title: "Top Issues im Hero",
-          whyItMatters: "Besucher verstehen den naechsten Schritt nicht.",
-          evidence: ["CTA ist zu schwach."],
-          recommendedAction: "Primaeren CTA schaerfen.",
-          impact: "high",
-          effort: "low",
+          ...createRawReport().topLevers[0],
+          title: "CTA im Hero",
+          recommendation: "Primaeren CTA schaerfen.",
         },
+        createRawReport().topLevers[1],
+        createRawReport().topLevers[2],
       ],
-      actionPlan: [
-        {
-          step: 1,
-          title: "Quick Fix",
-          description: "Hero klaeren.",
-          priority: "now",
-        },
-      ],
-      exampleImprovements: {
-        heroTextIdeas: ["Hero klarer machen"],
-        ctaIdeas: ["CTA pruefen"],
-        trustElementIdeas: ["Trust frueher zeigen"],
-      },
-      disclaimer: "Keine Garantie fuer Umsatz.",
     });
 
     expect(report.mainDiagnosis).toContain("Startbereich und Button");
-    expect(report.scoreExplanation).toContain("Vertrauen");
-    expect(report.topIssues[0]?.title).toContain("Wichtigste Probleme");
-    expect(validateReportCopyQuality(JSON.stringify(report)).isValid).toBe(true);
+    expect(report.topLevers[0]?.title).toContain("Button im Startbereich");
+    expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
   });
 
-  it("liefert einen Disclaimer", async () => {
-    const report = await generatePremiumAiReport(createInput());
+  it("liefert einen datenbasierten Fallback-Bericht", () => {
+    const report = buildFallbackPremiumAiReport(createInput());
 
-    expect(report.disclaimer).toContain("ausschließlich");
-    expect(report.disclaimer).toContain("keine Garantie");
+    expect(report.topLevers).toHaveLength(3);
+    expect(report.sevenDayPlan.map((step) => step.day)).toEqual(["Tag 1-2", "Tag 3-5", "Tag 6-7"]);
+    expect(report.mainDiagnosis).toContain("Button im Startbereich");
+    expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
   });
 
   it("haelt Provider- und AnalysisResult-Details aus dem Service heraus", () => {

@@ -17,6 +17,9 @@ import { RevenueBlockersReport } from "@/components/results/revenue-blockers-rep
 import { ScoreGrid } from "@/components/results/score-grid";
 import { SevenDayRoadmap } from "@/components/results/seven-day-roadmap";
 import { VisualAuditSection } from "@/components/results/visual-audit-section";
+import { PREMIUM_AI_REPORT_VERSION } from "@/lib/ai/premiumAiReportServer";
+import { premiumAiReportSchema } from "@/lib/ai/premiumAiReport.schema";
+import { getPremiumAiReportByAnalysisId } from "@/lib/ai/premiumAiReportStore";
 import { getAnalysisResult } from "@/lib/analysisStore";
 import { buildAnalysisOpportunities } from "@/lib/analyse/opportunity-engine";
 import {
@@ -129,6 +132,25 @@ export default async function AnalyseResultPage({
       (resolvedSearchParams.upgrade === "premium" && !canViewPremium));
   const premiumReport = canViewPremium
     ? await getOrCreatePremiumReport({ analysis: result })
+    : null;
+  const storedAiReport = canViewPremium
+    ? await getPremiumAiReportByAnalysisId(result.id).catch((error) => {
+        console.warn("[premium-ai-report] cached report could not be loaded for result screen", {
+          analysisId: result.id,
+          error: error instanceof Error ? error.message : "unknown",
+        });
+        return null;
+      })
+    : null;
+  const parsedStoredAiReport =
+    storedAiReport?.reportVersion === PREMIUM_AI_REPORT_VERSION
+      ? premiumAiReportSchema.safeParse(storedAiReport.report)
+      : null;
+  const initialAiReport = parsedStoredAiReport?.success ? parsedStoredAiReport.data : null;
+  const initialAiReportSource = initialAiReport
+    ? storedAiReport?.status === "fallback"
+      ? "fallback"
+      : "cache"
     : null;
   const diagnosis = getAnalysisSummary(analysis);
   const generatedOpportunities = buildAnalysisOpportunities({
@@ -243,7 +265,12 @@ export default async function AnalyseResultPage({
             {canViewPremium && premiumReport ? (
               <section className="mt-10">
                 <PremiumReportSection report={premiumReport} analysisId={result.id}>
-                  <PremiumAiReportSection analysisId={result.id} canViewPremium={canViewPremium} />
+                  <PremiumAiReportSection
+                    analysisId={result.id}
+                    canViewPremium={canViewPremium}
+                    initialReport={initialAiReport}
+                    initialSource={initialAiReportSource}
+                  />
                 </PremiumReportSection>
               </section>
             ) : (

@@ -8,6 +8,7 @@ import {
   renderPremiumReportPdfDiagnostics,
 } from "@/lib/premium/premiumReportPdf";
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
+import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import {
   REPORT_LABELS,
@@ -110,6 +111,42 @@ function createReport(): PremiumReport {
       },
     ],
     conversionHypothesis: "Wenn die Seite Angebot und Nutzen früher erklärt, zoegern Besucher kürzer.",
+  };
+}
+
+function createAiReport(): PremiumAiReport {
+  return {
+    executiveSummary: "Management-Fazit: Der Shop braucht zuerst mehr Klarheit im Startbereich.",
+    mainDiagnosis: "Das Hauptproblem ist ein unklarer nächster Schritt. Das kann Umsatz kosten, weil Besucher länger überlegen müssen.",
+    topLevers: [
+      {
+        title: "Button klarer formulieren",
+        problem: "Der nächste Schritt ist nicht eindeutig.",
+        businessImpact: "Unklarheit kann Anfragen bremsen.",
+        recommendation: "Den wichtigsten Button konkreter formulieren.",
+        firstStep: "Button-Text im Startbereich prüfen.",
+      },
+      {
+        title: "Vertrauen früher zeigen",
+        problem: "Trust-Signale kommen zu spät.",
+        businessImpact: "Unsicherheit kann Entscheidungen verzögern.",
+        recommendation: "Bewertungen näher an den Startbereich bringen.",
+        firstStep: "Zwei Vertrauensbelege auswählen.",
+      },
+      {
+        title: "Mobile Ansicht ordnen",
+        problem: "Wichtige Signale erscheinen mobil zu spät.",
+        businessImpact: "Mobile Besucher müssen mehr suchen.",
+        recommendation: "Mobile Reihenfolge vereinfachen.",
+        firstStep: "Mobile Startansicht gegenlesen.",
+      },
+    ],
+    sevenDayPlan: [
+      { day: "Tag 1-2", focus: "Sofortmaßnahmen", tasks: ["Button und Startbereich prüfen."] },
+      { day: "Tag 3-5", focus: "Umsetzung", tasks: ["Trust-Signale platzieren."] },
+      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht prüfen."] },
+    ],
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann nächster Schritt.",
   };
 }
 
@@ -240,6 +277,21 @@ describe("premiumReportPdf consultant notes", () => {
     expect(validateReportCopyQuality(text).isValid).toBe(true);
   });
 
+  it("nimmt gespeicherte KI-Beratung in die PDF-Textstruktur auf", () => {
+    const text = getPremiumReportPdfRenderTextData({
+      analysis: createAnalysis(),
+      report: createReport(),
+      consultantNotes: {},
+      aiReport: createAiReport(),
+    }).join(" ");
+
+    expect(text).toContain("Management-Fazit");
+    expect(text).toContain("Button klarer formulieren");
+    expect(text).toContain("Tag 1-2");
+    expect(text).toContain("Erst Klarheit, dann Vertrauen");
+    expect(validateReportCopyQuality(text).isValid).toBe(true);
+  });
+
   it("verhindert zusammengeklebte Abschnittstexte im PDF", async () => {
     const { pdf } = await renderPremiumReportPdfDiagnostics({
       analysis: createAnalysis(),
@@ -334,8 +386,9 @@ describe("premiumReportPdf consultant notes", () => {
       "https://example.supabase.co/storage/v1/object/public/analysis-screenshots/analysis-results/a/viewport.png";
     const analysis = createAnalysis();
     analysis.analysis.screenshots = { viewport: screenshotUrl };
+    const imageBuffer = await largePngBuffer();
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(await largePngBuffer(), {
+      new Response(new Uint8Array(imageBuffer), {
         status: 200,
         headers: { "content-type": "image/png" },
       }),

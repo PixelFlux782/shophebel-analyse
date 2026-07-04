@@ -10,20 +10,14 @@ type PromptPayload = {
     title?: string;
     description?: string;
     action?: string;
-    impact?: string;
-    effort?: string;
-    evidence?: string[];
   }>;
   measures?: Array<{
     title?: string;
     description?: string;
   }>;
-  detectedPageSignals?: {
-    heroText?: string[];
-    ctaTexts?: string[];
-    trustSignals?: string[];
-  };
 };
+
+type PromptRevenueBlocker = NonNullable<PromptPayload["revenueBlockers"]>[number];
 
 function extractPromptPayload(messages: PremiumPromptMessage[]): PromptPayload {
   const userMessage = messages.find((message) => message.role === "user")?.content ?? "";
@@ -40,26 +34,29 @@ function extractPromptPayload(messages: PremiumPromptMessage[]): PromptPayload {
   }
 }
 
-function normalizeLevel(value: string | undefined): "low" | "medium" | "high" {
-  if (!value) {
-    return "medium";
-  }
-
-  const normalized = value.toLowerCase();
-
-  if (normalized.includes("hoch") || normalized.includes("high")) {
-    return "high";
-  }
-
-  if (normalized.includes("niedrig") || normalized.includes("low")) {
-    return "low";
-  }
-
-  return "medium";
-}
-
 function fallbackText(value: string | undefined, fallback: string) {
   return value && value.trim() ? value : fallback;
+}
+
+function buildLever(
+  blocker: PromptRevenueBlocker | undefined,
+  fallbackTitle: string,
+  fallbackProblem: string,
+  fallbackRecommendation: string,
+) {
+  return {
+    title: fallbackText(blocker?.title, fallbackTitle),
+    problem: fallbackText(blocker?.description, fallbackProblem),
+    businessImpact: fallbackText(
+      blocker?.description,
+      "Dieser Punkt kann Besucher genau vor Anfrage oder Kauf unsicher machen.",
+    ),
+    recommendation: fallbackText(blocker?.action, fallbackRecommendation),
+    firstStep: fallbackText(
+      blocker?.action,
+      "Den betroffenen Abschnitt prüfen und eine konkrete Änderung direkt umsetzen.",
+    ),
+  };
 }
 
 export const mockPremiumReportProvider: PremiumReportProvider = {
@@ -67,84 +64,66 @@ export const mockPremiumReportProvider: PremiumReportProvider = {
     const payload = extractPromptPayload(messages);
     const firstBlocker = payload.revenueBlockers?.[0];
     const secondBlocker = payload.revenueBlockers?.[1];
+    const thirdBlocker = payload.revenueBlockers?.[2];
     const firstMeasure = payload.measures?.[0];
     const overallScore = payload.analysis?.overallScore ?? 0;
     const url = payload.analysis?.url ?? "die analysierte Seite";
 
     return JSON.stringify({
-      executiveSummary: `Die Analyse zeigt für ${url} klare Ansatzpunkte, um Orientierung, Vertrauen und Kaufbereitschaft zu verbessern.`,
-      mainDiagnosis: "Die Seite braucht vor allem klarere Priorisierung: Besucher sollen schneller verstehen, warum sie bleiben und was sie als Naechstes tun sollen.",
-      scoreExplanation: `Der Gesamtscore von ${overallScore} zeigt, dass bereits Grundlagen vorhanden sind, aber zentrale Conversion- und Vertrauenselemente noch nicht stark genug arbeiten.`,
-      topIssues: [
+      executiveSummary: `Die Analyse zeigt für ${url} einen Score von ${overallScore}/100 und klare Ansatzpunkte, um Orientierung, Vertrauen und Kaufbereitschaft zu verbessern.`,
+      mainDiagnosis:
+        "Das Hauptproblem ist fehlende Priorisierung im ersten Eindruck. Das kostet wahrscheinlich Umsatz, weil Besucher Nutzen, Sicherheit und nächsten Schritt nicht schnell genug zusammenbringen. Der wichtigste erste Schritt ist, die Hauptbotschaft und den primären Button gemeinsam zu schärfen.",
+      topLevers: [
+        buildLever(
+          firstBlocker,
+          "Nächster Schritt ist nicht klar genug",
+          "Wenn der nächste Schritt nicht sofort erkennbar ist, verlieren Besucher leichter die Orientierung.",
+          "Startbereich und primären Call to Action konkreter formulieren.",
+        ),
+        buildLever(
+          secondBlocker,
+          "Vertrauen früher sichtbar machen",
+          "Vertrauenssignale senken Unsicherheit, bevor Besucher eine Anfrage oder einen Kauf erwägen.",
+          "Bewertungen, Garantien, Kontaktoptionen oder Referenzen näher an kaufnahe Bereiche bringen.",
+        ),
+        buildLever(
+          thirdBlocker,
+          "Anfrageweg einfacher führen",
+          "Wenn zu viele Signale gleichzeitig konkurrieren, wirkt die Entscheidung anstrengender als nötig.",
+          "Die wichtigste Handlung priorisieren und ablenkende Elemente im Startbereich reduzieren.",
+        ),
+      ],
+      sevenDayPlan: [
         {
-          title: fallbackText(firstBlocker?.title, "Unklarer nächster Schritt"),
-          whyItMatters: fallbackText(
-            firstBlocker?.description,
-            "Wenn der nächste Schritt nicht sofort erkennbar ist, verlieren Besucher leichter die Orientierung.",
-          ),
-          evidence: firstBlocker?.evidence?.length
-            ? firstBlocker.evidence
-            : ["Die Empfehlung basiert auf den strukturierten Shophebel-Analyse-Fakten."],
-          recommendedAction: fallbackText(
-            firstBlocker?.action,
-            "Hero-Botschaft und primaeren Call to Action im sichtbaren Bereich konkreter formulieren.",
-          ),
-          impact: normalizeLevel(firstBlocker?.impact),
-          effort: normalizeLevel(firstBlocker?.effort),
+          day: "Tag 1-2",
+          focus: "Sofortmaßnahmen",
+          tasks: [
+            fallbackText(
+              firstMeasure?.description,
+              "Nutzenversprechen, Zielgruppe und Hauptaktion in einem sichtbaren Block klären.",
+            ),
+            "Wichtigsten Button auf eine konkrete Handlung zuspitzen.",
+          ],
         },
         {
-          title: fallbackText(secondBlocker?.title, "Vertrauen frueher sichtbar machen"),
-          whyItMatters: fallbackText(
-            secondBlocker?.description,
-            "Vertrauenssignale senken Unsicherheit, bevor Besucher eine Anfrage oder einen Kauf erwaegen.",
-          ),
-          evidence: secondBlocker?.evidence?.length
-            ? secondBlocker.evidence
-            : ["Die Analyse enthaelt Hinweise auf ausbaufaehige Trust-Elemente."],
-          recommendedAction: fallbackText(
-            secondBlocker?.action,
-            "Bewertungen, Garantien, Kontaktoptionen oder Referenzen naeher an die kaufnahen Bereiche bringen.",
-          ),
-          impact: normalizeLevel(secondBlocker?.impact),
-          effort: normalizeLevel(secondBlocker?.effort),
+          day: "Tag 3-5",
+          focus: "Umsetzung",
+          tasks: [
+            "Vertrauensbelege näher an den ersten Entscheidungsbereich rücken.",
+            "Startbereich und mobile Ansicht auf klare Reihenfolge prüfen.",
+          ],
+        },
+        {
+          day: "Tag 6-7",
+          focus: "Kontrolle und Optimierung",
+          tasks: [
+            "Nach der Umsetzung prüfen, ob Nutzen, Vertrauen und nächster Schritt ohne Vorwissen lesbar sind.",
+            "Eine zweite Button- oder Headline-Variante für spätere Tests vorbereiten.",
+          ],
         },
       ],
-      actionPlan: [
-        {
-          step: 1,
-          title: fallbackText(firstMeasure?.title, "Hero und CTA schaerfen"),
-          description: fallbackText(
-            firstMeasure?.description,
-            "Formuliere Nutzenversprechen und Hauptaktion so, dass sie ohne Vorwissen in wenigen Sekunden verstanden werden.",
-          ),
-          priority: "now",
-        },
-        {
-          step: 2,
-          title: "Trust-Elemente platzieren",
-          description: "Ergaenze sichtbare Belege wie Bewertungen, Siegel, Referenzen oder klare Kontaktinformationen an entscheidenden Stellen.",
-          priority: "next",
-        },
-        {
-          step: 3,
-          title: "Wirkung nachpruefen",
-          description: "Pruefe nach der Umsetzung, ob CTA, Nutzenversprechen und Vertrauenselemente im ersten sichtbaren Bereich zusammenspielen.",
-          priority: "later",
-        },
-      ],
-      exampleImprovements: {
-        heroTextIdeas: payload.detectedPageSignals?.heroText?.length
-          ? payload.detectedPageSignals.heroText.map((text) => `${text} - jetzt mit klarem Kundennutzen`)
-          : ["Mehr passende Kundenanfragen aus deinem Shop"],
-        ctaIdeas: payload.detectedPageSignals?.ctaTexts?.length
-          ? payload.detectedPageSignals.ctaTexts.map((text) => `${text} starten`)
-          : ["Kostenlose Ersteinschaetzung anfragen", "Passende Loesung finden"],
-        trustElementIdeas: payload.detectedPageSignals?.trustSignals?.length
-          ? payload.detectedPageSignals.trustSignals
-          : ["Kundenbewertungen im sichtbaren Bereich", "Klare Kontaktmoeglichkeit", "Sichere Zahlungs- und Versandhinweise"],
-      },
-      disclaimer:
-        "Diese Premiumanalyse basiert ausschließlich auf den bereitgestellten Shophebel-Analyse-Fakten und ist keine Garantie für Umsatzsteigerungen.",
+      ownerConclusion:
+        "Der Bericht empfiehlt keinen großen Umbau, sondern eine klare Reihenfolge: erst Verstehen erleichtern, dann Vertrauen zeigen, dann den nächsten Schritt sichtbarer machen.",
     });
   },
 };

@@ -91,6 +91,7 @@ describe("openRouterPremiumReportProvider", () => {
       model: string;
       messages: PremiumPromptMessage[];
       temperature: number;
+      max_tokens: number;
       response_format: { type: string };
     };
 
@@ -98,6 +99,7 @@ describe("openRouterPremiumReportProvider", () => {
       model: "openrouter/test-model",
       messages,
       temperature: 0.2,
+      max_tokens: 1400,
       response_format: {
         type: "json_object",
       },

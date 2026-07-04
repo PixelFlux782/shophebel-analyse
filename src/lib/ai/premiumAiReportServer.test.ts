@@ -1,8 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "crypto";
 
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
-import { getOrGeneratePremiumAiReport, PremiumAiReportRequestError } from "@/lib/ai/premiumAiReportServer";
+import { getOrGeneratePremiumAiReport } from "@/lib/ai/premiumAiReportServer";
+import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 import type { AnalysisResult } from "@/types/analysis";
 
@@ -103,31 +105,47 @@ function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiRepo
   return {
     executiveSummary: "Kurzfassung",
     mainDiagnosis: "Diagnose",
-    scoreExplanation: "Score-Erklaerung",
-    topIssues: [
+    topLevers: [
       {
         title: "CTA im Hero ist nicht eindeutig",
-        whyItMatters: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
-        evidence: ["Der Hauptbutton ist nicht eindeutig."],
-        recommendedAction: "Primaeren CTA klarer formulieren.",
-        impact: "high",
-        effort: "low",
+        problem: "Besucher erkennen den naechsten Schritt nicht schnell genug.",
+        businessImpact: "Unklare Fuehrung kann Anfragen bremsen.",
+        recommendation: "Primaeren CTA klarer formulieren.",
+        firstStep: "CTA-Text pruefen.",
       },
-    ],
-    actionPlan: [
       {
-        step: 1,
-        title: "CTA schaerfen",
-        description: "Hero-CTA konkret machen.",
-        priority: "now",
+        title: "Vertrauen fehlt frueh",
+        problem: "Trust-Signale sind nicht frueh genug sichtbar.",
+        businessImpact: "Unsicherheit kann Kaufentscheidungen verzoegern.",
+        recommendation: "Bewertungen naeher an den Startbereich bringen.",
+        firstStep: "Zwei Trust-Signale auswaehlen.",
+      },
+      {
+        title: "Mobile Reihenfolge pruefen",
+        problem: "Wichtige Signale koennen mobil zu spaet kommen.",
+        businessImpact: "Mobile Besucher muessen mehr suchen.",
+        recommendation: "Startbereich mobil verdichten.",
+        firstStep: "Mobile Ansicht gegenlesen.",
       },
     ],
-    exampleImprovements: {
-      heroTextIdeas: ["Klarer Nutzen im ersten Satz"],
-      ctaIdeas: ["Analyse anfragen"],
-      trustElementIdeas: ["Bewertungen sichtbar machen"],
-    },
-    disclaimer: "Nur auf Basis der Analyse.",
+    sevenDayPlan: [
+      {
+        day: "Tag 1-2",
+        focus: "Sofortmassnahmen",
+        tasks: ["Hero-CTA konkret machen."],
+      },
+      {
+        day: "Tag 3-5",
+        focus: "Umsetzung",
+        tasks: ["Trust-Signale platzieren."],
+      },
+      {
+        day: "Tag 6-7",
+        focus: "Kontrolle",
+        tasks: ["Mobile Ansicht pruefen."],
+      },
+    ],
+    ownerConclusion: "Erst Klarheit, dann Vertrauen, dann naechster Schritt.",
     ...overrides,
   };
 }
@@ -136,6 +154,10 @@ function createProvider(report = createAiReport()): PremiumReportProvider {
   return {
     generate: vi.fn().mockResolvedValue(JSON.stringify(report)),
   };
+}
+
+function currentInputHash(analysis = createAnalysisResult()) {
+  return createHash("sha256").update(JSON.stringify(buildPremiumReportInput(analysis))).digest("hex");
 }
 
 describe("getOrGeneratePremiumAiReport", () => {
@@ -198,6 +220,9 @@ describe("getOrGeneratePremiumAiReport", () => {
       report: result.report,
       provider: "test-provider",
       model: "test-model",
+      status: "generated",
+      reportVersion: "premium-ai-report-v2",
+      inputHash: expect.any(String),
     });
   });
 
@@ -208,6 +233,8 @@ describe("getOrGeneratePremiumAiReport", () => {
       id: "ai-report-existing",
       analysisId: "analysis-123",
       report: existingReport,
+      reportVersion: "premium-ai-report-v2",
+      inputHash: currentInputHash(),
     });
 
     const result = await getOrGeneratePremiumAiReport({
@@ -236,31 +263,37 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(provider.generate).not.toHaveBeenCalled();
   });
 
-  it("mappt Providerfehler sauber", async () => {
+  it("nutzt bei Providerfehlern einen gespeicherten Fallback", async () => {
     const provider: PremiumReportProvider = {
       generate: vi.fn().mockRejectedValue(new Error("provider exploded")),
     };
 
-    await expect(getOrGeneratePremiumAiReport({
+    const result = await getOrGeneratePremiumAiReport({
       analysisId: "analysis-123",
       provider,
-    })).rejects.toMatchObject({
-      code: "provider_error",
-      status: 502,
     });
+
+    expect(result.source).toBe("fallback");
+    expect(result.report.topLevers).toHaveLength(3);
+    expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
+      analysisId: "analysis-123",
+      status: "fallback",
+      reportVersion: "premium-ai-report-v2",
+      inputHash: expect.any(String),
+    }));
   });
 
-  it("mappt ungueltige KI-Antworten auf invalid_ai_response", async () => {
+  it("nutzt bei ungueltigen KI-Antworten einen gespeicherten Fallback", async () => {
     const provider: PremiumReportProvider = {
       generate: vi.fn().mockResolvedValue("{\"executiveSummary\":\"fehlt viel\"}"),
     };
 
-    await expect(getOrGeneratePremiumAiReport({
+    const result = await getOrGeneratePremiumAiReport({
       analysisId: "analysis-123",
       provider,
-    })).rejects.toMatchObject({
-      code: "invalid_ai_response",
-      status: 502,
-    } satisfies Partial<PremiumAiReportRequestError>);
+    });
+
+    expect(result.source).toBe("fallback");
+    expect(result.report.sevenDayPlan).toHaveLength(3);
   });
 });

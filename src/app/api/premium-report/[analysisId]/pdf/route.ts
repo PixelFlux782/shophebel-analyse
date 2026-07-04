@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+import { PREMIUM_AI_REPORT_VERSION } from "@/lib/ai/premiumAiReportServer";
+import { premiumAiReportSchema } from "@/lib/ai/premiumAiReport.schema";
+import { getPremiumAiReportByAnalysisId } from "@/lib/ai/premiumAiReportStore";
 import { getAnalysisResult } from "@/lib/analysisStore";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
 import { renderPremiumReportPdf } from "@/lib/premium/premiumReportPdf";
@@ -58,10 +61,23 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
       });
     }
 
+    const aiReportRecord = await getPremiumAiReportByAnalysisId(analysisId).catch((error) => {
+      console.warn("[premium-report-pdf] Stored AI report could not be loaded; PDF continues without it.", {
+        analysisId,
+        error: error instanceof Error ? error.message : "unknown",
+      });
+      return null;
+    });
+    const parsedAiReport = aiReportRecord?.reportVersion === PREMIUM_AI_REPORT_VERSION
+      ? premiumAiReportSchema.safeParse(aiReportRecord.report)
+      : null;
+    const aiReport = parsedAiReport?.success ? parsedAiReport.data : null;
+
     const pdf = await renderPremiumReportPdf({
       analysis,
       report: premiumReport,
       consultantNotes: premiumReportRecord?.consultantNotes ?? {},
+      aiReport,
     });
     const filename = `shophebel-premium-report-${analysisId}.pdf`;
 
