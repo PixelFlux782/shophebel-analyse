@@ -3,7 +3,7 @@ import { createHash } from "crypto";
 
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
-import { getOrGeneratePremiumAiReport } from "@/lib/ai/premiumAiReportServer";
+import { getOrGeneratePremiumAiReport, resolvePremiumAiRuntimeConfig } from "@/lib/ai/premiumAiReportServer";
 import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
 import type { PremiumReportProvider } from "@/lib/ai/premiumReportProvider";
 import type { AnalysisResult } from "@/types/analysis";
@@ -160,9 +160,31 @@ function currentInputHash(analysis = createAnalysisResult()) {
   return createHash("sha256").update(JSON.stringify(buildPremiumReportInput(analysis))).digest("hex");
 }
 
+function restoreEnv(name: string, value: string | undefined) {
+  if (value === undefined) {
+    delete process.env[name];
+    return;
+  }
+
+  process.env[name] = value;
+}
+
 describe("getOrGeneratePremiumAiReport", () => {
+  const originalEnv = {
+    AI_PROVIDER: process.env.AI_PROVIDER,
+    AI_ENABLED: process.env.AI_ENABLED,
+    ALLOW_AI_REGENERATE: process.env.ALLOW_AI_REGENERATE,
+    OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+    OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    restoreEnv("AI_PROVIDER", originalEnv.AI_PROVIDER);
+    restoreEnv("AI_ENABLED", originalEnv.AI_ENABLED);
+    restoreEnv("ALLOW_AI_REGENERATE", originalEnv.ALLOW_AI_REGENERATE);
+    restoreEnv("OPENROUTER_API_KEY", originalEnv.OPENROUTER_API_KEY);
+    restoreEnv("OPENROUTER_MODEL", originalEnv.OPENROUTER_MODEL);
     mocks.getAnalysisResult.mockResolvedValue(createStoredAnalysis());
     mocks.getPremiumAiReportByAnalysisId.mockResolvedValue(null);
     mocks.savePremiumAiReportForAnalysis.mockImplementation(async (input: { analysisId: string; report: PremiumAiReport }) => ({
@@ -171,6 +193,55 @@ describe("getOrGeneratePremiumAiReport", () => {
       report: input.report,
       status: "generated",
     }));
+  });
+
+  it("nutzt ohne Env-Konfiguration den kostenfreien Mock-Provider", async () => {
+    delete process.env.AI_PROVIDER;
+    delete process.env.OPENROUTER_API_KEY;
+
+    const result = await getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+    });
+
+    expect(result.source).toBe("generated");
+    expect(result.report.topLevers).toHaveLength(3);
+    expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
+      provider: "mock",
+      model: "shophebel-mock-premium-ai-report",
+      status: "generated",
+    }));
+  });
+
+  it("loest bei AI_ENABLED=false keinen Provider-Aufruf aus und speichert einen Fallback", async () => {
+    process.env.AI_ENABLED = "false";
+    const provider = createProvider();
+
+    const result = await getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+      provider,
+    });
+
+    expect(result.source).toBe("fallback");
+    expect(provider.generate).not.toHaveBeenCalled();
+    expect(mocks.savePremiumAiReportForAnalysis).toHaveBeenCalledWith(expect.objectContaining({
+      provider: "fallback",
+      status: "fallback",
+      reportVersion: "premium-ai-report-v2",
+    }));
+  });
+
+  it("liest die Runtime-Schalter defensiv aus der Env", () => {
+    process.env.AI_PROVIDER = "openrouter";
+    process.env.AI_ENABLED = "0";
+    process.env.ALLOW_AI_REGENERATE = "yes";
+    process.env.OPENROUTER_MODEL = "openrouter/test-model";
+
+    expect(resolvePremiumAiRuntimeConfig()).toEqual({
+      enabled: false,
+      providerName: "openrouter",
+      model: "openrouter/test-model",
+      allowRegenerate: true,
+    });
   });
 
   it("weist fehlende Analyse-ID ab", async () => {
@@ -188,6 +259,27 @@ describe("getOrGeneratePremiumAiReport", () => {
       paymentStatus: "free",
       accessLevel: "premium",
       paidAt: null,
+    }));
+
+    await expect(getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+      provider,
+    })).rejects.toMatchObject({
+      code: "premium_access_required",
+      status: 403,
+    });
+
+    expect(provider.generate).not.toHaveBeenCalled();
+    expect(mocks.getPremiumAiReportByAnalysisId).not.toHaveBeenCalled();
+  });
+
+  it("weist Full-Zugriff ab, bevor der Provider aufgerufen wird", async () => {
+    const provider = createProvider();
+    mocks.getAnalysisResult.mockResolvedValue(createStoredAnalysis({
+      accessLevel: "full",
+      plan: "full",
+      productType: "full_analysis",
+      isPremium: false,
     }));
 
     await expect(getOrGeneratePremiumAiReport({
@@ -246,6 +338,51 @@ describe("getOrGeneratePremiumAiReport", () => {
     expect(result.report.executiveSummary).toBe("Schon vorhanden");
     expect(provider.generate).not.toHaveBeenCalled();
     expect(mocks.savePremiumAiReportForAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("regeneriert gespeicherte AI-Reports standardmaessig nicht bei geaendertem Input", async () => {
+    const existingReport = createAiReport({ executiveSummary: "Einmal erzeugt" });
+    const provider = createProvider();
+    mocks.getPremiumAiReportByAnalysisId.mockResolvedValue({
+      id: "ai-report-existing",
+      analysisId: "analysis-123",
+      report: existingReport,
+      reportVersion: "premium-ai-report-v2",
+      inputHash: "alter-hash",
+      status: "generated",
+    });
+
+    const result = await getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+      provider,
+    });
+
+    expect(result.source).toBe("cache");
+    expect(result.report.executiveSummary).toBe("Einmal erzeugt");
+    expect(provider.generate).not.toHaveBeenCalled();
+    expect(mocks.savePremiumAiReportForAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("regeneriert geaenderte Inputs nur mit ALLOW_AI_REGENERATE=true", async () => {
+    process.env.ALLOW_AI_REGENERATE = "true";
+    const provider = createProvider(createAiReport({ executiveSummary: "Neu erzeugt" }));
+    mocks.getPremiumAiReportByAnalysisId.mockResolvedValue({
+      id: "ai-report-existing",
+      analysisId: "analysis-123",
+      report: createAiReport({ executiveSummary: "Alter Bericht" }),
+      reportVersion: "premium-ai-report-v2",
+      inputHash: "alter-hash",
+      status: "generated",
+    });
+
+    const result = await getOrGeneratePremiumAiReport({
+      analysisId: "analysis-123",
+      provider,
+    });
+
+    expect(result.source).toBe("generated");
+    expect(result.report.executiveSummary).toBe("Neu erzeugt");
+    expect(provider.generate).toHaveBeenCalledTimes(1);
   });
 
   it("bricht bei Store-Lesefehlern vor dem Provider-Aufruf ab", async () => {

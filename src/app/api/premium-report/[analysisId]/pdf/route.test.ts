@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { PremiumAiReport } from "@/lib/ai/premiumAiReport.schema";
 import type { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { AnalysisResult } from "@/types/analysis";
@@ -110,6 +111,43 @@ function createPremiumReport(overrides: Partial<PremiumReport> = {}): PremiumRep
   };
 }
 
+function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiReport {
+  return {
+    executiveSummary: "Gespeicherte KI-Kurzfassung",
+    mainDiagnosis: "Gespeicherte KI-Diagnose",
+    topLevers: [
+      {
+        title: "CTA schaerfen",
+        problem: "Der naechste Schritt ist nicht eindeutig.",
+        businessImpact: "Unklarheit kann Anfragen bremsen.",
+        recommendation: "Primaeren Button konkretisieren.",
+        firstStep: "Button-Text pruefen.",
+      },
+      {
+        title: "Trust frueher zeigen",
+        problem: "Vertrauen kommt zu spaet.",
+        businessImpact: "Unsicherheit kann Besucher verlieren.",
+        recommendation: "Bewertungen im Startbereich zeigen.",
+        firstStep: "Zwei Trust-Signale auswaehlen.",
+      },
+      {
+        title: "Mobile Reihenfolge pruefen",
+        problem: "Wichtige Signale erscheinen mobil spaet.",
+        businessImpact: "Mobile Nutzer muessen mehr suchen.",
+        recommendation: "Startbereich mobil verdichten.",
+        firstStep: "Mobile Ansicht gegenlesen.",
+      },
+    ],
+    sevenDayPlan: [
+      { day: "Tag 1-2", focus: "CTA", tasks: ["Button konkretisieren."] },
+      { day: "Tag 3-5", focus: "Trust", tasks: ["Bewertungen platzieren."] },
+      { day: "Tag 6-7", focus: "Kontrolle", tasks: ["Mobile Ansicht pruefen."] },
+    ],
+    ownerConclusion: "Erst Klarheit, dann Vertrauen.",
+    ...overrides,
+  };
+}
+
 function createContext(analysisId = "analysis-123") {
   return {
     params: Promise.resolve({ analysisId }),
@@ -135,6 +173,8 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
   });
 
   afterEach(() => {
+    vi.doUnmock("@/lib/premium/premiumReportPdf");
+    vi.resetModules();
     vi.restoreAllMocks();
   });
 
@@ -185,6 +225,37 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     const response = await GET(new Request("http://localhost:3001/api/premium-report/analysis-123/pdf"), createContext());
 
     expect(response.headers.get("content-type")).toBe("application/pdf");
+  });
+
+  it("nutzt den gespeicherten KI-Bericht fuer das PDF", async () => {
+    vi.resetModules();
+    const renderPremiumReportPdfMock = vi.fn().mockResolvedValue(Buffer.from("%PDF stored-ai"));
+    const aiReport = createAiReport();
+    getPremiumAiReportByAnalysisIdMock.mockResolvedValue({
+      id: "ai-report-123",
+      analysisId: "analysis-123",
+      report: aiReport,
+      status: "generated",
+      reportVersion: "premium-ai-report-v2",
+      inputHash: "hash-123",
+    });
+    vi.doMock("@/lib/premium/premiumReportPdf", () => ({
+      renderPremiumReportPdf: renderPremiumReportPdfMock,
+    }));
+
+    const { GET } = await import("@/app/api/premium-report/[analysisId]/pdf/route");
+
+    const response = await GET(new Request("http://localhost:3001/api/premium-report/analysis-123/pdf"), createContext());
+    const body = Buffer.from(await response.arrayBuffer());
+
+    expect(response.status).toBe(200);
+    expect(body.toString()).toBe("%PDF stored-ai");
+    expect(getPremiumAiReportByAnalysisIdMock).toHaveBeenCalledWith("analysis-123");
+    expect(renderPremiumReportPdfMock).toHaveBeenCalledWith(expect.objectContaining({
+      aiReport,
+    }));
+
+    vi.doUnmock("@/lib/premium/premiumReportPdf");
   });
 
   it("crasht bei fehlenden Report-Feldern nicht", async () => {

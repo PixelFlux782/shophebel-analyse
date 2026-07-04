@@ -1,6 +1,7 @@
 import { createHash } from "crypto";
 
 import { getAnalysisResult } from "@/lib/analysisStore";
+import { mockPremiumReportProvider } from "@/lib/ai/mockPremiumReportProvider";
 import { createOpenRouterPremiumReportProvider, DEFAULT_OPENROUTER_MODEL, OpenRouterProviderError } from "@/lib/ai/openRouterPremiumReportProvider";
 import { getPremiumAiReportByAnalysisId, savePremiumAiReportForAnalysis } from "@/lib/ai/premiumAiReportStore";
 import { buildPremiumReportInput } from "@/lib/ai/premiumReportInput";
@@ -9,8 +10,17 @@ import { buildFallbackPremiumAiReport, generatePremiumAiReport, PremiumAiReportV
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
 
 export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v2";
+const MOCK_PREMIUM_AI_MODEL = "shophebel-mock-premium-ai-report";
 
 export type PremiumAiReportSource = "cache" | "generated" | "fallback";
+export type PremiumAiProviderName = "mock" | "openrouter";
+
+export type PremiumAiRuntimeConfig = {
+  enabled: boolean;
+  providerName: PremiumAiProviderName;
+  model: string;
+  allowRegenerate: boolean;
+};
 
 export type PremiumAiReportGenerationResult = {
   analysisId: string;
@@ -34,8 +44,45 @@ function normalizeAnalysisId(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
-function createDefaultProvider() {
-  return createOpenRouterPremiumReportProvider();
+function readBooleanEnv(name: string, defaultValue: boolean) {
+  const value = process.env[name]?.trim().toLowerCase();
+
+  if (!value) {
+    return defaultValue;
+  }
+
+  return value === "true" || value === "1" || value === "yes";
+}
+
+function readProviderEnv(): PremiumAiProviderName {
+  const provider = process.env.AI_PROVIDER?.trim().toLowerCase();
+
+  return provider === "openrouter" ? "openrouter" : "mock";
+}
+
+export function resolvePremiumAiRuntimeConfig(input: {
+  providerName?: string;
+  model?: string;
+} = {}): PremiumAiRuntimeConfig {
+  const providerName = input.providerName === "openrouter" || input.providerName === "mock"
+    ? input.providerName
+    : readProviderEnv();
+
+  return {
+    enabled: readBooleanEnv("AI_ENABLED", true),
+    providerName,
+    model: input.model
+      ?? (providerName === "openrouter"
+        ? process.env.OPENROUTER_MODEL?.trim() || DEFAULT_OPENROUTER_MODEL
+        : MOCK_PREMIUM_AI_MODEL),
+    allowRegenerate: readBooleanEnv("ALLOW_AI_REGENERATE", false),
+  };
+}
+
+function createDefaultProvider(providerName: PremiumAiProviderName) {
+  return providerName === "openrouter"
+    ? createOpenRouterPremiumReportProvider()
+    : mockPremiumReportProvider;
 }
 
 function buildInputHash(value: unknown) {
@@ -46,12 +93,20 @@ function isReusableReport(input: {
   reportVersion?: string | null;
   inputHash?: string | null;
   status?: string | null;
-}, inputHash: string) {
+}, inputHash: string, allowRegenerate: boolean) {
   if (!input.reportVersion && !input.inputHash) {
     return false;
   }
 
-  return input.reportVersion === PREMIUM_AI_REPORT_VERSION && input.inputHash === inputHash && input.status !== "failed";
+  if (input.reportVersion !== PREMIUM_AI_REPORT_VERSION || input.status === "failed") {
+    return false;
+  }
+
+  if (!allowRegenerate) {
+    return true;
+  }
+
+  return input.inputHash === inputHash;
 }
 
 function logPremiumAiFailure(message: string, details: { analysisId: string; code: string; error: unknown }) {
@@ -69,6 +124,10 @@ export async function getOrGeneratePremiumAiReport(input: {
   model?: string;
 }): Promise<PremiumAiReportGenerationResult> {
   const analysisId = normalizeAnalysisId(input.analysisId);
+  const runtimeConfig = resolvePremiumAiRuntimeConfig({
+    providerName: input.providerName,
+    model: input.model,
+  });
 
   if (!analysisId) {
     throw new PremiumAiReportRequestError(
@@ -112,7 +171,7 @@ export async function getOrGeneratePremiumAiReport(input: {
     );
   }
 
-  if (existingReport && isReusableReport(existingReport, inputHash)) {
+  if (existingReport && isReusableReport(existingReport, inputHash, runtimeConfig.allowRegenerate)) {
     return {
       analysisId,
       source: "cache",
@@ -120,14 +179,33 @@ export async function getOrGeneratePremiumAiReport(input: {
     };
   }
 
+  if (!runtimeConfig.enabled) {
+    const fallbackReport = buildFallbackPremiumAiReport(reportInput);
+    const saved = await savePremiumAiReportForAnalysis({
+      analysisId,
+      report: fallbackReport,
+      provider: "fallback",
+      model: runtimeConfig.model,
+      status: "fallback",
+      reportVersion: PREMIUM_AI_REPORT_VERSION,
+      inputHash,
+    });
+
+    return {
+      analysisId,
+      source: "fallback",
+      report: saved.report,
+    };
+  }
+
   try {
-    const provider = input.provider ?? createDefaultProvider();
+    const provider = input.provider ?? createDefaultProvider(runtimeConfig.providerName);
     const report = await generatePremiumAiReport(reportInput, provider);
     const saved = await savePremiumAiReportForAnalysis({
       analysisId,
       report,
-      provider: input.providerName ?? "openrouter",
-      model: input.model ?? process.env.OPENROUTER_MODEL?.trim() ?? DEFAULT_OPENROUTER_MODEL,
+      provider: input.providerName ?? runtimeConfig.providerName,
+      model: runtimeConfig.model,
       status: "generated",
       reportVersion: PREMIUM_AI_REPORT_VERSION,
       inputHash,
@@ -168,7 +246,7 @@ export async function getOrGeneratePremiumAiReport(input: {
           analysisId,
           report: fallbackReport,
           provider: input.providerName ?? "fallback",
-          model: input.model ?? process.env.OPENROUTER_MODEL?.trim() ?? DEFAULT_OPENROUTER_MODEL,
+          model: runtimeConfig.model,
           status: "fallback",
           reportVersion: PREMIUM_AI_REPORT_VERSION,
           inputHash,
