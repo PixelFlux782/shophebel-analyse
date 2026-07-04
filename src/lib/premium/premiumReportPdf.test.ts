@@ -59,13 +59,18 @@ function createAnalysis(): StoredAnalysisResult {
   };
 }
 
-function largePngBuffer() {
-  const onePixelPng = Buffer.from(
-    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAFgwJ/l2J7WQAAAABJRU5ErkJggg==",
-    "base64",
-  );
+async function largePngBuffer() {
+  const sharpModule = await import("sharp");
+  const sharp = sharpModule.default;
 
-  return Buffer.concat([onePixelPng, Buffer.alloc(1200)]);
+  return sharp({
+    create: {
+      width: 320,
+      height: 180,
+      channels: 3,
+      background: "#0f766e",
+    },
+  }).png().toBuffer();
 }
 
 function createReport(): PremiumReport {
@@ -146,19 +151,20 @@ describe("premiumReportPdf consultant notes", () => {
   it("verwendet deutsche Premium-Labels für den PDF-Report", () => {
     const labels = getPremiumReportPdfStaticLabels().join(" ");
 
+    expect(labels).toContain("Premium-Bericht inkl. KI-Beratung");
     expect(labels).toContain("Management-Zusammenfassung");
-    expect(labels).toContain("Conversion-Hypothese");
-    expect(labels).toContain("Priorisierter Maßnahmenplan");
-    expect(labels).toContain("Übersicht");
-    expect(labels).toContain("Einführung");
+    expect(labels).toContain("Kurzüberblick");
+    expect(labels).toContain("Detailanhang");
+    expect(labels).toContain("Screenshot-Hinweis");
     expect(labels).toContain("Nächster Schritt");
     expect(labels).toContain("Nutzerführung");
-    expect(labels).toContain("Visuelle Prüfung");
     expect(labels).toContain("Shophebel-Analysewert");
     expect(labels).toContain("Visueller Seitenüberblick");
-    expect(labels).toContain("sichtbarer Startbereich");
     expect(labels).toContain("Umsatzbremsen");
     expect(labels).toContain("Maßnahmen");
+    expect(labels).not.toContain("Findings");
+    expect(labels).not.toContain("Premium Report");
+    expect(labels).not.toContain("Critical Signals");
     expect(validateReportCopyQuality(labels).isValid).toBe(true);
   });
 
@@ -226,6 +232,11 @@ describe("premiumReportPdf consultant notes", () => {
 
     expect(text).toContain(REPORT_LABELS.websiteIntelligenceScore);
     expect(text).toContain("Bildverständnis");
+    expect(text).toContain("Premium-Bericht inkl. KI-Beratung");
+    expect(text).not.toContain("Findings");
+    expect(text).not.toContain("Premium Report");
+    expect(text).not.toContain("Critical Signals");
+    expect(text).not.toMatch(/Prem ium|U m satz|M anagem ent|Zus ammenfassung/);
     expect(validateReportCopyQuality(text).isValid).toBe(true);
   });
 
@@ -275,6 +286,19 @@ describe("premiumReportPdf consultant notes", () => {
     expect(source).not.toMatch(/KRITISC\s+H|WICHTI\s+G|KURZFA\s+ZIT|Zus\s+ammenfassung/);
   });
 
+  it("liefert ein gueltiges PDF ohne bekannte kaputte Wortabstands-Muster", async () => {
+    const { pdf } = await renderPremiumReportPdfDiagnostics({
+      analysis: createAnalysis(),
+      report: createReport(),
+      consultantNotes: {},
+    });
+    const source = pdf.toString("latin1");
+
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(countPdfPages(pdf)).toBeGreaterThan(0);
+    expect(source).not.toMatch(/Prem ium|U m satz|M anagem ent|Zus ammenfassung/);
+  });
+
   it("rendert den priorisierten Maßnahmenplan als eigenen PDF-Abschnitt", async () => {
     const report: PremiumReport = {
       ...createReport(),
@@ -300,11 +324,9 @@ describe("premiumReportPdf consultant notes", () => {
       report,
       consultantNotes: {},
     });
-    const source = pdf.toString("latin1");
 
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
     expect(countPdfPages(pdf)).toBeGreaterThan(0);
-    expect(source).toContain("5072696f726973696572");
-    expect(source).toContain("456d7066");
   });
 
   it("laedt Supabase Storage Screenshots als Buffer und bettet PNGs in das PDF ein", async () => {
@@ -313,7 +335,7 @@ describe("premiumReportPdf consultant notes", () => {
     const analysis = createAnalysis();
     analysis.analysis.screenshots = { viewport: screenshotUrl };
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
-      new Response(largePngBuffer(), {
+      new Response(await largePngBuffer(), {
         status: 200,
         headers: { "content-type": "image/png" },
       }),

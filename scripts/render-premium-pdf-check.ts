@@ -2,7 +2,7 @@ import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { pathToFileURL } from "url";
 
-import puppeteer from "puppeteer";
+import puppeteer, { type Browser } from "puppeteer";
 
 import { countPdfPages, renderPremiumReportPdf } from "@/lib/premium/premiumReportPdf";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
@@ -142,12 +142,69 @@ function createReport(): PremiumReport {
   };
 }
 
+async function createFixtureScreenshot(browser: Browser) {
+  const screenshotDir = path.join(process.cwd(), "public", "generated-screenshots", "pdf-check");
+  await mkdir(screenshotDir, { recursive: true });
+
+  const page = await browser.newPage();
+  await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 1 });
+  await page.setContent(
+    `<!doctype html>
+    <html lang="de">
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          body { margin: 0; font-family: Arial, sans-serif; background: #f7fafc; color: #172033; }
+          header { min-height: 420px; padding: 72px 84px; background: linear-gradient(135deg, #17324a, #0f766e); color: white; }
+          .brand { font-size: 14px; letter-spacing: .16em; font-weight: 700; opacity: .78; }
+          h1 { max-width: 760px; font-size: 58px; line-height: 1.05; margin: 42px 0 18px; }
+          p { max-width: 650px; font-size: 22px; line-height: 1.45; }
+          button { margin-top: 26px; border: 0; border-radius: 4px; background: #ffffff; color: #17324a; padding: 16px 24px; font-size: 17px; font-weight: 700; }
+          main { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; padding: 42px 84px; }
+          article { background: white; border: 1px solid #d8dee8; border-radius: 6px; padding: 28px; min-height: 150px; box-shadow: 0 12px 36px rgba(23,32,51,.07); }
+          h2 { margin: 0 0 12px; font-size: 22px; }
+          article p { margin: 0; font-size: 16px; color: #657085; }
+        </style>
+      </head>
+      <body>
+        <header>
+          <div class="brand">SHOPHEBEL TEST-SHOP</div>
+          <h1>Klarer Startbereich für mehr qualifizierte Anfragen</h1>
+          <p>Diese Beispielseite liefert einen echten Screenshot für den Premium-PDF-Qualitätscheck.</p>
+          <button>Beratung anfragen</button>
+        </header>
+        <main>
+          <article><h2>Vertrauen</h2><p>Belege und Kontaktmöglichkeiten sollten vor dem ersten Formular sichtbar sein.</p></article>
+          <article><h2>Klarheit</h2><p>Der nächste Schritt braucht eine ruhigere Hierarchie und bessere Blickführung.</p></article>
+          <article><h2>Mobile UX</h2><p>Abstände und Buttons werden im Bericht als priorisierte Maßnahmen aufgegriffen.</p></article>
+        </main>
+      </body>
+    </html>`,
+    { waitUntil: "load" },
+  );
+
+  const screenshotPath = path.join(screenshotDir, "viewport.png");
+  await page.screenshot({ path: screenshotPath, fullPage: true });
+  await page.close();
+
+  return "/generated-screenshots/pdf-check/viewport.png";
+}
+
 async function main() {
   const outputDir = path.join(process.cwd(), "tmp", "premium-pdf-quality-check");
   await mkdir(outputDir, { recursive: true });
 
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--allow-file-access-from-files"],
+  });
+  const analysis = createAnalysis();
+  const screenshotPath = await createFixtureScreenshot(browser);
+  analysis.analysis.visualPreviewAvailable = true;
+  analysis.analysis.screenshots = { viewport: screenshotPath };
+
   const pdf = await renderPremiumReportPdf({
-    analysis: createAnalysis(),
+    analysis,
     report: createReport(),
     consultantNotes: {
       executiveComment: "Manuell geprüft: Startbereich und Anfrageweg zuerst priorisieren.",
@@ -159,11 +216,7 @@ async function main() {
   await writeFile(pdfPath, pdf);
 
   const pageCount = countPdfPages(pdf);
-  const pages = Array.from(new Set([1, 2, 3, 4, pageCount].filter((page) => page >= 1 && page <= pageCount)));
-  const browser = await puppeteer.launch({
-    headless: true,
-    args: ["--allow-file-access-from-files"],
-  });
+  const pages = Array.from({ length: pageCount }, (_, index) => index + 1);
 
   try {
     for (const pageNumber of pages) {
@@ -181,7 +234,7 @@ async function main() {
     await browser.close();
   }
 
-  console.log(JSON.stringify({ pdfPath, pageCount, renderedPages: pages }, null, 2));
+  console.log(JSON.stringify({ pdfPath, pageCount, renderedPages: pages, screenshotPath }, null, 2));
 }
 
 main().catch((error) => {
