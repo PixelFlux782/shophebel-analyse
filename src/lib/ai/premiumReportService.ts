@@ -39,6 +39,19 @@ function normalizeStringList(values: string[]) {
   return values.map((value) => normalizeGermanReportText(value)).filter(Boolean);
 }
 
+type SevenDayPlanDay = "Tag 1-2" | "Tag 3-5" | "Tag 6-7";
+
+function normalizeSevenDayPlanDay(day: string, index: number): SevenDayPlanDay {
+  const normalized = normalizeGermanReportText(day);
+
+  if (normalized === "Tag 1-2" || normalized === "Tag 3-5" || normalized === "Tag 6-7") {
+    return normalized;
+  }
+
+  const fallbackDays: SevenDayPlanDay[] = ["Tag 1-2", "Tag 3-5", "Tag 6-7"];
+  return fallbackDays[index] ?? "Tag 1-2";
+}
+
 function collectReportText(value: unknown, output: string[] = []): string[] {
   if (typeof value === "string") {
     output.push(value);
@@ -70,8 +83,8 @@ export function normalizePremiumAiReportCopy(report: PremiumAiReport): PremiumAi
       difficulty: issue.difficulty,
       expectedEffect: normalizeGermanReportText(issue.expectedEffect),
     })),
-    sevenDayPlan: report.sevenDayPlan.map((step) => ({
-      day: normalizeGermanReportText(step.day),
+    sevenDayPlan: report.sevenDayPlan.map((step, index) => ({
+      day: normalizeSevenDayPlanDay(step.day, index),
       focus: normalizeGermanReportText(step.focus),
       tasks: normalizeStringList(step.tasks).slice(0, 4),
     })),
