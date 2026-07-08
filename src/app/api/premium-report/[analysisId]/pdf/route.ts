@@ -9,6 +9,7 @@ import { renderPremiumReportPdf } from "@/lib/premium/premiumReportPdf";
 import {
   getOrCreatePremiumReport,
   getPremiumReportRecordByAnalysisId,
+  shouldRefreshPremiumReportForScreenshots,
 } from "@/lib/premium/premiumReportStore";
 
 export const runtime = "nodejs";
@@ -42,7 +43,9 @@ export async function GET(_request: Request, context: PremiumReportPdfRouteConte
     }
 
     const premiumReportRecord = await getPremiumReportRecordByAnalysisId(analysisId);
-    const premiumReport = premiumReportRecord?.report ?? await getOrCreatePremiumReport({ analysis });
+    const premiumReport = premiumReportRecord?.report && !shouldRefreshPremiumReportForScreenshots(premiumReportRecord.report)
+      ? premiumReportRecord.report
+      : await getOrCreatePremiumReport({ analysis });
 
     if (!premiumReport) {
       console.error("[premium-report-pdf] Premium report could not be generated.", {

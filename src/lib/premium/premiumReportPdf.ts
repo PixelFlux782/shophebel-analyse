@@ -777,6 +777,7 @@ async function drawPremiumPageScreenshotCards(
   drawSectionTitle(doc, fonts, "Seitenscreenshots", "Reduzierte Vorschau");
 
   for (const [index, page] of pages.slice(0, 5).entries()) {
+    const pageScreenshot = page.screenshotUrl || page.screenshot;
     const x = doc.page.margins.left;
     const width = pageWidth(doc);
     const padding = PAGE.cardPadding;
@@ -792,8 +793,8 @@ async function drawPremiumPageScreenshotCards(
     const titleHeight = measureTextBlock(doc, fonts, title, contentWidth, 11.4, 2, "bold");
     const bodyHeight = measureTextBlock(doc, fonts, body, contentWidth, 9.6, 2.8);
     const height = Math.max(126, padding * 2 + titleHeight + 8 + bodyHeight, padding * 2 + imageHeight);
-    const screenshot = typeof page.screenshot === "string" && page.screenshot.trim()
-      ? await fetchPdfImage(page.screenshot, textValue(page.label, "Seitenscreenshot"))
+    const screenshot = typeof pageScreenshot === "string" && pageScreenshot.trim()
+      ? await fetchPdfImage(pageScreenshot, textValue(page.label, "Seitenscreenshot"))
       : null;
 
     ensureSpace(doc, height + PAGE.gap);

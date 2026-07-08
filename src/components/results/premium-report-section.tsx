@@ -36,6 +36,10 @@ function screenshotFallbackText(reason?: string) {
   return reason || "Fuer diese Seite liegt keine visuelle Vorschau vor.";
 }
 
+function pageScreenshot(page: PremiumWebsiteAnalysis["pages"][number]) {
+  return page.screenshotUrl || page.screenshot;
+}
+
 function WebsiteSystemView({ websiteAnalysis }: { websiteAnalysis: PremiumWebsiteAnalysis }) {
   return (
     <div className="mt-8 space-y-7 border-t border-slate-300 pt-7">
@@ -110,9 +114,9 @@ function WebsiteSystemView({ websiteAnalysis }: { websiteAnalysis: PremiumWebsit
               </summary>
               <div className="mt-4 grid gap-4 lg:grid-cols-[16rem_1fr]">
                 <div className="overflow-hidden border border-slate-200 bg-slate-100">
-                  {page.screenshot ? (
+                  {pageScreenshot(page) ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={page.screenshot} alt="" className="h-44 w-full object-cover object-top" />
+                    <img src={pageScreenshot(page)!} alt="" className="h-44 w-full object-cover object-top" />
                   ) : (
                     <div className="flex h-44 flex-col items-center justify-center gap-2 px-4 text-center text-slate-500">
                       <span className="text-xs font-semibold uppercase tracking-[0.12em]">

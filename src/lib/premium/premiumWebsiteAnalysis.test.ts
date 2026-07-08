@@ -127,6 +127,7 @@ describe("buildPremiumWebsiteAnalysis", () => {
     expect(website.pages[1]).toMatchObject({
       label: "Leistungen",
       screenshot,
+      screenshotUrl: screenshot,
       screenshotUnavailableReason: undefined,
     });
   });

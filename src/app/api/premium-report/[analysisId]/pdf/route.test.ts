@@ -9,6 +9,7 @@ const getAnalysisResultMock = vi.hoisted(() => vi.fn());
 const getPremiumAiReportByAnalysisIdMock = vi.hoisted(() => vi.fn());
 const getPremiumReportRecordByAnalysisIdMock = vi.hoisted(() => vi.fn());
 const getOrCreatePremiumReportMock = vi.hoisted(() => vi.fn());
+const shouldRefreshPremiumReportForScreenshotsMock = vi.hoisted(() => vi.fn());
 
 vi.mock("@/lib/analysisStore", () => ({
   getAnalysisResult: getAnalysisResultMock,
@@ -21,6 +22,7 @@ vi.mock("@/lib/ai/premiumAiReportStore", () => ({
 vi.mock("@/lib/premium/premiumReportStore", () => ({
   getPremiumReportRecordByAnalysisId: getPremiumReportRecordByAnalysisIdMock,
   getOrCreatePremiumReport: getOrCreatePremiumReportMock,
+  shouldRefreshPremiumReportForScreenshots: shouldRefreshPremiumReportForScreenshotsMock,
 }));
 
 function createAnalysis(): AnalysisResult {
@@ -186,6 +188,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     });
     getPremiumAiReportByAnalysisIdMock.mockResolvedValue(null);
     getOrCreatePremiumReportMock.mockResolvedValue(createPremiumReport());
+    shouldRefreshPremiumReportForScreenshotsMock.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -233,6 +236,34 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
     expect(getOrCreatePremiumReportMock).toHaveBeenCalledWith({
       analysis: expect.objectContaining({ id: "analysis-123" }),
     });
+  });
+
+  it("regeneriert das PDF aus getOrCreate, wenn der gespeicherte Report alte Screenshot-Daten hat", async () => {
+    const refreshedReport = createPremiumReport({
+      conversionHypothesis: "Regenerierter Report mit Unterseiten-Screenshots.",
+    });
+    shouldRefreshPremiumReportForScreenshotsMock.mockReturnValue(true);
+    getOrCreatePremiumReportMock.mockResolvedValue(refreshedReport);
+    vi.resetModules();
+    const renderPremiumReportPdfMock = vi.fn().mockResolvedValue(Buffer.from("%PDF refreshed"));
+    vi.doMock("@/lib/premium/premiumReportPdf", () => ({
+      renderPremiumReportPdf: renderPremiumReportPdfMock,
+    }));
+    const { GET } = await import("@/app/api/premium-report/[analysisId]/pdf/route");
+
+    const response = await GET(new Request("http://localhost:3001/api/premium-report/analysis-123/pdf"), createContext());
+    const body = Buffer.from(await response.arrayBuffer());
+
+    expect(response.status).toBe(200);
+    expect(body.toString()).toBe("%PDF refreshed");
+    expect(getOrCreatePremiumReportMock).toHaveBeenCalledWith({
+      analysis: expect.objectContaining({ id: "analysis-123" }),
+    });
+    expect(renderPremiumReportPdfMock).toHaveBeenCalledWith(expect.objectContaining({
+      report: refreshedReport,
+    }));
+
+    vi.doUnmock("@/lib/premium/premiumReportPdf");
   });
 
   it("setzt den Content-Type auf application/pdf", async () => {

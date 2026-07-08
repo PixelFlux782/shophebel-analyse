@@ -43,6 +43,34 @@ type SupabasePremiumReportRow = {
   version?: string | null;
 };
 
+function pageScreenshot(page: unknown) {
+  if (!page || typeof page !== "object") return undefined;
+  const candidate = page as { screenshotUrl?: unknown; screenshot?: unknown };
+  const value = candidate.screenshotUrl ?? candidate.screenshot;
+
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+function pageHasScreenshotDecision(page: unknown) {
+  if (!page || typeof page !== "object") return false;
+  const candidate = page as {
+    analysisStatus?: unknown;
+    screenshotUnavailableReason?: unknown;
+  };
+
+  return candidate.analysisStatus !== "analyzed"
+    || Boolean(pageScreenshot(page))
+    || (typeof candidate.screenshotUnavailableReason === "string" && candidate.screenshotUnavailableReason.trim().length > 0);
+}
+
+export function shouldRefreshPremiumReportForScreenshots(report: PremiumReport | null | undefined) {
+  const websiteAnalysis = report?.websiteAnalysis;
+  const pages = Array.isArray(websiteAnalysis?.pages) ? websiteAnalysis.pages : [];
+
+  if (pages.length === 0) return true;
+  return pages.some((page) => !pageHasScreenshotDecision(page));
+}
+
 function getSupabaseConfig(): { url: string; serviceRoleKey: string } | null {
   const url = process.env.SUPABASE_URL?.trim();
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
@@ -167,6 +195,48 @@ export async function savePremiumReportForAnalysis(
   }
 }
 
+async function updatePremiumReportForAnalysis(input: {
+  analysisId: string;
+  report: PremiumReport;
+}): Promise<PremiumReport | null> {
+  const config = getSupabaseConfig();
+
+  if (!config) {
+    return null;
+  }
+
+  const requestUrl = `${config.url}/rest/v1/premium_reports?analysis_id=eq.${encodeURIComponent(input.analysisId)}`;
+
+  try {
+    const response = await fetch(requestUrl, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: config.serviceRoleKey,
+        Authorization: `Bearer ${config.serviceRoleKey}`,
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        report: input.report,
+        status: "generated",
+        updated_at: new Date().toISOString(),
+      }),
+      cache: "no-store",
+    });
+
+    if (!response.ok) {
+      throw new Error(`supabase_premium_report_update_failed: ${response.status} ${await response.text()}`);
+    }
+
+    const rows = (await response.json()) as SupabasePremiumReportRow[];
+
+    return rows[0]?.report ?? input.report;
+  } catch (error) {
+    logPremiumReportError("update", error);
+    return null;
+  }
+}
+
 export async function saveConsultantNotesForAnalysis(input: {
   analysisId: string;
   consultantNotes: ConsultantNotes;
@@ -217,9 +287,10 @@ export async function getOrCreatePremiumReport(
     return null;
   }
 
-  const existingReport = await getPremiumReportByAnalysisId(input.analysis.id);
+  const existingRecord = await getPremiumReportRecordByAnalysisId(input.analysis.id);
+  const existingReport = existingRecord?.report ?? null;
 
-  if (existingReport) {
+  if (existingReport && !shouldRefreshPremiumReportForScreenshots(existingReport)) {
     return existingReport;
   }
 
@@ -236,11 +307,16 @@ export async function getOrCreatePremiumReport(
     paymentStatus: input.analysis.paymentStatus,
     websiteAnalysis,
   });
-  const savedReport = await savePremiumReportForAnalysis({
-    analysisId: input.analysis.id,
-    paymentId: input.paymentId,
-    report: generatedReport,
-  });
+  const savedReport = existingRecord
+    ? await updatePremiumReportForAnalysis({
+        analysisId: input.analysis.id,
+        report: generatedReport,
+      })
+    : await savePremiumReportForAnalysis({
+        analysisId: input.analysis.id,
+        paymentId: input.paymentId,
+        report: generatedReport,
+      });
 
   return savedReport ?? generatedReport;
 }

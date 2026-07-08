@@ -113,7 +113,7 @@ describe("PremiumReportSection", () => {
                 role: "contact",
                 reason: "Kontakt-Signal",
                 analysisStatus: "analyzed",
-                screenshot: "https://cdn.example.com/kontakt.png",
+                screenshotUrl: "https://cdn.example.com/kontakt.png",
                 score: 82,
                 strengths: ["Kontakt sichtbar"],
                 problems: ["Trust fehlt"],

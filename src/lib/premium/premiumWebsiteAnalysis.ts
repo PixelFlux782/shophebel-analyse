@@ -11,6 +11,7 @@ export type PremiumWebsitePageAnalysis = {
   reason: string;
   analysisStatus: "analyzed" | "failed";
   screenshot?: string;
+  screenshotUrl?: string;
   screenshotUnavailableReason?: string;
   score?: number;
   subscores?: Array<{ label: string; score: number }>;
@@ -79,7 +80,10 @@ function screenshotForAnalysis(analysis: AnalysisResult) {
     screenshot?: string;
     screenshotUrl?: string;
     screenshotPath?: string;
+    visualSnapshot?: string;
     visualScreenshot?: string;
+    renderedScreenshot?: string;
+    artifactUrl?: string;
   };
 
   return firstNonEmptyString([
@@ -90,7 +94,10 @@ function screenshotForAnalysis(analysis: AnalysisResult) {
     legacy.screenshot,
     legacy.screenshotUrl,
     legacy.screenshotPath,
+    legacy.visualSnapshot,
     legacy.visualScreenshot,
+    legacy.renderedScreenshot,
+    legacy.artifactUrl,
   ]);
 }
 
@@ -143,6 +150,8 @@ function shortDiagnosisForPage(page: PremiumDiscoveredPage, analysis: AnalysisRe
 }
 
 function pageFromAnalysis(page: PremiumDiscoveredPage, analysis: AnalysisResult): PremiumWebsitePageAnalysis {
+  const screenshot = screenshotForAnalysis(analysis);
+
   return {
     url: analysis.url,
     title: page.title,
@@ -150,7 +159,8 @@ function pageFromAnalysis(page: PremiumDiscoveredPage, analysis: AnalysisResult)
     role: page.role,
     reason: page.reason,
     analysisStatus: "analyzed",
-    screenshot: screenshotForAnalysis(analysis),
+    screenshot,
+    screenshotUrl: screenshot,
     screenshotUnavailableReason: screenshotUnavailableReason(analysis),
     score: analysis.overallScore,
     subscores: Object.values(analysis.categories).map((category) => ({

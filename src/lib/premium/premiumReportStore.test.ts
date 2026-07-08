@@ -41,6 +41,49 @@ function createPremiumReport(overrides: Partial<PremiumReport> = {}): PremiumRep
   };
 }
 
+function createWebsiteAnalysis(overrides: Partial<NonNullable<PremiumReport["websiteAnalysis"]>> = {}): NonNullable<PremiumReport["websiteAnalysis"]> {
+  return {
+    pages: [
+      {
+        url: "https://shop.test/",
+        label: "Startseite",
+        role: "home",
+        reason: "Startpunkt",
+        analysisStatus: "analyzed",
+        screenshotUrl: "https://cdn.example.com/home.png",
+        score: 80,
+        strengths: [],
+        problems: [],
+        recommendation: "CTA pruefen.",
+        shortDiagnosis: "Startseite mit CTA-Hebel.",
+      },
+      {
+        url: "https://shop.test/kontakt",
+        label: "Kontakt",
+        role: "contact",
+        reason: "Kontakt",
+        analysisStatus: "analyzed",
+        screenshotUnavailableReason: "Screenshot konnte nicht erstellt werden.",
+        score: 74,
+        strengths: [],
+        problems: [],
+        recommendation: "Trust pruefen.",
+        shortDiagnosis: "Kontakt mit Trust-Hebel.",
+      },
+    ],
+    overallWebsiteScore: 77,
+    crossPageDiagnosis: "Website-Systemanalyse",
+    repeatedProblems: [],
+    conversionPathAssessment: "Conversion-Pfad",
+    trustConsistencyAssessment: "Trust",
+    navigationAssessment: "Navigation",
+    topPrioritiesWebsiteWide: ["Prioritaet"],
+    sevenDayPlan: [],
+    missingPageTypes: [],
+    ...overrides,
+  };
+}
+
 function createAnalysis(): AnalysisResult {
   const now = "2026-05-08T12:00:00.000Z";
 
@@ -260,7 +303,7 @@ describe("premiumReportStore", () => {
   });
 
   it("ruft buildPremiumReport nicht erneut auf, wenn der Report danach gespeichert vorliegt", async () => {
-    const report = createPremiumReport();
+    const report = createPremiumReport({ websiteAnalysis: createWebsiteAnalysis() });
     buildPremiumReportMock.mockReturnValue(report);
     vi.stubGlobal("fetch", vi.fn()
       .mockResolvedValueOnce(new Response(JSON.stringify([]), { status: 200 }))
@@ -272,5 +315,66 @@ describe("premiumReportStore", () => {
 
     expect(secondLoad).toEqual(report);
     expect(buildPremiumReportMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("regeneriert alte gespeicherte Premium-Reports ohne Unterseiten-Screenshot-Entscheidung", async () => {
+    const staleReport = createPremiumReport({
+      websiteAnalysis: createWebsiteAnalysis({
+        pages: [
+          {
+            url: "https://shop.test/kontakt",
+            label: "Kontakt",
+            role: "contact",
+            reason: "Kontakt",
+            analysisStatus: "analyzed",
+            score: 74,
+            strengths: [],
+            problems: [],
+            recommendation: "Trust pruefen.",
+            shortDiagnosis: "Kontakt mit Trust-Hebel.",
+          },
+        ],
+      }),
+    });
+    const refreshedReport = createPremiumReport({
+      websiteAnalysis: createWebsiteAnalysis({
+        pages: [
+          {
+            url: "https://shop.test/kontakt",
+            label: "Kontakt",
+            role: "contact",
+            reason: "Kontakt",
+            analysisStatus: "analyzed",
+            screenshotUrl: "https://cdn.example.com/kontakt.png",
+            score: 74,
+            strengths: [],
+            problems: [],
+            recommendation: "Trust pruefen.",
+            shortDiagnosis: "Kontakt mit Trust-Hebel.",
+          },
+        ],
+      }),
+    });
+    buildPremiumReportMock.mockReturnValue(refreshedReport);
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([{
+        id: "premium-report-123",
+        analysis_id: "analysis-123",
+        report: staleReport,
+        consultant_notes: {},
+        status: "generated",
+      }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([{ report: refreshedReport }]), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const loaded = await getOrCreatePremiumReport({ analysis: createStoredAnalysis() });
+    const [, updateInit] = fetchMock.mock.calls[1] as [string, RequestInit];
+    const payload = JSON.parse(updateInit.body as string) as { report: PremiumReport };
+
+    expect(loaded).toEqual(refreshedReport);
+    expect(createPremiumWebsiteAnalysisMock).toHaveBeenCalledTimes(1);
+    expect(buildPremiumReportMock).toHaveBeenCalledTimes(1);
+    expect(updateInit.method).toBe("PATCH");
+    expect(payload.report.websiteAnalysis?.pages[0].screenshotUrl).toBe("https://cdn.example.com/kontakt.png");
   });
 });
