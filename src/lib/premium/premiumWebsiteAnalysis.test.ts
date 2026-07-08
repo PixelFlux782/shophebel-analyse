@@ -4,7 +4,7 @@ import { buildPremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysi
 import type { PremiumDiscoveredPage } from "@/lib/premium/premiumPageDiscovery";
 import type { AnalysisResult } from "@/types/analysis";
 
-function createAnalysis(url: string, score: number, problem: string): AnalysisResult {
+function createAnalysis(url: string, score: number, problem: string, overrides: Partial<AnalysisResult> = {}): AnalysisResult {
   const now = "2026-07-06T10:00:00.000Z";
 
   return {
@@ -53,6 +53,7 @@ function createAnalysis(url: string, score: number, problem: string): AnalysisRe
     categoryScores: {},
     findings: [],
     recommendations: [],
+    ...overrides,
   };
 }
 
@@ -103,5 +104,51 @@ describe("buildPremiumWebsiteAnalysis", () => {
     expect(website.fallbackNote).toContain("keine weiteren");
     expect(website.missingPageTypes).toEqual(["offer", "product", "trust", "contact"]);
     expect(website.crossPageDiagnosis).toContain("keine sinnvolle Unterseitenstruktur");
+  });
+
+  it("uebernimmt Screenshot-Referenzen pro Premium-Unterseite in das Aggregationsmodell", () => {
+    const home = page("https://shop.test/", "home", "Startseite");
+    const offer = page("https://shop.test/leistungen", "offer", "Leistungen");
+    const screenshot = "https://cdn.example.com/screenshots/leistungen-viewport.png";
+    const website = buildPremiumWebsiteAnalysis({
+      startAnalysis: createAnalysis(home.url, 70, "CTA ist unklar"),
+      pageAnalyses: [
+        { page: home, analysis: createAnalysis(home.url, 70, "CTA ist unklar") },
+        {
+          page: offer,
+          analysis: createAnalysis(offer.url, 76, "Angebot braucht Proof", {
+            screenshots: { viewport: screenshot },
+            visualPreviewAvailable: true,
+          }),
+        },
+      ],
+    });
+
+    expect(website.pages[1]).toMatchObject({
+      label: "Leistungen",
+      screenshot,
+      screenshotUnavailableReason: undefined,
+    });
+  });
+
+  it("setzt fuer analysierte Premium-Unterseiten ohne Screenshot einen ruhigen Fallback-Grund", () => {
+    const home = page("https://shop.test/", "home", "Startseite");
+    const contact = page("https://shop.test/kontakt", "contact", "Kontakt");
+    const website = buildPremiumWebsiteAnalysis({
+      startAnalysis: createAnalysis(home.url, 70, "CTA ist unklar"),
+      pageAnalyses: [
+        { page: home, analysis: createAnalysis(home.url, 70, "CTA ist unklar") },
+        {
+          page: contact,
+          analysis: createAnalysis(contact.url, 68, "Kontakt braucht Vertrauen", {
+            analysisMode: "static",
+          }),
+        },
+      ],
+    });
+
+    expect(website.pages[1].analysisStatus).toBe("analyzed");
+    expect(website.pages[1].screenshot).toBeUndefined();
+    expect(website.pages[1].screenshotUnavailableReason).toContain("ohne gerenderte Vorschau");
   });
 });

@@ -11,6 +11,7 @@ export type PremiumWebsitePageAnalysis = {
   reason: string;
   analysisStatus: "analyzed" | "failed";
   screenshot?: string;
+  screenshotUnavailableReason?: string;
   score?: number;
   subscores?: Array<{ label: string; score: number }>;
   strengths: string[];
@@ -69,8 +70,39 @@ const ROLE_LABELS: Record<PremiumPageRole, string> = {
   unknown: "Weitere Unterseite",
 };
 
+function firstNonEmptyString(values: unknown[]) {
+  return values.find((value): value is string => typeof value === "string" && value.trim().length > 0);
+}
+
 function screenshotForAnalysis(analysis: AnalysisResult) {
-  return analysis.screenshots?.viewport ?? analysis.screenshots?.fullPage ?? analysis.screenshots?.mobile ?? analysis.screenshots?.hero;
+  const legacy = analysis as AnalysisResult & {
+    screenshot?: string;
+    screenshotUrl?: string;
+    screenshotPath?: string;
+    visualScreenshot?: string;
+  };
+
+  return firstNonEmptyString([
+    analysis.screenshots?.viewport,
+    analysis.screenshots?.fullPage,
+    analysis.screenshots?.mobile,
+    analysis.screenshots?.hero,
+    legacy.screenshot,
+    legacy.screenshotUrl,
+    legacy.screenshotPath,
+    legacy.visualScreenshot,
+  ]);
+}
+
+function screenshotUnavailableReason(analysis: AnalysisResult) {
+  if (screenshotForAnalysis(analysis)) return undefined;
+  if (analysis.metadata?.screenshotError) {
+    return "Screenshot konnte fuer diese Seite technisch nicht erstellt werden.";
+  }
+  if (analysis.analysisMode === "static") {
+    return "Diese Seite wurde ohne gerenderte Vorschau ausgewertet.";
+  }
+  return "Fuer diese Seite liegt keine visuelle Vorschau vor.";
 }
 
 function topStrengths(analysis: AnalysisResult) {
@@ -119,6 +151,7 @@ function pageFromAnalysis(page: PremiumDiscoveredPage, analysis: AnalysisResult)
     reason: page.reason,
     analysisStatus: "analyzed",
     screenshot: screenshotForAnalysis(analysis),
+    screenshotUnavailableReason: screenshotUnavailableReason(analysis),
     score: analysis.overallScore,
     subscores: Object.values(analysis.categories).map((category) => ({
       label: category.label,
@@ -320,7 +353,7 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
 
   for (const page of subpages) {
     try {
-      const analysis = await analysePage(page.url);
+      const analysis = await analysePage(page.url, { preferRendered: true });
       pageAnalyses.push({ page, analysis });
     } catch (error) {
       console.warn("[premium-website-analysis] subpage analysis failed", {

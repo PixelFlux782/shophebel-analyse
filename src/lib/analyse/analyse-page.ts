@@ -133,7 +133,11 @@ async function buildResultFromDocument(
   return result;
 }
 
-export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
+type AnalysePageOptions = {
+  preferRendered?: boolean;
+};
+
+export async function analysePage(inputUrl: string, options: AnalysePageOptions = {}): Promise<AnalysisResult> {
   const technicalNotes: string[] = [];
   let staticDocument: StaticDocument | null = null;
   let staticError: FetchHtmlError | null = null;
@@ -156,7 +160,7 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
     html: staticDocument?.html,
     staticFetchFailed: Boolean(staticError),
   });
-  const preferRenderedAnalysis = shouldPreferRenderedAnalysis();
+  const preferRenderedAnalysis = options.preferRendered || shouldPreferRenderedAnalysis();
   const renderedModeRequested = preferRenderedAnalysis || useRenderedFallback;
 
   console.info("[analysis] rendered mode decision", {
@@ -191,7 +195,9 @@ export async function analysePage(inputUrl: string): Promise<AnalysisResult> {
 
   if (preferRenderedAnalysis && staticDocument && !useRenderedFallback) {
     technicalNotes.push(
-      "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht für Screenshots.",
+      options.preferRendered
+        ? "Premium-Mehrseitenanalyse nutzt eine echte Browseransicht fuer Screenshots."
+        : "Lokale Entwicklungsanalyse nutzt eine echte Browseransicht für Screenshots.",
     );
   }
 

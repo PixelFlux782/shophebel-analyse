@@ -32,6 +32,10 @@ function roleLabel(role: string) {
   return labels[role] ?? role;
 }
 
+function screenshotFallbackText(reason?: string) {
+  return reason || "Fuer diese Seite liegt keine visuelle Vorschau vor.";
+}
+
 function WebsiteSystemView({ websiteAnalysis }: { websiteAnalysis: PremiumWebsiteAnalysis }) {
   return (
     <div className="mt-8 space-y-7 border-t border-slate-300 pt-7">
@@ -110,8 +114,13 @@ function WebsiteSystemView({ websiteAnalysis }: { websiteAnalysis: PremiumWebsit
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={page.screenshot} alt="" className="h-44 w-full object-cover object-top" />
                   ) : (
-                    <div className="flex h-44 items-center justify-center px-4 text-center text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                      Kein Screenshot verfügbar
+                    <div className="flex h-44 flex-col items-center justify-center gap-2 px-4 text-center text-slate-500">
+                      <span className="text-xs font-semibold uppercase tracking-[0.12em]">
+                        Kein Screenshot verfügbar
+                      </span>
+                      <span className="max-w-44 text-xs leading-5">
+                        {screenshotFallbackText(page.screenshotUnavailableReason)}
+                      </span>
                     </div>
                   )}
                 </div>

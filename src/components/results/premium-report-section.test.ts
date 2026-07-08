@@ -113,6 +113,7 @@ describe("PremiumReportSection", () => {
                 role: "contact",
                 reason: "Kontakt-Signal",
                 analysisStatus: "analyzed",
+                screenshot: "https://cdn.example.com/kontakt.png",
                 score: 82,
                 strengths: ["Kontakt sichtbar"],
                 problems: ["Trust fehlt"],
@@ -147,5 +148,46 @@ describe("PremiumReportSection", () => {
     expect(markup).toContain("Priorisierter 7-Tage-Plan");
     expect(markup).toContain("76/100");
     expect(markup).toContain("Kontakt");
+    expect(markup).toContain('src="https://cdn.example.com/kontakt.png"');
+  });
+
+  it("rendert fuer Premium-Unterseiten ohne Screenshot einen ruhigen Fallback", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(PremiumReportSection, {
+        report: createReport({
+          websiteAnalysis: {
+            pages: [
+              {
+                url: "https://shop.test/kontakt",
+                label: "Kontakt",
+                role: "contact",
+                reason: "Kontakt-Signal",
+                analysisStatus: "analyzed",
+                screenshotUnavailableReason: "Diese Seite wurde ohne gerenderte Vorschau ausgewertet.",
+                score: 71,
+                strengths: ["Kontakt sichtbar"],
+                problems: ["Trust fehlt"],
+                recommendation: "Trust am Formular zeigen.",
+                shortDiagnosis: "Kontaktseite mit Trust-Hebel.",
+              },
+            ],
+            overallWebsiteScore: 71,
+            crossPageDiagnosis: "Die Website wurde als System bewertet.",
+            repeatedProblems: [],
+            conversionPathAssessment: "Kontakt logisch verbinden.",
+            trustConsistencyAssessment: "Trust konsistent machen.",
+            navigationAssessment: "Navigation auf CTA ausrichten.",
+            topPrioritiesWebsiteWide: ["CTA vereinheitlichen"],
+            sevenDayPlan: [
+              { days: "Tag 1-2", focus: "Klarheit", actions: ["CTA pruefen."] },
+            ],
+            missingPageTypes: [],
+          },
+        }),
+      }),
+    );
+
+    expect(markup).toContain("Kein Screenshot verfügbar");
+    expect(markup).toContain("Diese Seite wurde ohne gerenderte Vorschau ausgewertet.");
   });
 });

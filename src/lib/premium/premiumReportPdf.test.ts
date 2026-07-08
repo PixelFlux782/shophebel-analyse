@@ -451,4 +451,71 @@ describe("premiumReportPdf consultant notes", () => {
       }),
     );
   });
+
+  it("rendert Premium-Unterseiten im PDF mit und ohne Screenshot", async () => {
+    const screenshotUrl = "https://cdn.example.com/screenshots/kontakt.png";
+    const imageBuffer = await largePngBuffer();
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(new Uint8Array(imageBuffer), {
+        status: 200,
+        headers: { "content-type": "image/png" },
+      }),
+    );
+    const report: PremiumReport = {
+      ...createReport(),
+      websiteAnalysis: {
+        pages: [
+          {
+            url: "https://shop.test/kontakt",
+            label: "Kontakt",
+            role: "contact",
+            reason: "Kontakt-Signal",
+            analysisStatus: "analyzed",
+            screenshot: screenshotUrl,
+            score: 71,
+            strengths: ["Kontakt sichtbar"],
+            problems: ["Trust fehlt"],
+            recommendation: "Trust am Formular zeigen.",
+            shortDiagnosis: "Kontaktseite mit Trust-Hebel.",
+          },
+          {
+            url: "https://shop.test/ueber-uns",
+            label: "Ueber uns",
+            role: "trust",
+            reason: "Trust-Signal",
+            analysisStatus: "analyzed",
+            screenshotUnavailableReason: "Diese Seite wurde ohne gerenderte Vorschau ausgewertet.",
+            score: 66,
+            strengths: ["Team sichtbar"],
+            problems: ["Belege fehlen"],
+            recommendation: "Referenzen ergaenzen.",
+            shortDiagnosis: "Trust-Seite mit Beleg-Hebel.",
+          },
+        ],
+        overallWebsiteScore: 69,
+        crossPageDiagnosis: "Die Website wurde als System bewertet.",
+        repeatedProblems: ["Trust fehlt"],
+        strongestPage: { label: "Kontakt", url: "https://shop.test/kontakt", score: 71 },
+        weakestPage: { label: "Ueber uns", url: "https://shop.test/ueber-uns", score: 66 },
+        conversionPathAssessment: "Kontakt logisch verbinden.",
+        trustConsistencyAssessment: "Trust konsistent machen.",
+        navigationAssessment: "Navigation auf CTA ausrichten.",
+        topPrioritiesWebsiteWide: ["Trust vereinheitlichen"],
+        sevenDayPlan: [
+          { days: "Tag 1-2", focus: "Klarheit", actions: ["CTA pruefen."] },
+        ],
+        missingPageTypes: [],
+      },
+    };
+
+    const { pdf } = await renderPremiumReportPdfDiagnostics({
+      analysis: createAnalysis(),
+      report,
+      consultantNotes: {},
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith(screenshotUrl, { cache: "no-store" });
+    expect(pdf.subarray(0, 4).toString()).toBe("%PDF");
+    expect(countPdfPages(pdf)).toBeGreaterThan(0);
+  });
 });

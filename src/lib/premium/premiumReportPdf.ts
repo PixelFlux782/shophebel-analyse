@@ -361,6 +361,24 @@ function drawTextBox(
   });
 }
 
+function drawInlineFallback(
+  doc: PDFKit.PDFDocument,
+  fonts: Record<FontKey, string>,
+  text: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+) {
+  doc.roundedRect(x, y, width, height, PAGE.radius).fillAndStroke(COLORS.soft, COLORS.line);
+  drawWrappedText(doc, fonts, text, x + 12, y + 16, {
+    width: width - 24,
+    size: 9.2,
+    lineGap: 2.5,
+    color: COLORS.muted,
+  });
+}
+
 function drawInsightCard(
   doc: PDFKit.PDFDocument,
   fonts: Record<FontKey, string>,
@@ -751,7 +769,82 @@ function drawOverview(doc: PDFKit.PDFDocument, fonts: Record<FontKey, string>, a
   doc.y = y + height + PAGE.gap;
 }
 
-function drawWebsiteSystemAnalysis(
+async function drawPremiumPageScreenshotCards(
+  doc: PDFKit.PDFDocument,
+  fonts: Record<FontKey, string>,
+  pages: NonNullable<PremiumReport["websiteAnalysis"]>["pages"],
+) {
+  drawSectionTitle(doc, fonts, "Seitenscreenshots", "Reduzierte Vorschau");
+
+  for (const [index, page] of pages.slice(0, 5).entries()) {
+    const x = doc.page.margins.left;
+    const width = pageWidth(doc);
+    const padding = PAGE.cardPadding;
+    const imageWidth = 156;
+    const imageHeight = 96;
+    const gap = 16;
+    const contentWidth = width - padding * 2 - imageWidth - gap;
+    const title = `${index + 1}. ${textValue(page.label, "Seite")}`;
+    const body = [
+      typeof page.score === "number" ? `Score: ${page.score}/100` : "Score: offen",
+      textValue(page.shortDiagnosis, "Keine Kurzdiagnose gespeichert."),
+    ].join("\n");
+    const titleHeight = measureTextBlock(doc, fonts, title, contentWidth, 11.4, 2, "bold");
+    const bodyHeight = measureTextBlock(doc, fonts, body, contentWidth, 9.6, 2.8);
+    const height = Math.max(126, padding * 2 + titleHeight + 8 + bodyHeight, padding * 2 + imageHeight);
+    const screenshot = typeof page.screenshot === "string" && page.screenshot.trim()
+      ? await fetchPdfImage(page.screenshot, textValue(page.label, "Seitenscreenshot"))
+      : null;
+
+    ensureSpace(doc, height + PAGE.gap);
+    const y = doc.y;
+    doc.roundedRect(x, y, width, height, PAGE.radius).fillAndStroke(COLORS.paper, COLORS.line);
+
+    const imageX = x + padding;
+    const imageY = y + padding;
+    if (screenshot) {
+      try {
+        doc.image(`data:${screenshot.contentType};base64,${screenshot.buffer.toString("base64")}`, imageX, imageY, {
+          fit: [imageWidth, imageHeight],
+          align: "center",
+          valign: "center",
+        });
+      } catch (error) {
+        logScreenshotDebug("Premium page screenshot embed failed", {
+          contentType: screenshot.contentType,
+          bufferLength: screenshot.buffer.length,
+          detectedFormat: screenshot.detectedFormat,
+          screenshotUrl: screenshot.src,
+          errorMessage: error instanceof Error ? error.message : "unknown",
+        });
+        drawInlineFallback(doc, fonts, "Screenshot konnte im PDF nicht eingebettet werden.", imageX, imageY, imageWidth, imageHeight);
+      }
+    } else {
+      drawInlineFallback(
+        doc,
+        fonts,
+        textValue(page.screenshotUnavailableReason, "Fuer diese Seite liegt keine visuelle Vorschau vor."),
+        imageX,
+        imageY,
+        imageWidth,
+        imageHeight,
+      );
+    }
+
+    const textX = imageX + imageWidth + gap;
+    font(doc, fonts, "bold", 11.4, COLORS.ink);
+    doc.text(normalizeGermanText(title), textX, y + padding, { width: contentWidth, lineGap: 2 });
+    drawWrappedText(doc, fonts, body, textX, y + padding + titleHeight + 8, {
+      width: contentWidth,
+      size: 9.6,
+      lineGap: 2.8,
+      color: COLORS.ink2,
+    });
+    doc.y = y + height + PAGE.gap;
+  }
+}
+
+async function drawWebsiteSystemAnalysis(
   doc: PDFKit.PDFDocument,
   fonts: Record<FontKey, string>,
   report: Partial<PremiumReport>,
@@ -800,6 +893,8 @@ function drawWebsiteSystemAnalysis(
       ],
     });
   });
+
+  await drawPremiumPageScreenshotCards(doc, fonts, websiteAnalysis.pages);
 
   drawSectionTitle(doc, fonts, REPORT_LABELS.sevenDayPlan, "Website-weiter Plan");
   websiteAnalysis.sevenDayPlan.forEach((step, index) => {
@@ -997,7 +1092,7 @@ async function renderPremiumReportPdfWithFooterStats({
   doc.addPage();
   drawOverview(doc, fonts, analysis);
 
-  drawWebsiteSystemAnalysis(doc, fonts, report);
+  await drawWebsiteSystemAnalysis(doc, fonts, report);
 
   drawVisualAnalysis(doc, fonts, analysis, visualAsset, visualAuditNotes);
 

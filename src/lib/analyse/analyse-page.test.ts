@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const fetchHtmlMock = vi.hoisted(() => vi.fn());
+const fetchRenderedHtmlMock = vi.hoisted(() => vi.fn());
 const fetchRobotsTxtMock = vi.hoisted(() => vi.fn());
 const generateSuggestionsMock = vi.hoisted(() => vi.fn());
 
@@ -12,7 +13,7 @@ vi.mock("@/lib/analyse/fetch-html", () => ({
 
 vi.mock("@/lib/analyse/fetch-rendered-html", () => ({
   FetchRenderedHtmlError: class FetchRenderedHtmlError extends Error {},
-  fetchRenderedHtml: vi.fn(),
+  fetchRenderedHtml: fetchRenderedHtmlMock,
 }));
 
 vi.mock("@/lib/analyse/fetch-robots", () => ({
@@ -116,6 +117,15 @@ describe("analysePage", () => {
     vi.stubEnv("SHOPHEBEL_ANALYSIS_MODE", "static");
     vi.stubEnv("SHOPHEBEL_RENDERED_ANALYSIS", "static");
     fetchRobotsTxtMock.mockResolvedValue(undefined);
+    fetchRenderedHtmlMock.mockResolvedValue({
+      requestedUrl: "https://example.com/",
+      finalUrl: "https://example.com/shop",
+      html,
+      loadTimeMs: 260,
+      screenshots: {
+        viewport: "https://cdn.example.com/rendered-viewport.png",
+      },
+    });
     generateSuggestionsMock.mockResolvedValue([
       {
         id: "suggestion-trust",
@@ -148,5 +158,21 @@ describe("analysePage", () => {
         sourceType: expect.any(String),
       }),
     );
+  });
+
+  it("kann fuer Premium-Unterseiten gerenderte Analyse erzwingen, ohne globale ENV-Schalter zu aendern", async () => {
+    fetchHtmlMock.mockResolvedValue({
+      requestedUrl: "https://example.com/",
+      finalUrl: "https://example.com/shop",
+      html,
+      loadTimeMs: 240,
+    });
+
+    const result = await analysePage("https://example.com", { preferRendered: true });
+
+    expect(fetchRenderedHtmlMock).toHaveBeenCalledWith("https://example.com");
+    expect(result.analysisMode).toBe("rendered");
+    expect(result.screenshots?.viewport).toBe("https://cdn.example.com/rendered-viewport.png");
+    expect(result.technicalNotes).toContain("Premium-Mehrseitenanalyse nutzt eine echte Browseransicht fuer Screenshots.");
   });
 });
