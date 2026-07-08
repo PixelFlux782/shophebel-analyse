@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import { PremiumReportSection } from "@/components/results/premium-report-section";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 
-function createReport(): PremiumReport {
+function createReport(overrides: Partial<PremiumReport> = {}): PremiumReport {
   return {
     isPaid: true,
     premiumSummary: {
@@ -42,6 +42,7 @@ function createReport(): PremiumReport {
       },
     ],
     conversionHypothesis: "Wenn der CTA klarer wird, steigen Anfragen.",
+    ...overrides,
   };
 }
 
@@ -86,5 +87,65 @@ describe("PremiumReportSection", () => {
 
     expect(markup).toContain("Eingebettete KI-Einordnung");
     expect(markup).not.toContain("Umsetzung besprechen");
+  });
+
+  it("rendert die Premium-Mehrseitenanalyse als Website-System statt als Stapel", () => {
+    const markup = renderToStaticMarkup(
+      React.createElement(PremiumReportSection, {
+        report: createReport({
+          websiteAnalysis: {
+            pages: [
+              {
+                url: "https://shop.test/",
+                label: "Startseite",
+                role: "home",
+                reason: "Startpunkt",
+                analysisStatus: "analyzed",
+                score: 70,
+                strengths: ["SEO solide"],
+                problems: ["CTA unklar"],
+                recommendation: "CTA klarer formulieren.",
+                shortDiagnosis: "Startseite mit CTA-Hebel.",
+              },
+              {
+                url: "https://shop.test/kontakt",
+                label: "Kontakt",
+                role: "contact",
+                reason: "Kontakt-Signal",
+                analysisStatus: "analyzed",
+                score: 82,
+                strengths: ["Kontakt sichtbar"],
+                problems: ["Trust fehlt"],
+                recommendation: "Trust am Formular zeigen.",
+                shortDiagnosis: "Kontaktseite mit Trust-Hebel.",
+              },
+            ],
+            overallWebsiteScore: 76,
+            crossPageDiagnosis: "Die Website wurde als System bewertet.",
+            repeatedProblems: ["CTA unklar"],
+            strongestPage: { label: "Kontakt", url: "https://shop.test/kontakt", score: 82 },
+            weakestPage: { label: "Startseite", url: "https://shop.test/", score: 70 },
+            conversionPathAssessment: "Angebot und Kontakt logisch verbinden.",
+            trustConsistencyAssessment: "Trust konsistent machen.",
+            navigationAssessment: "Navigation auf CTA ausrichten.",
+            topPrioritiesWebsiteWide: ["CTA vereinheitlichen"],
+            sevenDayPlan: [
+              { days: "Tag 1-2", focus: "Klarheit", actions: ["CTA pruefen."] },
+              { days: "Tag 3-5", focus: "Trust", actions: ["Trust platzieren."] },
+              { days: "Tag 6-7", focus: "Kontrolle", actions: ["Mobile pruefen."] },
+            ],
+            missingPageTypes: ["offer"],
+          },
+        }),
+      }),
+    );
+
+    expect(markup).toContain("Website-Gesamturteil");
+    expect(markup).toContain("Seitenübersicht");
+    expect(markup).toContain("Website-weite Muster");
+    expect(markup).toContain("Einzelanalysen");
+    expect(markup).toContain("Priorisierter 7-Tage-Plan");
+    expect(markup).toContain("76/100");
+    expect(markup).toContain("Kontakt");
   });
 });

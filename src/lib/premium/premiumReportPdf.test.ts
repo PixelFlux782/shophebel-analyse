@@ -118,6 +118,16 @@ function createAiReport(): PremiumAiReport {
   return {
     executiveSummary: "Management-Fazit: Der Shop braucht zuerst mehr Klarheit im Startbereich.",
     mainDiagnosis: "Das eigentliche Problem ist nicht ein einzelner Button, sondern die unklare Reihenfolge aus Nutzen, Vertrauen und naechstem Schritt.",
+    websiteSystem: {
+      overallWebsiteScore: 64,
+      crossPageDiagnosis: "Die Website braucht klarere Verbindung aus Angebot, Vertrauen und naechstem Schritt.",
+      repeatedProblems: ["CTA ist unklar"],
+      conversionPathAssessment: "Der Anfrageweg braucht klarere Fuehrung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an die Entscheidung.",
+      navigationAssessment: "Navigation und Button sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen"],
+      missingPageTypes: [],
+    },
     topLevers: [
       {
         title: "Button klarer formulieren",

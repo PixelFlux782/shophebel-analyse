@@ -14,6 +14,7 @@ import {
   polishPremiumText,
   sentenceFragment,
 } from "@/lib/premium/premiumCopy";
+import type { PremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysis";
 
 export type PremiumBlocker = {
   title: string;
@@ -28,6 +29,7 @@ export type PremiumBlocker = {
 
 export type PremiumReport = {
   isPaid: boolean;
+  websiteAnalysis?: PremiumWebsiteAnalysis;
   premiumSummary: {
     headline: string;
     mainReason: string;
@@ -519,6 +521,7 @@ function normalizePremiumReport(report: PremiumReport): PremiumReport {
 export function buildPremiumReport(input: {
   analysis: AnalysisResult;
   paymentStatus?: string | null;
+  websiteAnalysis?: PremiumWebsiteAnalysis;
 }): PremiumReport {
   const isPaid = input.paymentStatus === "paid";
   const topRevenueBlockers = buildTopRevenueBlockers(input.analysis);
@@ -526,6 +529,7 @@ export function buildPremiumReport(input: {
 
   return normalizePremiumReport({
     isPaid,
+    ...(input.websiteAnalysis ? { websiteAnalysis: input.websiteAnalysis } : {}),
     premiumSummary,
     topRevenueBlockers,
     opportunityRoadmap: buildOpportunityRoadmap(input.analysis.opportunities),

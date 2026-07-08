@@ -15,6 +15,16 @@ type PromptPayload = {
     title?: string;
     description?: string;
   }>;
+  websiteAnalysis?: {
+    overallWebsiteScore?: number;
+    crossPageDiagnosis?: string;
+    repeatedProblems?: string[];
+    conversionPathAssessment?: string;
+    trustConsistencyAssessment?: string;
+    navigationAssessment?: string;
+    topPrioritiesWebsiteWide?: string[];
+    missingPageTypes?: string[];
+  };
 };
 
 type PromptRevenueBlocker = NonNullable<PromptPayload["revenueBlockers"]>[number];
@@ -83,12 +93,43 @@ export const mockPremiumReportProvider: PremiumReportProvider = {
     const thirdBlocker = payload.revenueBlockers?.[2];
     const firstMeasure = payload.measures?.[0];
     const overallScore = payload.analysis?.overallScore ?? 0;
+    const websiteScore = payload.websiteAnalysis?.overallWebsiteScore ?? overallScore;
     const url = payload.analysis?.url ?? "die analysierte Seite";
 
     const content = JSON.stringify({
       executiveSummary: `Die Analyse zeigt für ${url} einen Score von ${overallScore}/100: Der Shop hat eine brauchbare Grundlage, aber der erste Eindruck arbeitet noch nicht hart genug für die Entscheidung. Positiv ist, dass Angebot, Handlung und Vertrauen bereits erkennbare Anknüpfungspunkte haben. Gebremst wird der Shop vor allem, weil Besucher Nutzen, Sicherheit und nächsten Schritt noch zu stark selbst zusammensetzen müssen. Die nächsten sieben Tage sollten deshalb nicht in einen Komplettumbau gehen, sondern in eine klare Reihenfolge: erst Nutzen verstehen, dann Vertrauen spüren, dann eindeutig handeln.`,
       mainDiagnosis:
         "Das eigentliche Problem ist nicht, dass dem Shop einzelne Optimierungen fehlen, sondern dass die Entscheidungshilfe noch zu verteilt wirkt. Besucher bekommen vermutlich mehrere richtige Signale, aber nicht in der Reihenfolge, in der sie innerlich entscheiden: Was ist das Angebot, warum ist es glaubwürdig, was soll ich jetzt tun? Der erste Beratungshebel ist deshalb eine klarere Dramaturgie im sichtbaren und kaufnahen Bereich.",
+      websiteSystem: {
+        overallWebsiteScore: websiteScore,
+        crossPageDiagnosis: fallbackText(
+          payload.websiteAnalysis?.crossPageDiagnosis,
+          "Die Website sollte als Zusammenspiel aus Startseite, Angebot, Vertrauen und nächstem Schritt gelesen werden.",
+        ),
+        repeatedProblems: payload.websiteAnalysis?.repeatedProblems?.length
+          ? payload.websiteAnalysis.repeatedProblems
+          : ["Klarheit, Vertrauen und nächster Schritt sind noch nicht konsequent verbunden."],
+        conversionPathAssessment: fallbackText(
+          payload.websiteAnalysis?.conversionPathAssessment,
+          "Der Weg von Angebot zu Anfrage oder Kauf braucht eine klarere Führung.",
+        ),
+        trustConsistencyAssessment: fallbackText(
+          payload.websiteAnalysis?.trustConsistencyAssessment,
+          "Vertrauen sollte nicht nur irgendwo vorhanden sein, sondern nahe an der Entscheidung auftauchen.",
+        ),
+        navigationAssessment: fallbackText(
+          payload.websiteAnalysis?.navigationAssessment,
+          "Navigation und Hauptbutton sollten dieselbe wichtigste Handlung unterstützen.",
+        ),
+        topPrioritiesWebsiteWide: payload.websiteAnalysis?.topPrioritiesWebsiteWide?.length
+          ? payload.websiteAnalysis.topPrioritiesWebsiteWide
+          : [
+              "Startbereich, Angebot und nächsten Schritt sprachlich aufeinander abstimmen.",
+              "Vertrauensbelege näher an die Entscheidung bringen.",
+              "Den Kontakt- oder Kaufweg eindeutiger führen.",
+            ],
+        missingPageTypes: payload.websiteAnalysis?.missingPageTypes ?? [],
+      },
       topLevers: [
         buildLever(
           firstBlocker,

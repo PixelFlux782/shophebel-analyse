@@ -115,6 +115,16 @@ function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiRepo
   return {
     executiveSummary: "Gespeicherte KI-Kurzfassung",
     mainDiagnosis: "Gespeicherte KI-Diagnose",
+    websiteSystem: {
+      overallWebsiteScore: 64,
+      crossPageDiagnosis: "Gespeicherte Website-Systemdiagnose",
+      repeatedProblems: ["CTA ist unklar"],
+      conversionPathAssessment: "Der Anfrageweg braucht klarere Fuehrung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an die Entscheidung.",
+      navigationAssessment: "Navigation und Button sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen"],
+      missingPageTypes: [],
+    },
     topLevers: [
       {
         title: "CTA schaerfen",
@@ -242,7 +252,7 @@ describe("GET /api/premium-report/[analysisId]/pdf", () => {
       analysisId: "analysis-123",
       report: aiReport,
       status: "generated",
-      reportVersion: "premium-ai-report-v3",
+      reportVersion: "premium-ai-report-v4",
       inputHash: "hash-123",
     });
     vi.doMock("@/lib/premium/premiumReportPdf", () => ({

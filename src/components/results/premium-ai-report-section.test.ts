@@ -20,6 +20,16 @@ function createReport(): PremiumAiReport {
   return {
     executiveSummary: "Die Seite hat Potenzial, verliert aber im ersten Eindruck zu viel Klarheit.",
     mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Reihenfolge aus Nutzen, Vertrauen und nächstem Schritt.",
+    websiteSystem: {
+      overallWebsiteScore: 68,
+      crossPageDiagnosis: "Die Website wirkt als System brauchbar, aber Angebot, Vertrauen und Anfrageweg greifen noch nicht sauber ineinander.",
+      repeatedProblems: ["Button und Vertrauensbelege sind nicht konsequent verbunden."],
+      conversionPathAssessment: "Der Weg von Angebot zu Anfrage braucht eine klarere Fuehrung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an die Entscheidung.",
+      navigationAssessment: "Navigation und Hauptbutton sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen", "Trust sichtbarer machen"],
+      missingPageTypes: ["product"],
+    },
     topLevers: [
       {
         title: "Button ist zu unkonkret",
@@ -125,6 +135,9 @@ describe("PremiumAiReportSection", () => {
 
     expect(markup).toContain("Management-Fazit");
     expect(markup).toContain("KI-Einordnung");
+    expect(markup).toContain("Website-System");
+    expect(markup).toContain("Gesamtberatung");
+    expect(markup).toContain("68/100");
     expect(markup).toContain("Die wichtigsten 3 Hebel");
     expect(markup).toContain("Warum wichtig");
     expect(markup).toContain("Erwarteter Effekt");

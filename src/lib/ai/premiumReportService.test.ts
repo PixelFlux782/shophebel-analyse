@@ -69,6 +69,27 @@ function createInput(overrides: Partial<PremiumReportInput> = {}): PremiumReport
       },
     ],
     opportunities: [],
+    websiteAnalysis: {
+      overallWebsiteScore: 66,
+      crossPageDiagnosis: "Die Website zeigt ueber mehrere Seiten dieselbe CTA-Reibung.",
+      repeatedProblems: ["CTA ist unklar"],
+      conversionPathAssessment: "Angebot und Kontaktweg brauchen klarere Verbindung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an Angebots- und Anfragebereiche.",
+      navigationAssessment: "Navigation und Hauptbutton sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen", "Trust sichtbarer machen"],
+      missingPageTypes: ["product"],
+      pages: [
+        {
+          label: "Startseite",
+          role: "home",
+          score: 64,
+          analysisStatus: "analyzed",
+          mainProblem: "CTA ist unklar",
+          recommendation: "Button klarer formulieren.",
+          shortDiagnosis: "Startseite mit CTA-Hebel.",
+        },
+      ],
+    },
     detectedPageSignals: {
       heroText: ["Bessere Shops fuer mehr Anfragen"],
       ctaTexts: ["Angebot anfragen"],
@@ -89,6 +110,16 @@ function createRawReport(): PremiumAiReport {
   return {
     executiveSummary: "Kurzfassung fuer den Shop mit Staerke und Bremse.",
     mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Entscheidungsfuehrung.",
+    websiteSystem: {
+      overallWebsiteScore: 66,
+      crossPageDiagnosis: "Die Website zeigt ueber mehrere Seiten dieselbe CTA-Reibung.",
+      repeatedProblems: ["CTA ist unklar"],
+      conversionPathAssessment: "Angebot und Kontaktweg brauchen klarere Verbindung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an Angebots- und Anfragebereiche.",
+      navigationAssessment: "Navigation und Hauptbutton sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen", "Trust sichtbarer machen"],
+      missingPageTypes: ["product"],
+    },
     topLevers: [
       {
         title: "Button im Startbereich",
@@ -158,6 +189,10 @@ describe("premiumReportService", () => {
     expect(report.topLevers[0]).toMatchObject({
       title: "Button im Startbereich ist nicht eindeutig",
       difficulty: "leicht",
+    });
+    expect(report.websiteSystem).toMatchObject({
+      overallWebsiteScore: 66,
+      missingPageTypes: ["product"],
     });
     expect(report.sevenDayPlan.map((step) => step.day)).toEqual(["Tag 1-2", "Tag 3-5", "Tag 6-7"]);
     expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);
@@ -240,6 +275,7 @@ ${JSON.stringify(createRawReport(), null, 2)}
     const report = buildFallbackPremiumAiReport(createInput());
 
     expect(report.topLevers).toHaveLength(3);
+    expect(report.websiteSystem.topPrioritiesWebsiteWide).toContain("Button vereinheitlichen");
     expect(report.sevenDayPlan.map((step) => step.day)).toEqual(["Tag 1-2", "Tag 3-5", "Tag 6-7"]);
     expect(report.mainDiagnosis).toContain("Button im Startbereich");
     expect(validateReportCopyQuality(visibleReportText(report)).isValid).toBe(true);

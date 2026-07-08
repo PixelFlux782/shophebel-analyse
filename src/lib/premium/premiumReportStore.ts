@@ -6,6 +6,7 @@ import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { ConsultantNotes } from "@/lib/premium/consultantNotes";
 import { normalizeConsultantNotes } from "@/lib/premium/consultantNotes";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
+import { createPremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysis";
 
 type SavePremiumReportInput = {
   analysisId: string;
@@ -222,9 +223,18 @@ export async function getOrCreatePremiumReport(
     return existingReport;
   }
 
+  const websiteAnalysis = await createPremiumWebsiteAnalysis(input.analysis.analysis).catch((error) => {
+    console.warn("[premium-report-store] premium website analysis failed; using single-page report", {
+      analysisId: input.analysis.id,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return undefined;
+  });
+
   const generatedReport = buildPremiumReport({
     analysis: input.analysis.analysis,
     paymentStatus: input.analysis.paymentStatus,
+    websiteAnalysis,
   });
   const savedReport = await savePremiumReportForAnalysis({
     analysisId: input.analysis.id,

@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   getAnalysisResult: vi.fn(),
   getPremiumAiReportByAnalysisId: vi.fn(),
   savePremiumAiReportForAnalysis: vi.fn(),
+  getOrCreatePremiumReport: vi.fn(),
 }));
 
 vi.mock("@/lib/analysisStore", () => ({
@@ -25,6 +26,10 @@ vi.mock("@/lib/analysisStore", () => ({
 vi.mock("@/lib/ai/premiumAiReportStore", () => ({
   getPremiumAiReportByAnalysisId: mocks.getPremiumAiReportByAnalysisId,
   savePremiumAiReportForAnalysis: mocks.savePremiumAiReportForAnalysis,
+}));
+
+vi.mock("@/lib/premium/premiumReportStore", () => ({
+  getOrCreatePremiumReport: mocks.getOrCreatePremiumReport,
 }));
 
 function createAnalysisResult(overrides: Partial<AnalysisResult> = {}): AnalysisResult {
@@ -109,6 +114,16 @@ function createAiReport(overrides: Partial<PremiumAiReport> = {}): PremiumAiRepo
   return {
     executiveSummary: "Kurzfassung",
     mainDiagnosis: "Das eigentliche Problem ist nicht der Button allein, sondern die unklare Entscheidungshilfe.",
+    websiteSystem: {
+      overallWebsiteScore: 64,
+      crossPageDiagnosis: "Die Website braucht klarere Verbindung aus Angebot, Vertrauen und naechstem Schritt.",
+      repeatedProblems: ["CTA ist unklar"],
+      conversionPathAssessment: "Der Anfrageweg braucht klarere Fuehrung.",
+      trustConsistencyAssessment: "Vertrauen muss naeher an die Entscheidung.",
+      navigationAssessment: "Navigation und Button sollten denselben Weg fuehren.",
+      topPrioritiesWebsiteWide: ["CTA vereinheitlichen"],
+      missingPageTypes: [],
+    },
     topLevers: [
       {
         title: "CTA im Hero ist nicht eindeutig",
@@ -197,6 +212,7 @@ describe("getOrGeneratePremiumAiReport", () => {
     restoreEnv("OPENROUTER_MODEL", originalEnv.OPENROUTER_MODEL);
     mocks.getAnalysisResult.mockResolvedValue(createStoredAnalysis());
     mocks.getPremiumAiReportByAnalysisId.mockResolvedValue(null);
+    mocks.getOrCreatePremiumReport.mockResolvedValue(null);
     mocks.savePremiumAiReportForAnalysis.mockImplementation(async (input: { analysisId: string; report: PremiumAiReport }) => ({
       id: "ai-report-123",
       analysisId: input.analysisId,

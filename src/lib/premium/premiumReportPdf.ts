@@ -85,6 +85,9 @@ export function getPremiumReportPdfStaticLabels() {
     "KI-Einordnung",
     "Die wichtigsten 3 Hebel",
     "Management-Zusammenfassung",
+    "Website-Systemanalyse",
+    "Seitenübersicht",
+    "Website-weite Muster",
     "Kurzüberblick",
     "Die wichtigsten 3 Umsatzbremsen",
     "Premium-Bericht inkl. KI-Beratung",
@@ -748,6 +751,67 @@ function drawOverview(doc: PDFKit.PDFDocument, fonts: Record<FontKey, string>, a
   doc.y = y + height + PAGE.gap;
 }
 
+function drawWebsiteSystemAnalysis(
+  doc: PDFKit.PDFDocument,
+  fonts: Record<FontKey, string>,
+  report: Partial<PremiumReport>,
+) {
+  const websiteAnalysis = report.websiteAnalysis;
+
+  if (!websiteAnalysis) {
+    return;
+  }
+
+  drawSectionTitle(doc, fonts, "Website-Systemanalyse", "Premium Mehrseitenanalyse");
+  drawTextBox(doc, fonts, {
+    title: "Gesamturteil der Website",
+    tone: "ink",
+    label: `${websiteAnalysis.overallWebsiteScore}/100`,
+    body: [
+      websiteAnalysis.crossPageDiagnosis,
+      websiteAnalysis.fallbackNote ?? "",
+    ].filter(Boolean),
+  });
+
+  drawTextBox(doc, fonts, {
+    title: "Website-weite Muster",
+    tone: "sage",
+    body: [
+      `Conversion-Pfad: ${websiteAnalysis.conversionPathAssessment}`,
+      `Vertrauen: ${websiteAnalysis.trustConsistencyAssessment}`,
+      `Navigation: ${websiteAnalysis.navigationAssessment}`,
+      websiteAnalysis.repeatedProblems.length
+        ? `Wiederkehrende Probleme: ${websiteAnalysis.repeatedProblems.slice(0, 4).join("; ")}`
+        : "Keine wiederkehrenden Probleme über mehrere Seiten erkannt.",
+    ],
+  });
+
+  drawSectionTitle(doc, fonts, "Seitenübersicht", "Analysierte Seiten");
+  websiteAnalysis.pages.slice(0, 5).forEach((page, index) => {
+    drawTextBox(doc, fonts, {
+      title: `${index + 1}. ${textValue(page.label, "Seite")} (${textValue(page.role, "Rolle")})`,
+      tone: index === 0 ? "mist" : page.analysisStatus === "failed" ? "gold" : "mist",
+      label: typeof page.score === "number" ? `${page.score}/100` : page.analysisStatus === "failed" ? "Nicht analysierbar" : "offen",
+      minHeight: 72,
+      body: [
+        textValue(page.shortDiagnosis, "Keine Kurzdiagnose gespeichert."),
+        `Hauptproblem: ${textValue(page.problems[0], "Kein Hauptproblem gespeichert.")}`,
+        `Wichtigster Hebel: ${textValue(page.recommendation, "Wichtigste Maßnahme priorisieren.")}`,
+      ],
+    });
+  });
+
+  drawSectionTitle(doc, fonts, REPORT_LABELS.sevenDayPlan, "Website-weiter Plan");
+  websiteAnalysis.sevenDayPlan.forEach((step, index) => {
+    drawTextBox(doc, fonts, {
+      title: `${textValue(step.days, "Zeitraum")}: ${textValue(step.focus, "Fokus")}`,
+      tone: index === 0 ? "sage" : "mist",
+      label: timelineLabel(index),
+      body: stringList(step.actions),
+    });
+  });
+}
+
 function drawVisualAnalysis(
   doc: PDFKit.PDFDocument,
   fonts: Record<FontKey, string>,
@@ -932,6 +996,8 @@ async function renderPremiumReportPdfWithFooterStats({
 
   doc.addPage();
   drawOverview(doc, fonts, analysis);
+
+  drawWebsiteSystemAnalysis(doc, fonts, report);
 
   drawVisualAnalysis(doc, fonts, analysis, visualAsset, visualAuditNotes);
 

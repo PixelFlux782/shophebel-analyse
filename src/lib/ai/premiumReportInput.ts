@@ -8,6 +8,7 @@ import {
   RevenueBlocker,
   ScoreBlock,
 } from "@/types/analysis";
+import type { PremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysis";
 
 export type PremiumReportSeverity = "low" | "medium" | "high" | "critical";
 
@@ -70,6 +71,27 @@ export type PremiumReportInput = {
     trustSignals?: string[];
     technicalNotes?: string[];
   };
+  websiteAnalysis?: {
+    overallWebsiteScore: number;
+    crossPageDiagnosis: string;
+    repeatedProblems: string[];
+    strongestPage?: { label: string; score: number };
+    weakestPage?: { label: string; score: number };
+    conversionPathAssessment: string;
+    trustConsistencyAssessment: string;
+    navigationAssessment: string;
+    topPrioritiesWebsiteWide: string[];
+    missingPageTypes: string[];
+    pages: Array<{
+      label: string;
+      role: string;
+      score?: number;
+      analysisStatus: "analyzed" | "failed";
+      mainProblem?: string;
+      recommendation: string;
+      shortDiagnosis: string;
+    }>;
+  };
   constraints: {
     language: "de";
     audience: "shop-owner-non-technical";
@@ -86,6 +108,7 @@ const MAX_REVENUE_BLOCKERS = 6;
 const MAX_MEASURES = 8;
 const MAX_OPPORTUNITIES = 6;
 const MAX_SIGNAL_ITEMS = 8;
+const MAX_WEBSITE_PAGES = 5;
 
 export function limitText(value: unknown, maxLength = MAX_TEXT_LENGTH): string | undefined {
   if (typeof value !== "string") {
@@ -363,8 +386,56 @@ function buildDetectedPageSignals(result: AnalysisResult): PremiumReportInput["d
   return Object.keys(signals).length > 0 ? signals : undefined;
 }
 
-export function buildPremiumReportInput(result: AnalysisResult): PremiumReportInput {
+function mapWebsiteAnalysis(websiteAnalysis?: PremiumWebsiteAnalysis): PremiumReportInput["websiteAnalysis"] {
+  if (!websiteAnalysis) {
+    return undefined;
+  }
+
+  return {
+    overallWebsiteScore: cleanNumber(websiteAnalysis.overallWebsiteScore) ?? 0,
+    crossPageDiagnosis: limitText(websiteAnalysis.crossPageDiagnosis) ?? "",
+    repeatedProblems: limitList(websiteAnalysis.repeatedProblems, 5)
+      .map((item) => limitText(item, 180))
+      .filter((item): item is string => Boolean(item)),
+    strongestPage: websiteAnalysis.strongestPage
+      ? {
+          label: limitText(websiteAnalysis.strongestPage.label, 80) ?? "Stärkste Seite",
+          score: cleanNumber(websiteAnalysis.strongestPage.score) ?? 0,
+        }
+      : undefined,
+    weakestPage: websiteAnalysis.weakestPage
+      ? {
+          label: limitText(websiteAnalysis.weakestPage.label, 80) ?? "Schwächste Seite",
+          score: cleanNumber(websiteAnalysis.weakestPage.score) ?? 0,
+        }
+      : undefined,
+    conversionPathAssessment: limitText(websiteAnalysis.conversionPathAssessment) ?? "",
+    trustConsistencyAssessment: limitText(websiteAnalysis.trustConsistencyAssessment) ?? "",
+    navigationAssessment: limitText(websiteAnalysis.navigationAssessment) ?? "",
+    topPrioritiesWebsiteWide: limitList(websiteAnalysis.topPrioritiesWebsiteWide, 5)
+      .map((item) => limitText(item, 180))
+      .filter((item): item is string => Boolean(item)),
+    missingPageTypes: websiteAnalysis.missingPageTypes,
+    pages: limitList(websiteAnalysis.pages, MAX_WEBSITE_PAGES).map((page) =>
+      compactObject({
+        label: limitText(page.label, 90) ?? "Seite",
+        role: page.role,
+        score: cleanNumber(page.score),
+        analysisStatus: page.analysisStatus,
+        mainProblem: limitText(page.problems[0], 180),
+        recommendation: limitText(page.recommendation, 220) ?? "",
+        shortDiagnosis: limitText(page.shortDiagnosis, 220) ?? "",
+      }),
+    ),
+  };
+}
+
+export function buildPremiumReportInput(
+  result: AnalysisResult,
+  options: { websiteAnalysis?: PremiumWebsiteAnalysis } = {},
+): PremiumReportInput {
   const detectedPageSignals = buildDetectedPageSignals(result);
+  const websiteAnalysis = mapWebsiteAnalysis(options.websiteAnalysis);
 
   return {
     url: result.url,
@@ -381,6 +452,7 @@ export function buildPremiumReportInput(result: AnalysisResult): PremiumReportIn
     measures: mapMeasures(result.measures),
     opportunities: mapOpportunities(result.opportunities),
     ...(detectedPageSignals ? { detectedPageSignals } : {}),
+    ...(websiteAnalysis ? { websiteAnalysis } : {}),
     constraints: {
       language: "de",
       audience: "shop-owner-non-technical",

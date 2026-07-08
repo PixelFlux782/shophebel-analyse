@@ -175,6 +175,16 @@ describe("promptBuilder", () => {
       schema: {
         executiveSummary: "string",
         mainDiagnosis: "string",
+        websiteSystem: {
+          overallWebsiteScore: "number aus Input oder 0",
+          crossPageDiagnosis: "string",
+          repeatedProblems: ["string"],
+          conversionPathAssessment: "string",
+          trustConsistencyAssessment: "string",
+          navigationAssessment: "string",
+          topPrioritiesWebsiteWide: ["string"],
+          missingPageTypes: ["string"],
+        },
         topLevers: [
           {
             title: "string",
@@ -216,6 +226,44 @@ describe("promptBuilder", () => {
     expect(serialized).not.toMatch(/payment/i);
     expect(serialized).not.toContain("metadata");
     expect(serialized).not.toContain("contactRequestId");
+  });
+
+  it("nimmt Website-Systemdaten begrenzt in den Prompt auf", () => {
+    const payload = getUserPayload(createInput({
+      websiteAnalysis: {
+        overallWebsiteScore: 72,
+        crossPageDiagnosis: "Die Website braucht konsistentere CTA-Fuehrung.",
+        repeatedProblems: ["CTA ist unklar"],
+        conversionPathAssessment: "Angebot und Anfrageweg sind vorhanden.",
+        trustConsistencyAssessment: "Trust ist vorhanden, aber zu weit weg.",
+        navigationAssessment: "Navigation fuehrt noch nicht konsequent.",
+        topPrioritiesWebsiteWide: ["CTA vereinheitlichen", "Trust naeher platzieren"],
+        missingPageTypes: ["product"],
+        pages: [
+          {
+            label: "Startseite",
+            role: "home",
+            score: 64,
+            analysisStatus: "analyzed",
+            mainProblem: "CTA ist unklar",
+            recommendation: "Button klarer formulieren.",
+            shortDiagnosis: "Startseite mit CTA-Hebel.",
+          },
+        ],
+      },
+    }));
+
+    expect(payload.websiteAnalysis).toMatchObject({
+      overallWebsiteScore: 72,
+      missingPageTypes: ["product"],
+      pages: [
+        expect.objectContaining({
+          label: "Startseite",
+          role: "home",
+          score: 64,
+        }),
+      ],
+    });
   });
 
   it("hat einen stabilen Contract fuer einen Beispielinput", () => {

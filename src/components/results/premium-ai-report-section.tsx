@@ -99,6 +99,53 @@ function ReportView({
       </div>
 
       <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_14px_55px_-48px_rgba(15,23,42,0.45)]">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-cyan-700">Website-System</p>
+            <h3 className="mt-2 text-xl font-bold text-slate-950">Gesamtberatung über alle Seiten</h3>
+          </div>
+          <p className="inline-flex w-fit rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-bold uppercase tracking-[0.12em] text-slate-600">
+            {Math.round(report.websiteSystem.overallWebsiteScore)}/100
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <p className="text-sm leading-7 text-slate-700">
+            <strong className="text-slate-950">Diagnose:</strong> {normalizeGermanReportText(report.websiteSystem.crossPageDiagnosis)}
+          </p>
+          <p className="text-sm leading-7 text-slate-700">
+            <strong className="text-slate-950">Nutzerführung:</strong> {normalizeGermanReportText(report.websiteSystem.navigationAssessment)}
+          </p>
+          <p className="text-sm leading-7 text-slate-700">
+            <strong className="text-slate-950">Anfrage-/Kaufweg:</strong> {normalizeGermanReportText(report.websiteSystem.conversionPathAssessment)}
+          </p>
+          <p className="text-sm leading-7 text-slate-700">
+            <strong className="text-slate-950">Vertrauen:</strong> {normalizeGermanReportText(report.websiteSystem.trustConsistencyAssessment)}
+          </p>
+        </div>
+        <div className="mt-4 grid gap-3 md:grid-cols-2">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Wiederkehrende Probleme</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-7 text-slate-700">
+              {report.websiteSystem.repeatedProblems.length
+                ? report.websiteSystem.repeatedProblems.map((item) => <li key={item}>{normalizeGermanReportText(item)}</li>)
+                : <li>Keine wiederkehrenden Probleme über mehrere Seiten erkannt.</li>}
+            </ul>
+          </div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Website-weite Prioritäten</p>
+            <ul className="mt-2 list-disc space-y-1 pl-5 text-sm leading-7 text-slate-700">
+              {report.websiteSystem.topPrioritiesWebsiteWide.map((item) => <li key={item}>{normalizeGermanReportText(item)}</li>)}
+            </ul>
+          </div>
+        </div>
+        {report.websiteSystem.missingPageTypes.length ? (
+          <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-7 text-amber-950">
+            Fehlende Seitentypen im Input: {report.websiteSystem.missingPageTypes.map((item) => normalizeGermanReportText(item)).join(", ")}.
+          </p>
+        ) : null}
+      </article>
+
+      <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-[0_14px_55px_-48px_rgba(15,23,42,0.45)]">
         <h3 className="text-xl font-bold text-slate-950">Die wichtigsten 3 Hebel</h3>
         <div className="mt-4 grid gap-3">
           {report.topLevers.map((lever, index) => (

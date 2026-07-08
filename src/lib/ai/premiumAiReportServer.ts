@@ -13,8 +13,9 @@ import {
   PremiumAiReportValidationError,
 } from "@/lib/ai/premiumReportService";
 import { canViewPremiumReport } from "@/lib/premium/premiumAccess";
+import { getOrCreatePremiumReport } from "@/lib/premium/premiumReportStore";
 
-export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v3";
+export const PREMIUM_AI_REPORT_VERSION = "premium-ai-report-v4";
 const MOCK_PREMIUM_AI_MODEL = "shophebel-mock-premium-ai-report";
 
 export type PremiumAiReportSource = "cache" | "generated" | "fallback";
@@ -197,7 +198,16 @@ export async function getOrGeneratePremiumAiReport(input: {
     );
   }
 
-  const reportInput = buildPremiumReportInput(analysis.analysis);
+  const premiumReport = await getOrCreatePremiumReport({ analysis }).catch((error) => {
+    console.warn("[premium-ai-report] premium website report could not be loaded for AI input", {
+      analysisId,
+      reason: error instanceof Error ? error.message : "unknown",
+    });
+    return null;
+  });
+  const reportInput = buildPremiumReportInput(analysis.analysis, {
+    websiteAnalysis: premiumReport?.websiteAnalysis,
+  });
   const inputHash = buildInputHash(reportInput);
 
   let existingReport: Awaited<ReturnType<typeof getPremiumAiReportByAnalysisId>>;

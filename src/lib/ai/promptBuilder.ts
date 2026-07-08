@@ -35,6 +35,7 @@ type PromptPayload = {
   measures: PremiumReportInput["measures"];
   opportunities: PremiumReportInput["opportunities"];
   detectedPageSignals?: PremiumReportInput["detectedPageSignals"];
+  websiteAnalysis?: PremiumReportInput["websiteAnalysis"];
   technicalNotes: string[];
   constraints: PremiumReportInput["constraints"] & {
     noFreeWebsiteReview: true;
@@ -55,6 +56,7 @@ const MAX_REVENUE_BLOCKERS = 5;
 const MAX_MEASURES = 7;
 const MAX_OPPORTUNITIES = 5;
 const MAX_SIGNAL_ITEMS = 6;
+const MAX_WEBSITE_PAGES = 5;
 const FORBIDDEN_PROMPT_TERMS = [
   /html/gi,
   /screenshotUrl/gi,
@@ -71,6 +73,9 @@ const SYSTEM_PROMPT = [
   "Ton: ruhig, beratend, klar, hochwertig, konkret, wie ein erfahrener Shop-Berater nach einer echten Durchsicht.",
   "Die bestehende Shophebel-Analyse ist die einzige Faktenbasis.",
   "Erklaere dem Shopbetreiber, welche 3 Dinge den Shop aktuell am staerksten bremsen und was er in den naechsten 7 Tagen konkret tun sollte.",
+  "Wenn websiteAnalysis im Input enthalten ist, bewerte die Website als Gesamtsystem statt als Stapel einzelner Seiten.",
+  "Pruefe dann: Angebot schnell verstaendlich, Vertrauen ueber Seiten hinweg, Navigation/CTA, Kontakt- oder Kaufweg und fehlende Seitentypen.",
+  "Wenn eine Seitentype fehlt, benenne sie als Luecke. Erfinde keine Unterseite.",
   "Bewerte keine Webseite frei und fuehre keine eigene Recherche durch.",
   "Erfinde keine Fakten, Kennzahlen, Beobachtungen, Ursachen oder Belege.",
   "Behaupte nichts ueber Dinge, die nicht im Input stehen.",
@@ -238,10 +243,66 @@ function mapSignals(signals: PremiumReportInput["detectedPageSignals"]): Premium
   return Object.keys(mapped).length > 0 ? mapped : undefined;
 }
 
+function mapWebsiteAnalysis(websiteAnalysis: PremiumReportInput["websiteAnalysis"]): PremiumReportInput["websiteAnalysis"] | undefined {
+  if (!websiteAnalysis) {
+    return undefined;
+  }
+
+  return compactObject({
+    overallWebsiteScore: limitNumber(websiteAnalysis.overallWebsiteScore),
+    crossPageDiagnosis: limitText(websiteAnalysis.crossPageDiagnosis) ?? "",
+    repeatedProblems: limitList(websiteAnalysis.repeatedProblems, 5)
+      .map((item) => limitText(item, 180))
+      .filter((item): item is string => Boolean(item)),
+    strongestPage: websiteAnalysis.strongestPage
+      ? compactObject({
+          label: limitText(websiteAnalysis.strongestPage.label, 80) ?? "Stärkste Seite",
+          score: limitNumber(websiteAnalysis.strongestPage.score),
+        })
+      : undefined,
+    weakestPage: websiteAnalysis.weakestPage
+      ? compactObject({
+          label: limitText(websiteAnalysis.weakestPage.label, 80) ?? "Schwächste Seite",
+          score: limitNumber(websiteAnalysis.weakestPage.score),
+        })
+      : undefined,
+    conversionPathAssessment: limitText(websiteAnalysis.conversionPathAssessment) ?? "",
+    trustConsistencyAssessment: limitText(websiteAnalysis.trustConsistencyAssessment) ?? "",
+    navigationAssessment: limitText(websiteAnalysis.navigationAssessment) ?? "",
+    topPrioritiesWebsiteWide: limitList(websiteAnalysis.topPrioritiesWebsiteWide, 5)
+      .map((item) => limitText(item, 180))
+      .filter((item): item is string => Boolean(item)),
+    missingPageTypes: limitList(websiteAnalysis.missingPageTypes, 5)
+      .map((item) => limitText(item, 40))
+      .filter((item): item is string => Boolean(item)),
+    pages: limitList(websiteAnalysis.pages, MAX_WEBSITE_PAGES).map((page) =>
+      compactObject({
+        label: limitText(page.label, 90) ?? "Seite",
+        role: limitText(page.role, 40) ?? "unknown",
+        score: typeof page.score === "number" ? limitNumber(page.score) : undefined,
+        analysisStatus: page.analysisStatus,
+        mainProblem: limitText(page.mainProblem, 180),
+        recommendation: limitText(page.recommendation, 220) ?? "",
+        shortDiagnosis: limitText(page.shortDiagnosis, 220) ?? "",
+      }),
+    ),
+  });
+}
+
 function buildRequiredOutputSchema() {
   return {
     executiveSummary: "string",
     mainDiagnosis: "string",
+    websiteSystem: {
+      overallWebsiteScore: "number aus Input oder 0",
+      crossPageDiagnosis: "string",
+      repeatedProblems: ["string"],
+      conversionPathAssessment: "string",
+      trustConsistencyAssessment: "string",
+      navigationAssessment: "string",
+      topPrioritiesWebsiteWide: ["string"],
+      missingPageTypes: ["string"],
+    },
     topLevers: [
       {
         title: "string",
@@ -266,6 +327,7 @@ function buildRequiredOutputSchema() {
 
 function buildPayload(input: PremiumReportInput): PromptPayload {
   const detectedPageSignals = mapSignals(input.detectedPageSignals);
+  const websiteAnalysis = mapWebsiteAnalysis(input.websiteAnalysis);
 
   return compactObject({
     analysis: compactObject({
@@ -284,6 +346,7 @@ function buildPayload(input: PremiumReportInput): PromptPayload {
     measures: mapMeasures(input.measures),
     opportunities: mapOpportunities(input.opportunities),
     detectedPageSignals,
+    websiteAnalysis,
     technicalNotes: detectedPageSignals?.technicalNotes ?? [],
     constraints: {
       ...input.constraints,
@@ -306,6 +369,7 @@ function buildUserPrompt(input: PremiumReportInput): string {
     "Pflichtstruktur:",
     "- executiveSummary: Management-Fazit in 3-5 kurzen Saetzen. Konkret sagen, was der Shop schon gut macht und was ihn bremst.",
     "- mainDiagnosis: zentrale Diagnose im Muster: Das eigentliche Problem ist nicht X, sondern Y. Es muss nach echter Einordnung klingen.",
+    "- websiteSystem: Gesamtberatung ueber alle analysierten Seiten. Nutze overallWebsiteScore nur aus dem Input. Benenne wiederkehrende Probleme, Conversion-Pfad, Vertrauen, Navigation, Website-weite Prioritaeten und fehlende Seitentypen.",
     "- topLevers: exakt 3 Hebel. Jeder Hebel braucht Titel, warum das wichtig ist, was im Shop vermutlich passiert, konkrete Verbesserung, erster kleiner Schritt, Schwierigkeit und qualitativen Effekt ohne Zahlenversprechen.",
     "- sevenDayPlan: exakt diese Phasen: Tag 1-2, Tag 3-5, Tag 6-7. Tag 1-2 klaert Texte und wichtigste Handlung. Tag 3-5 setzt Startseite, Produktseite, Vertrauen und Navigation um. Tag 6-7 kontrolliert, vergleicht und leitet die naechste Optimierung ab.",
     "- ownerConclusion: ehrliches Fazit fuer den Inhaber: ruhig, klar, motivierend, nicht werblich.",
@@ -313,6 +377,7 @@ function buildUserPrompt(input: PremiumReportInput): string {
     "- Schreibe nie nur \"Optimieren Sie Ihre Website\".",
     "- Schreibe nie nur \"Benutzererfahrung verbessern\".",
     "- Keine erfundenen Zahlen, keine Garantien, keine Umsatzversprechen.",
+    "- Bei Mehrseiten-Daten keine fuenf Einzelreports schreiben, sondern die groessten Muster ueber die Website hinweg beraten.",
     "- Keine Wiederholungen und keine langen Textwaende.",
     "Nutze nur die folgenden strukturierten Analyse-Fakten und gib ausschliesslich JSON zurueck.",
     JSON.stringify(payload, null, 2),

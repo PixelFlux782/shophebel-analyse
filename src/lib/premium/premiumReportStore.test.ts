@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { StoredAnalysisResult } from "@/lib/analysisStore";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import { buildPremiumReport } from "@/lib/premium/buildPremiumReport";
+import { createPremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysis";
 import {
   getOrCreatePremiumReport,
   getPremiumReportByAnalysisId,
@@ -14,8 +15,12 @@ import { AnalysisResult } from "@/types/analysis";
 vi.mock("@/lib/premium/buildPremiumReport", () => ({
   buildPremiumReport: vi.fn(),
 }));
+vi.mock("@/lib/premium/premiumWebsiteAnalysis", () => ({
+  createPremiumWebsiteAnalysis: vi.fn(),
+}));
 
 const buildPremiumReportMock = vi.mocked(buildPremiumReport);
+const createPremiumWebsiteAnalysisMock = vi.mocked(createPremiumWebsiteAnalysis);
 
 function createPremiumReport(overrides: Partial<PremiumReport> = {}): PremiumReport {
   return {
@@ -72,7 +77,10 @@ function createAnalysis(): AnalysisResult {
   };
 }
 
-function createStoredAnalysis(paymentStatus: string | null = "paid"): StoredAnalysisResult {
+function createStoredAnalysis(
+  paymentStatus: string | null = "paid",
+  overrides: Partial<StoredAnalysisResult> = {},
+): StoredAnalysisResult {
   return {
     id: "analysis-123",
     analysis: createAnalysis(),
@@ -80,6 +88,7 @@ function createStoredAnalysis(paymentStatus: string | null = "paid"): StoredAnal
     isDemo: false,
     paymentStatus,
     paidAt: paymentStatus === "paid" ? "2026-05-08T12:30:00.000Z" : null,
+    ...overrides,
   };
 }
 
@@ -88,6 +97,19 @@ describe("premiumReportStore", () => {
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co/");
     vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
     buildPremiumReportMock.mockReset();
+    createPremiumWebsiteAnalysisMock.mockReset();
+    createPremiumWebsiteAnalysisMock.mockResolvedValue({
+      pages: [],
+      overallWebsiteScore: 80,
+      crossPageDiagnosis: "Website-Systemanalyse",
+      repeatedProblems: [],
+      conversionPathAssessment: "Conversion-Pfad",
+      trustConsistencyAssessment: "Trust",
+      navigationAssessment: "Navigation",
+      topPrioritiesWebsiteWide: ["Priorität"],
+      sevenDayPlan: [],
+      missingPageTypes: [],
+    });
   });
 
   afterEach(() => {
@@ -179,6 +201,12 @@ describe("premiumReportStore", () => {
 
     expect(loaded).toEqual(report);
     expect(buildPremiumReportMock).toHaveBeenCalledTimes(1);
+    expect(createPremiumWebsiteAnalysisMock).toHaveBeenCalledTimes(1);
+    expect(buildPremiumReportMock).toHaveBeenCalledWith(expect.objectContaining({
+      websiteAnalysis: expect.objectContaining({
+        overallWebsiteScore: 80,
+      }),
+    }));
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock.mock.calls[1]?.[0]).toBe("https://example.supabase.co/rest/v1/premium_reports");
   });
@@ -194,6 +222,26 @@ describe("premiumReportStore", () => {
     expect(loaded).toBeNull();
     expect(fetchMock).not.toHaveBeenCalled();
     expect(buildPremiumReportMock).not.toHaveBeenCalled();
+    expect(createPremiumWebsiteAnalysisMock).not.toHaveBeenCalled();
+  });
+
+  it("erzeugt fuer bezahlte Full-Analysen keine Premium-Mehrseitenanalyse", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const loaded = await getOrCreatePremiumReport({
+      analysis: createStoredAnalysis("paid", {
+        accessLevel: "full",
+        plan: "full",
+        productType: "full_analysis",
+        isPremium: false,
+      }),
+    });
+
+    expect(loaded).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(buildPremiumReportMock).not.toHaveBeenCalled();
+    expect(createPremiumWebsiteAnalysisMock).not.toHaveBeenCalled();
   });
 
   it("crasht bei Supabase-Fehlern nicht und liefert einen generierten Fallback", async () => {

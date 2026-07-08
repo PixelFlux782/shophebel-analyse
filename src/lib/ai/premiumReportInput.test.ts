@@ -231,4 +231,52 @@ describe("premiumReportInput", () => {
     expect(serialized).not.toContain("isPremium");
     expect(serialized).not.toContain("ctaHref");
   });
+
+  it("uebergibt die Premium-Website-Systemanalyse ohne Screenshots an den KI-Input", () => {
+    const input = buildPremiumReportInput(createResult(), {
+      websiteAnalysis: {
+        overallWebsiteScore: 71,
+        crossPageDiagnosis: "Die Website wirkt als System solide, aber CTA und Trust brechen noch.",
+        repeatedProblems: ["CTA ist unklar"],
+        strongestPage: { label: "Kontakt", url: "https://shop.test/kontakt", score: 82 },
+        weakestPage: { label: "Leistungen", url: "https://shop.test/leistungen", score: 54 },
+        conversionPathAssessment: "Angebot und Kontakt sind vorhanden.",
+        trustConsistencyAssessment: "Trust muss naeher an die Entscheidung.",
+        navigationAssessment: "Navigation sollte CTA und Angebot verbinden.",
+        topPrioritiesWebsiteWide: ["CTA vereinheitlichen", "Trust sichtbar machen"],
+        sevenDayPlan: [],
+        missingPageTypes: ["product"],
+        pages: [
+          {
+            label: "Startseite",
+            role: "home",
+            reason: "Startpunkt",
+            url: "https://shop.test/",
+            analysisStatus: "analyzed",
+            screenshot: "/generated-screenshots/home.png",
+            score: 70,
+            strengths: ["SEO solide"],
+            problems: ["CTA ist unklar"],
+            recommendation: "CTA klarer formulieren.",
+            shortDiagnosis: "Startseite mit CTA-Hebel.",
+          },
+        ],
+      },
+    });
+
+    expect(input.websiteAnalysis).toMatchObject({
+      overallWebsiteScore: 71,
+      missingPageTypes: ["product"],
+      pages: [
+        {
+          label: "Startseite",
+          role: "home",
+          score: 70,
+          mainProblem: "CTA ist unklar",
+        },
+      ],
+    });
+    expect(JSON.stringify(input.websiteAnalysis)).not.toContain("generated-screenshots");
+    expect(JSON.stringify(input.websiteAnalysis)).not.toContain("https://shop.test/kontakt");
+  });
 });

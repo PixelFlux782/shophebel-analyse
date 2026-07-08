@@ -74,6 +74,16 @@ export function normalizePremiumAiReportCopy(report: PremiumAiReport): PremiumAi
   return {
     executiveSummary: normalizeGermanReportText(report.executiveSummary),
     mainDiagnosis: normalizeGermanReportText(report.mainDiagnosis),
+    websiteSystem: {
+      overallWebsiteScore: Math.max(0, Math.min(100, Math.round(report.websiteSystem.overallWebsiteScore))),
+      crossPageDiagnosis: normalizeGermanReportText(report.websiteSystem.crossPageDiagnosis),
+      repeatedProblems: normalizeStringList(report.websiteSystem.repeatedProblems).slice(0, 5),
+      conversionPathAssessment: normalizeGermanReportText(report.websiteSystem.conversionPathAssessment),
+      trustConsistencyAssessment: normalizeGermanReportText(report.websiteSystem.trustConsistencyAssessment),
+      navigationAssessment: normalizeGermanReportText(report.websiteSystem.navigationAssessment),
+      topPrioritiesWebsiteWide: normalizeStringList(report.websiteSystem.topPrioritiesWebsiteWide).slice(0, 5),
+      missingPageTypes: normalizeStringList(report.websiteSystem.missingPageTypes).slice(0, 5),
+    },
     topLevers: report.topLevers.slice(0, 3).map((issue) => ({
       title: normalizeGermanReportText(issue.title),
       whyItMatters: normalizeGermanReportText(issue.whyItMatters),
@@ -193,6 +203,24 @@ export function buildFallbackPremiumAiReport(input: PremiumReportInput): Premium
     executiveSummary:
       "Die Analyse zeigt einen Shop mit nutzbarer Grundlage und klaren Ansatzpunkten. Gut ist: Es gibt bereits verwertbare Signale fuer Angebot, Orientierung und naechste Handlung. Gebremst wird die Seite dort, wo Besucher Nutzen, Vertrauen und Entscheidung noch nicht schnell genug zusammenbringen. Am wichtigsten ist jetzt, den ersten Eindruck, die kaufnahen Belege und den naechsten Schritt in eine klare Reihenfolge zu bringen.",
     mainDiagnosis: `Das eigentliche Problem ist nicht ein einzelnes Detail, sondern die Priorisierung der Entscheidungshilfe. ${mainProblem} Besucher muessen dadurch mehr selbst zusammensetzen, bevor sie handeln. Der wichtigste erste Schritt ist: ${firstStep}`,
+    websiteSystem: {
+      overallWebsiteScore: input.websiteAnalysis?.overallWebsiteScore ?? input.overallScore,
+      crossPageDiagnosis: input.websiteAnalysis?.crossPageDiagnosis
+        ?? "Die Analyse bewertet die eingegebene Seite als wichtigsten Ausgangspunkt. Weitere Seitentypen werden nur beruecksichtigt, wenn sie im Input vorhanden sind.",
+      repeatedProblems: input.websiteAnalysis?.repeatedProblems ?? [mainProblem],
+      conversionPathAssessment: input.websiteAnalysis?.conversionPathAssessment
+        ?? "Der Anfrage- oder Kaufweg sollte von Startbereich zu Angebot und naechster Handlung klarer verbunden werden.",
+      trustConsistencyAssessment: input.websiteAnalysis?.trustConsistencyAssessment
+        ?? "Vertrauenssignale sollten vor kauf- oder anfragenahen Entscheidungen sichtbarer werden.",
+      navigationAssessment: input.websiteAnalysis?.navigationAssessment
+        ?? "Navigation und Hauptbutton sollten die wichtigste Handlung ohne Umwege tragen.",
+      topPrioritiesWebsiteWide: input.websiteAnalysis?.topPrioritiesWebsiteWide ?? [
+        firstStep,
+        "Vertrauen naeher an die Entscheidung bringen.",
+        "Den naechsten Schritt auf der wichtigsten Seite eindeutiger machen.",
+      ],
+      missingPageTypes: input.websiteAnalysis?.missingPageTypes ?? [],
+    },
     topLevers: [fallbackLever(input, 0), fallbackLever(input, 1), fallbackLever(input, 2)],
     sevenDayPlan: [
       {
