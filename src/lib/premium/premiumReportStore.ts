@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-import type { StoredAnalysisResult } from "@/lib/analysisStore";
+import { resolveStoredScreenshotUrl, type StoredAnalysisResult } from "@/lib/analysisStore";
 import { buildPremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { PremiumReport } from "@/lib/premium/buildPremiumReport";
 import type { ConsultantNotes } from "@/lib/premium/consultantNotes";
@@ -89,6 +89,53 @@ function logPremiumReportError(operation: string, error: unknown) {
   console.error(`[premium-report-store] ${operation} failed`, error);
 }
 
+function debugPremiumScreenshots(event: string, details: Record<string, unknown>) {
+  if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+    console.info(`[premium-screenshots] ${event}`, details);
+  }
+}
+
+async function resolvePremiumReportScreenshotUrls(report: PremiumReport): Promise<PremiumReport> {
+  const websiteAnalysis = report.websiteAnalysis;
+  const pages = websiteAnalysis?.pages;
+
+  if (!websiteAnalysis || !Array.isArray(pages) || pages.length === 0) {
+    return report;
+  }
+
+  const resolvedPages = await Promise.all(pages.map(async (page) => {
+    const storedUrl = pageScreenshot(page);
+    const resolvedUrl = await resolveStoredScreenshotUrl(storedUrl);
+
+    debugPremiumScreenshots("premium page loaded", {
+      url: page.url,
+      role: page.role,
+      storedScreenshotUrl: storedUrl,
+      finalScreenshotUrl: resolvedUrl,
+      signed: Boolean(resolvedUrl && resolvedUrl !== storedUrl),
+      screenshotUnavailableReason: page.screenshotUnavailableReason,
+    });
+
+    if (!resolvedUrl) {
+      return page;
+    }
+
+    return {
+      ...page,
+      ...(page.screenshot ? { screenshot: resolvedUrl } : {}),
+      screenshotUrl: resolvedUrl,
+    };
+  }));
+
+  return {
+    ...report,
+    websiteAnalysis: {
+      ...websiteAnalysis,
+      pages: resolvedPages,
+    },
+  };
+}
+
 function toPremiumReportRecord(row: SupabasePremiumReportRow): PremiumReportRecord {
   return {
     id: row.id,
@@ -163,6 +210,15 @@ export async function savePremiumReportForAnalysis(
     updated_at: now,
     version: "v1",
   };
+  input.report.websiteAnalysis?.pages.forEach((page) => {
+    debugPremiumScreenshots("saving premium page", {
+      url: page.url,
+      role: page.role,
+      screenshot: page.screenshot,
+      screenshotUrl: page.screenshotUrl,
+      screenshotUnavailableReason: page.screenshotUnavailableReason,
+    });
+  });
   const requestUrl = `${config.url}/rest/v1/premium_reports`;
 
   try {
@@ -206,6 +262,15 @@ async function updatePremiumReportForAnalysis(input: {
   }
 
   const requestUrl = `${config.url}/rest/v1/premium_reports?analysis_id=eq.${encodeURIComponent(input.analysisId)}`;
+  input.report.websiteAnalysis?.pages.forEach((page) => {
+    debugPremiumScreenshots("updating premium page", {
+      url: page.url,
+      role: page.role,
+      screenshot: page.screenshot,
+      screenshotUrl: page.screenshotUrl,
+      screenshotUnavailableReason: page.screenshotUnavailableReason,
+    });
+  });
 
   try {
     const response = await fetch(requestUrl, {
@@ -291,7 +356,7 @@ export async function getOrCreatePremiumReport(
   const existingReport = existingRecord?.report ?? null;
 
   if (existingReport && !shouldRefreshPremiumReportForScreenshots(existingReport)) {
-    return existingReport;
+    return resolvePremiumReportScreenshotUrls(existingReport);
   }
 
   const websiteAnalysis = await createPremiumWebsiteAnalysis(input.analysis.analysis).catch((error) => {
@@ -318,5 +383,5 @@ export async function getOrCreatePremiumReport(
         report: generatedReport,
       });
 
-  return savedReport ?? generatedReport;
+  return resolvePremiumReportScreenshotUrls(savedReport ?? generatedReport);
 }

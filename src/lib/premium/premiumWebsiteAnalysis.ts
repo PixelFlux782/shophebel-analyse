@@ -109,7 +109,13 @@ function screenshotUnavailableReason(analysis: AnalysisResult) {
   if (analysis.analysisMode === "static") {
     return "Diese Seite wurde ohne gerenderte Vorschau ausgewertet.";
   }
-  return "Fuer diese Seite liegt keine visuelle Vorschau vor.";
+  return undefined;
+}
+
+function debugPremiumScreenshots(event: string, details: Record<string, unknown>) {
+  if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+    console.info(`[premium-screenshots] ${event}`, details);
+  }
 }
 
 function topStrengths(analysis: AnalysisResult) {
@@ -348,6 +354,12 @@ export function buildPremiumWebsiteAnalysis(input: BuildPremiumWebsiteAnalysisIn
 
 export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult): Promise<PremiumWebsiteAnalysis> {
   const discoveredPages = await discoverPremiumPages(startAnalysis.finalUrl ?? startAnalysis.url);
+  discoveredPages.forEach((page) => {
+    debugPremiumScreenshots("discovered URL", {
+      url: page.url,
+      role: page.role,
+    });
+  });
   const [home, ...subpages] = discoveredPages;
   const pageAnalyses: BuildPremiumWebsiteAnalysisInput["pageAnalyses"] = [
     {
@@ -363,7 +375,25 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
 
   for (const page of subpages) {
     try {
+      debugPremiumScreenshots("analysis started", {
+        url: page.url,
+        role: page.role,
+        renderEnabled: true,
+      });
       const analysis = await analysePage(page.url, { preferRendered: true });
+      const screenshot = screenshotForAnalysis(analysis);
+      debugPremiumScreenshots("analysis completed", {
+        url: page.url,
+        finalUrl: analysis.finalUrl ?? analysis.url,
+        role: page.role,
+        analysisMode: analysis.analysisMode,
+        screenshotCaptured: Boolean(screenshot),
+        screenshotUrl: screenshot,
+        localScreenshotPath: screenshot?.startsWith("/generated-screenshots/") ? screenshot : undefined,
+        uploadSuccessful: Boolean(screenshot && !screenshot.startsWith("/generated-screenshots/")),
+        screenshotError: analysis.metadata?.screenshotError,
+        screenshotErrorSource: analysis.metadata?.screenshotErrorSource,
+      });
       pageAnalyses.push({ page, analysis });
     } catch (error) {
       console.warn("[premium-website-analysis] subpage analysis failed", {
@@ -378,9 +408,21 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
     }
   }
 
-  return buildPremiumWebsiteAnalysis({
+  const websiteAnalysis = buildPremiumWebsiteAnalysis({
     startAnalysis,
     discoveredPages,
     pageAnalyses,
   });
+
+  websiteAnalysis.pages.forEach((page) => {
+    debugPremiumScreenshots("premium page built", {
+      url: page.url,
+      role: page.role,
+      screenshotPresent: Boolean(page.screenshot),
+      screenshotUrl: page.screenshotUrl,
+      screenshotUnavailableReason: page.screenshotUnavailableReason,
+    });
+  });
+
+  return websiteAnalysis;
 }

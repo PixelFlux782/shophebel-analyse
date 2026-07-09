@@ -171,6 +171,20 @@ async function createSignedScreenshotUrl(value: string, config: SupabaseConfig) 
   }
 }
 
+export async function resolveStoredScreenshotUrl(value: string | undefined) {
+  if (!value) {
+    return undefined;
+  }
+
+  const config = getSupabaseConfig();
+
+  if (!config) {
+    return value;
+  }
+
+  return createSignedScreenshotUrl(value, config);
+}
+
 async function resolveScreenshotUrls(
   screenshots: AnalysisScreenshots | undefined,
   config: SupabaseConfig,

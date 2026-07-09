@@ -147,6 +147,25 @@ describe("screenshot-storage", () => {
     expect(writeFileMock).not.toHaveBeenCalled();
   });
 
+  it("kodiert Sonderzeichen in einem Screenshot-Speicherpfad sicher", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
+    vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "secret-service-role-key");
+    vi.stubEnv("SUPABASE_SCREENSHOT_BUCKET", "screenshots");
+    const fetchMock = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await saveScreenshotBuffer({
+      buffer: new Uint8Array([1, 2, 3]),
+      prefix: "unterseite/kontakt?q=grüße:lang",
+      variant: "viewport",
+    });
+
+    expect(fetchMock.mock.calls[0]?.[0]).toMatch(
+      /analysis-results\/unterseite\/kontakt%3Fq%3Dgr%C3%BC%C3%9Fe%3Alang\/viewport-/,
+    );
+  });
+
   it("nutzt optional eine konfigurierte Public Base URL", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");

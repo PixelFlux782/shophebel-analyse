@@ -317,6 +317,45 @@ describe("premiumReportStore", () => {
     expect(buildPremiumReportMock).toHaveBeenCalledTimes(1);
   });
 
+  it("liefert gespeicherte Unterseiten-Screenshots aus einem privaten Bucket als Signed URL", async () => {
+    const storedUrl =
+      "https://example.supabase.co/storage/v1/object/public/screenshots/analysis-results/subpage/viewport.png";
+    const report = createPremiumReport({
+      websiteAnalysis: createWebsiteAnalysis({
+        pages: [
+          {
+            ...createWebsiteAnalysis().pages[1],
+            screenshot: storedUrl,
+            screenshotUrl: storedUrl,
+            screenshotUnavailableReason: undefined,
+          },
+        ],
+      }),
+    });
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify([{
+        id: "premium-report-123",
+        analysis_id: "analysis-123",
+        report,
+        consultant_notes: {},
+        status: "generated",
+      }]), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        signedURL: "/object/sign/screenshots/analysis-results/subpage/viewport.png?token=signed",
+      }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const loaded = await getOrCreatePremiumReport({ analysis: createStoredAnalysis() });
+
+    expect(loaded?.websiteAnalysis?.pages[0].screenshotUrl).toBe(
+      "https://example.supabase.co/storage/v1/object/sign/screenshots/analysis-results/subpage/viewport.png?token=signed",
+    );
+    expect(fetchMock.mock.calls[1]?.[0]).toBe(
+      "https://example.supabase.co/storage/v1/object/sign/screenshots/analysis-results/subpage/viewport.png",
+    );
+    expect(buildPremiumReportMock).not.toHaveBeenCalled();
+  });
+
   it("regeneriert alte gespeicherte Premium-Reports ohne Unterseiten-Screenshot-Entscheidung", async () => {
     const staleReport = createPremiumReport({
       websiteAnalysis: createWebsiteAnalysis({
