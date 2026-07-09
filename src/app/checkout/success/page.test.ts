@@ -12,10 +12,11 @@ describe("CheckoutSuccessPage", () => {
     const markup = renderToStaticMarkup(page);
 
     expect(markup).toContain("Zahlung erfolgreich");
-    expect(markup).toContain("Premium-Report wird freigeschaltet");
-    expect(markup).toContain("Zum Premium-Report");
+    expect(markup).toContain("Deine Premium-Analyse wird erstellt");
+    expect(markup).toContain("Shopseiten werden erkannt");
+    expect(markup).toContain("Screenshots werden erstellt");
+    expect(markup).toContain("Bitte dieses Fenster geöffnet lassen");
     expect(markup).toContain('href="/analyse/result/analysis-456?upgrade=premium&amp;success=true"');
-    expect(markup).toContain("Automatische Weiterleitung");
   });
 
   it("unterstuetzt den alten analysis-Parameter als Fallback", async () => {
@@ -37,6 +38,6 @@ describe("CheckoutSuccessPage", () => {
 
     expect(markup).toContain("Analyse-ID fehlt");
     expect(markup).toContain('href="/analyse"');
-    expect(markup).not.toContain("Zum Premium-Report");
+    expect(markup).not.toContain("Shopseiten werden erkannt");
   });
 });
