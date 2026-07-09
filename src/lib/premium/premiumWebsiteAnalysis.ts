@@ -12,6 +12,7 @@ export type PremiumWebsitePageAnalysis = {
   analysisStatus: "analyzed" | "failed";
   screenshot?: string;
   screenshotUrl?: string;
+  screenshotStoragePath?: string;
   screenshotUnavailableReason?: string;
   score?: number;
   subscores?: Array<{ label: string; score: number }>;

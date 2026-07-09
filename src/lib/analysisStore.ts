@@ -72,7 +72,12 @@ function getSupabaseConfig(): SupabaseConfig | null {
   return { url, serviceRoleKey };
 }
 
-function parseSupabasePublicStorageUrl(value: string, config: SupabaseConfig) {
+type StoredScreenshotReference = {
+  bucket: string;
+  storagePath: string;
+};
+
+function parseSupabaseStorageUrl(value: string, config: SupabaseConfig): StoredScreenshotReference | null {
   let url: URL;
 
   try {
@@ -87,9 +92,13 @@ function parseSupabasePublicStorageUrl(value: string, config: SupabaseConfig) {
     return null;
   }
 
-  const prefix = "/storage/v1/object/public/";
+  const prefixes = [
+    "/storage/v1/object/public/",
+    "/storage/v1/object/sign/",
+  ];
+  const prefix = prefixes.find((candidate) => url.pathname.startsWith(candidate));
 
-  if (!url.pathname.startsWith(prefix)) {
+  if (!prefix) {
     return null;
   }
 
@@ -106,8 +115,38 @@ function parseSupabasePublicStorageUrl(value: string, config: SupabaseConfig) {
   };
 }
 
+function parseRawStoragePath(value: string): StoredScreenshotReference | null {
+  const bucket = process.env.SUPABASE_SCREENSHOT_BUCKET?.trim();
+  const normalized = value.replace(/^\/+/, "");
+
+  if (
+    !bucket
+    || !normalized
+    || normalized.startsWith("generated-screenshots/")
+    || normalized.includes("://")
+  ) {
+    return null;
+  }
+
+  return { bucket, storagePath: normalized };
+}
+
+export function getStoredScreenshotReference(
+  value: string | undefined,
+): StoredScreenshotReference | null {
+  if (!value) return null;
+  const config = getSupabaseConfig();
+
+  if (config) {
+    const parsedUrl = parseSupabaseStorageUrl(value, config);
+    if (parsedUrl) return parsedUrl;
+  }
+
+  return parseRawStoragePath(value);
+}
+
 async function createSignedScreenshotUrl(value: string, config: SupabaseConfig) {
-  const parsed = parseSupabasePublicStorageUrl(value, config);
+  const parsed = parseSupabaseStorageUrl(value, config) ?? parseRawStoragePath(value);
 
   if (!parsed) {
     return value;
@@ -132,12 +171,16 @@ async function createSignedScreenshotUrl(value: string, config: SupabaseConfig) 
 
     if (!response.ok) {
       const details = await response.text().catch(() => "");
-      console.warn("[analysis-store] screenshot signed URL creation failed", {
-        status: response.status,
-        details,
-        bucket: parsed.bucket,
-        storagePath: parsed.storagePath,
-      });
+      if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+        console.info("[premium-screenshots] signed url", {
+          bucketConfigured: Boolean(process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()),
+          serviceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+          screenshotStoragePathPresent: true,
+          signedUrlCreated: false,
+          signedUrlErrorMessage: details || response.statusText,
+          signedUrlErrorCode: response.status,
+        });
+      }
       return value;
     }
 
@@ -145,28 +188,47 @@ async function createSignedScreenshotUrl(value: string, config: SupabaseConfig) 
     const signedPath = payload.signedURL ?? payload.signedUrl;
 
     if (!signedPath) {
-      console.warn("[analysis-store] screenshot signed URL response did not contain a URL", {
-        bucket: parsed.bucket,
-        storagePath: parsed.storagePath,
-      });
+      if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+        console.info("[premium-screenshots] signed url", {
+          bucketConfigured: Boolean(process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()),
+          serviceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+          screenshotStoragePathPresent: true,
+          signedUrlCreated: false,
+          signedUrlErrorMessage: "Response did not contain a signed URL",
+          signedUrlErrorCode: "missing_signed_url",
+        });
+      }
       return value;
     }
 
-    if (signedPath.startsWith("http")) {
-      return signedPath;
-    }
-
-    const normalizedSignedPath = signedPath.startsWith("/object/")
+    const resolvedUrl = signedPath.startsWith("http")
+      ? signedPath
+      : `${config.url.replace(/\/+$/, "")}${signedPath.startsWith("/object/")
       ? `/storage/v1${signedPath}`
-      : signedPath;
+      : signedPath}`;
 
-    return `${config.url.replace(/\/+$/, "")}${normalizedSignedPath}`;
+    if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+      console.info("[premium-screenshots] signed url", {
+        bucketConfigured: Boolean(process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()),
+        serviceRoleConfigured: true,
+        screenshotStoragePathPresent: true,
+        signedUrlCreated: true,
+        signedUrlErrorMessage: null,
+        signedUrlErrorCode: null,
+      });
+    }
+    return resolvedUrl;
   } catch (error) {
-    console.warn("[analysis-store] screenshot signed URL creation threw", {
-      reason: error instanceof Error ? error.message : "unknown",
-      bucket: parsed.bucket,
-      storagePath: parsed.storagePath,
-    });
+    if (process.env.DEBUG_PREMIUM_SCREENSHOTS === "1") {
+      console.info("[premium-screenshots] signed url", {
+        bucketConfigured: Boolean(process.env.SUPABASE_SCREENSHOT_BUCKET?.trim()),
+        serviceRoleConfigured: Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()),
+        screenshotStoragePathPresent: true,
+        signedUrlCreated: false,
+        signedUrlErrorMessage: error instanceof Error ? error.message : "unknown",
+        signedUrlErrorCode: "request_failed",
+      });
+    }
     return value;
   }
 }
