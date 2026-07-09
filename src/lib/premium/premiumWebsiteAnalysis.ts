@@ -2,6 +2,7 @@ import { analysePage } from "@/lib/analyse/analyse-page";
 import { discoverPremiumPages } from "@/lib/premium/premiumPageDiscovery";
 import type { PremiumDiscoveredPage, PremiumPageRole } from "@/lib/premium/premiumPageDiscovery";
 import type { AnalysisResult } from "@/types/analysis";
+import { getStoredScreenshotReference } from "@/lib/analysisStore";
 
 export type PremiumWebsitePageAnalysis = {
   url: string;
@@ -104,7 +105,16 @@ function screenshotForAnalysis(analysis: AnalysisResult) {
 
 function screenshotUnavailableReason(analysis: AnalysisResult) {
   if (screenshotForAnalysis(analysis)) return undefined;
-  if (analysis.metadata?.screenshotError) {
+  if (
+    analysis.metadata?.screenshotCaptureAttempted
+    && (
+      !analysis.metadata.screenshotCaptureSucceeded
+      || (
+        analysis.metadata.screenshotUploadAttempted
+        && !analysis.metadata.screenshotUploadSucceeded
+      )
+    )
+  ) {
     return "Screenshot konnte fuer diese Seite technisch nicht erstellt werden.";
   }
   if (analysis.analysisMode === "static") {
@@ -158,6 +168,7 @@ function shortDiagnosisForPage(page: PremiumDiscoveredPage, analysis: AnalysisRe
 
 function pageFromAnalysis(page: PremiumDiscoveredPage, analysis: AnalysisResult): PremiumWebsitePageAnalysis {
   const screenshot = screenshotForAnalysis(analysis);
+  const screenshotReference = getStoredScreenshotReference(screenshot);
 
   return {
     url: analysis.url,
@@ -168,7 +179,8 @@ function pageFromAnalysis(page: PremiumDiscoveredPage, analysis: AnalysisResult)
     analysisStatus: "analyzed",
     screenshot,
     screenshotUrl: screenshot,
-    screenshotUnavailableReason: screenshotUnavailableReason(analysis),
+    screenshotStoragePath: screenshotReference?.storagePath,
+    screenshotUnavailableReason: screenshotReference ? undefined : screenshotUnavailableReason(analysis),
     score: analysis.overallScore,
     subscores: Object.values(analysis.categories).map((category) => ({
       label: category.label,
@@ -380,6 +392,8 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
         url: page.url,
         role: page.role,
         renderEnabled: true,
+        screenshotCaptureAttempted: false,
+        uploadAttempted: false,
       });
       const analysis = await analysePage(page.url, { preferRendered: true });
       const screenshot = screenshotForAnalysis(analysis);
@@ -388,12 +402,17 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
         finalUrl: analysis.finalUrl ?? analysis.url,
         role: page.role,
         analysisMode: analysis.analysisMode,
-        screenshotCaptured: Boolean(screenshot),
+        renderEnabled: analysis.analysisMode === "rendered",
+        screenshotCaptureAttempted: analysis.metadata?.screenshotCaptureAttempted ?? false,
+        screenshotCaptureSuccess: analysis.metadata?.screenshotCaptureSucceeded ?? Boolean(screenshot),
+        uploadAttempted: analysis.metadata?.screenshotUploadAttempted ?? false,
+        uploadSuccess: analysis.metadata?.screenshotUploadSucceeded ?? false,
         screenshotUrl: screenshot,
         localScreenshotPath: screenshot?.startsWith("/generated-screenshots/") ? screenshot : undefined,
         uploadSuccessful: Boolean(screenshot && !screenshot.startsWith("/generated-screenshots/")),
         screenshotError: analysis.metadata?.screenshotError,
         screenshotErrorSource: analysis.metadata?.screenshotErrorSource,
+        returnedScreenshotStoragePath: getStoredScreenshotReference(screenshot)?.storagePath,
       });
       pageAnalyses.push({ page, analysis });
     } catch (error) {
@@ -421,6 +440,7 @@ export async function createPremiumWebsiteAnalysis(startAnalysis: AnalysisResult
       role: page.role,
       screenshotPresent: Boolean(page.screenshot),
       screenshotUrl: page.screenshotUrl,
+      finalScreenshotStoragePath: page.screenshotStoragePath,
       screenshotUnavailableReason: page.screenshotUnavailableReason,
     });
   });

@@ -47,6 +47,10 @@ export interface FetchRenderedHtmlResult {
   screenshotError?: string;
   screenshotErrorSource?: AnalysisMetadata["screenshotErrorSource"];
   screenshotVariantFailures?: AnalysisMetadata["screenshotVariantFailures"];
+  screenshotCaptureAttempted: boolean;
+  screenshotCaptureSucceeded: boolean;
+  screenshotUploadAttempted: boolean;
+  screenshotUploadSucceeded: boolean;
 }
 
 interface PageMetrics {
@@ -222,12 +226,17 @@ export async function fetchRenderedHtml(
     let screenshotError: string | undefined;
     let screenshotErrorSource: AnalysisMetadata["screenshotErrorSource"] | undefined;
     let screenshotVariantFailures: AnalysisMetadata["screenshotVariantFailures"] | undefined;
+    let screenshotCaptureAttempted = false;
+    let screenshotCaptureSucceeded = false;
+    let screenshotUploadAttempted = false;
+    let screenshotUploadSucceeded = false;
     const screenshotDiagnostics: ScreenshotCaptureDiagnostics = {
       failures: [],
       storageMisses: [],
     };
 
     try {
+      screenshotCaptureAttempted = true;
       console.info("[analysis] captureAnalysisScreenshots starting", {
         requestedUrl,
         finalUrl: page.url() || requestedUrl,
@@ -238,6 +247,10 @@ export async function fetchRenderedHtml(
         screenshotDiagnostics,
       );
       const screenshotCount = Object.values(screenshots).filter(Boolean).length;
+      screenshotCaptureSucceeded = screenshotCount > 0 || screenshotDiagnostics.storageMisses.length > 0;
+      screenshotUploadAttempted = process.env.NODE_ENV === "production"
+        && (screenshotCount > 0 || screenshotDiagnostics.storageMisses.length > 0);
+      screenshotUploadSucceeded = process.env.NODE_ENV === "production" && screenshotCount > 0;
       screenshotVariantFailures = screenshotDiagnostics.failures;
 
       if (screenshotCount > 0) {
@@ -292,6 +305,10 @@ export async function fetchRenderedHtml(
       screenshotError,
       screenshotErrorSource,
       screenshotVariantFailures,
+      screenshotCaptureAttempted,
+      screenshotCaptureSucceeded,
+      screenshotUploadAttempted,
+      screenshotUploadSucceeded,
     };
   } catch (error) {
     if (error instanceof FetchRenderedHtmlError || error instanceof BrowserLaunchError) {

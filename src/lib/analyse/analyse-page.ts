@@ -235,6 +235,10 @@ export async function analysePage(inputUrl: string, options: AnalysePageOptions 
             screenshotError: renderedDocument.screenshotError,
             screenshotErrorSource: renderedDocument.screenshotErrorSource,
             screenshotVariantFailures: renderedDocument.screenshotVariantFailures,
+            screenshotCaptureAttempted: renderedDocument.screenshotCaptureAttempted,
+            screenshotCaptureSucceeded: renderedDocument.screenshotCaptureSucceeded,
+            screenshotUploadAttempted: renderedDocument.screenshotUploadAttempted,
+            screenshotUploadSucceeded: renderedDocument.screenshotUploadSucceeded,
             screenshotVariantsAttempted: ["viewport", "fullPage", "mobile"],
             screenshotVariantsStored: Object.entries(renderedDocument.screenshots ?? {})
               .filter(([, value]) => Boolean(value))
@@ -244,6 +248,10 @@ export async function analysePage(inputUrl: string, options: AnalysePageOptions 
           }
         : {
             screenshotVariantsAttempted: ["viewport", "fullPage", "mobile"],
+            screenshotCaptureAttempted: renderedDocument.screenshotCaptureAttempted,
+            screenshotCaptureSucceeded: renderedDocument.screenshotCaptureSucceeded,
+            screenshotUploadAttempted: renderedDocument.screenshotUploadAttempted,
+            screenshotUploadSucceeded: renderedDocument.screenshotUploadSucceeded,
             screenshotVariantsStored: Object.entries(renderedDocument.screenshots ?? {})
               .filter(([, value]) => Boolean(value))
               .map(([key]) => key),

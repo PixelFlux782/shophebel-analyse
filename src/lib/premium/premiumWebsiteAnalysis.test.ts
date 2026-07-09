@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { buildPremiumWebsiteAnalysis } from "@/lib/premium/premiumWebsiteAnalysis";
 import type { PremiumDiscoveredPage } from "@/lib/premium/premiumPageDiscovery";
@@ -68,6 +68,9 @@ function page(url: string, role: PremiumDiscoveredPage["role"], label: string): 
 }
 
 describe("buildPremiumWebsiteAnalysis", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
   it("aggregiert mehrere Seiten zu einer Website-weiten Bewertung", () => {
     const home = page("https://shop.test/", "home", "Startseite");
     const offer = page("https://shop.test/leistungen", "offer", "Leistungen");
@@ -151,5 +154,84 @@ describe("buildPremiumWebsiteAnalysis", () => {
     expect(website.pages[1].analysisStatus).toBe("analyzed");
     expect(website.pages[1].screenshot).toBeUndefined();
     expect(website.pages[1].screenshotUnavailableReason).toContain("ohne gerenderte Vorschau");
+  });
+
+  it("uebernimmt den kanonischen Storage-Pfad und setzt dann keinen Fallback", () => {
+    vi.stubEnv("SUPABASE_SCREENSHOT_BUCKET", "analysis-screenshots");
+    const home = page("https://shop.test/", "home", "Startseite");
+    const offer = page("https://shop.test/leistungen", "offer", "Leistungen");
+    const storagePath = "analysis-results/subpage/viewport.png";
+    const website = buildPremiumWebsiteAnalysis({
+      startAnalysis: createAnalysis(home.url, 70, "CTA ist unklar"),
+      pageAnalyses: [
+        { page: home, analysis: createAnalysis(home.url, 70, "CTA ist unklar") },
+        {
+          page: offer,
+          analysis: createAnalysis(offer.url, 76, "Angebot braucht Proof", {
+            analysisMode: "rendered",
+            screenshots: { viewport: storagePath },
+            metadata: {
+              screenshotCaptureAttempted: true,
+              screenshotCaptureSucceeded: true,
+              screenshotUploadAttempted: true,
+              screenshotUploadSucceeded: true,
+            },
+          }),
+        },
+      ],
+    });
+
+    expect(website.pages[1]).toMatchObject({
+      screenshotStoragePath: storagePath,
+      screenshotUnavailableReason: undefined,
+    });
+  });
+
+  it("setzt den technischen Fallback erst nach einem echten Capture-Fehler", () => {
+    const home = page("https://shop.test/", "home", "Startseite");
+    const contact = page("https://shop.test/kontakt", "contact", "Kontakt");
+    const website = buildPremiumWebsiteAnalysis({
+      startAnalysis: createAnalysis(home.url, 70, "CTA ist unklar"),
+      pageAnalyses: [
+        { page: home, analysis: createAnalysis(home.url, 70, "CTA ist unklar") },
+        {
+          page: contact,
+          analysis: createAnalysis(contact.url, 68, "Kontakt braucht Vertrauen", {
+            analysisMode: "rendered",
+            metadata: {
+              screenshotError: "capture failed",
+              screenshotErrorSource: "capture",
+              screenshotCaptureAttempted: false,
+              screenshotCaptureSucceeded: false,
+              screenshotUploadAttempted: false,
+              screenshotUploadSucceeded: false,
+            },
+          }),
+        },
+      ],
+    });
+
+    expect(website.pages[1].screenshotUnavailableReason).toBeUndefined();
+
+    const failedCapture = buildPremiumWebsiteAnalysis({
+      startAnalysis: createAnalysis(home.url, 70, "CTA ist unklar"),
+      pageAnalyses: [{
+        page: contact,
+        analysis: createAnalysis(contact.url, 68, "Kontakt braucht Vertrauen", {
+          analysisMode: "rendered",
+          metadata: {
+            screenshotError: "capture failed",
+            screenshotErrorSource: "capture",
+            screenshotCaptureAttempted: true,
+            screenshotCaptureSucceeded: false,
+            screenshotUploadAttempted: false,
+            screenshotUploadSucceeded: false,
+          },
+        }),
+      }],
+    });
+
+    expect(failedCapture.pages[0].screenshotUnavailableReason)
+      .toBe("Screenshot konnte fuer diese Seite technisch nicht erstellt werden.");
   });
 });

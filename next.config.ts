@@ -17,6 +17,12 @@ const nextConfig: NextConfig = {
     "/api/analyze": [
       "./node_modules/@sparticuz/chromium/bin/**/*",
     ],
+    "/analyse/result/*": [
+      "./node_modules/@sparticuz/chromium/bin/**/*",
+    ],
+    "/api/premium-report/*/pdf": [
+      "./node_modules/@sparticuz/chromium/bin/**/*",
+    ],
   },
   serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
 };

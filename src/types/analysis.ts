@@ -125,6 +125,10 @@ export interface AnalysisMetadata {
   auditContext?: Record<string, unknown>;
   screenshotError?: string;
   screenshotErrorSource?: "browser_launch" | "capture" | "storage" | "rendered_fallback";
+  screenshotCaptureAttempted?: boolean;
+  screenshotCaptureSucceeded?: boolean;
+  screenshotUploadAttempted?: boolean;
+  screenshotUploadSucceeded?: boolean;
   screenshotVariantFailures?: Array<{
     variant: string;
     reason: string;
